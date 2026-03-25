@@ -1,0 +1,18 @@
+{
+  "name": "picks-app",
+  "version": "1.0.0",
+  "description": "Weekly golf and soccer picks for friends",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "lowdb": "^1.0.0"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "NMyers",
+      "email": "nicholasmyers918@gmail.com",
+      "password_hash": "$2a$10$.QJrBI4Wpr/NuwOx2bm0te2ZS1BDMqFwqfbYLUKz5PUMgOCfBykdK",
+      "is_admin": true,
+      "created_at": "2026-03-25T17:29:22.721Z"
+    }
+  ],
+  "golf_tournaments": [
+    {
+      "id": 1,
+      "name": "The Sentry",
+      "course": null,
+      "start_date": "2026-01-08",
+      "deadline": "2026-03-27T15:09",
+      "predicted_top5": [
+        "test",
+        "test",
+        "test",
+        "tes",
+        "test"
+      ],
+      "results_entered": false,
+      "created_at": "2026-03-25T19:09:27.332Z"
+    }
+  ],
+  "golf_picks": [],
+  "soccer_weeks": [
+    {
+      "id": 1,
+      "week_name": "d",
+      "deadline": "2026-03-27T13:54",
+      "results_entered": true,
+      "created_at": "2026-03-25T17:55:16.782Z"
+    }
+  ],
+  "soccer_games": [
+    {
+      "id": 1,
+      "week_id": 1,
+      "home_team": "Bournemouth",
+      "away_team": "Manchester United",
+      "actual_home_score": 0,
+      "actual_away_score": 0,
+      "game_order": 1
+    },
+    {
+      "id": 2,
+      "week_id": 1,
+      "home_team": "Fulham",
+      "away_team": "Burnley",
+      "actual_home_score": 3,
+      "actual_away_score": 1,
+      "game_order": 2
+    },
+    {
+      "id": 3,
+      "week_id": 1,
+      "home_team": "Everton",
+      "away_team": "Chelsea",
+      "actual_home_score": 3,
+      "actual_away_score": 0,
+      "game_order": 3
+    }
+  ],
+  "soccer_picks": [
+    {
+      "id": 1,
+      "game_id": 0,
+      "user_id": 1,
+      "predicted_home": 0,
+      "predicted_away": 0,
+      "points_earned": 10,
+      "created_at": "2026-03-25T19:09:49.101Z"
+    }
+  ],
+  "settings": {
+    "football_data_api_key": "7fcca5af9a7c47169b6261f3d8b6d3df"
+  }
+}
