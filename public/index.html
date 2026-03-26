@@ -779,6 +779,10 @@ async function loadHomePage() {
   const soccerEl = document.getElementById('home-soccer-lb');
   const recentEl = document.getElementById('recent-results-list');
 
+  golfEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #000; background: #FFD700;">Loading PGA...</div>';
+  soccerEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #000; background: #1a1a1a; color: #fff;">Loading EPL...</div>';
+  recentEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #000; background: #f0f0f0;">Loading...</div>';
+
   try {
     console.log('Fetching leaderboards...');
     const [golfRows, soccerRows] = await Promise.all([
