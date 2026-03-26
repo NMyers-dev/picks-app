@@ -249,7 +249,7 @@
     <div class="header-logo"><img src="https://a.espncdn.com/i/leaguelogos/soccer/500/23.png" style="width:22px;height:22px;border-radius:4px" alt=""/> The Boys Picks</div>
     <nav class="header-nav">
       <button class="nav-btn" id="nav-golf"   onclick="showPage('golf')">🏌️ <span>PGA</span></button>
-      <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')">⚽ <span>EPL</span></button>
+      <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')" style="display:none">⚽ <span>EPL</span></button>
       <button class="nav-btn" id="nav-admin"  onclick="showPage('admin')" style="display:none">⚙️ <span>Admin</span></button>
     </nav>
     <div class="header-user">
@@ -457,7 +457,16 @@ const GOLFERS = [
 ];
 
 function getTeamLogo(name) {
-  const key = Object.keys(EPL_TEAM_LOGOS).find(k => name.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(name.toLowerCase()));
+  if (!name) return '';
+  const normalize = s => s.toLowerCase().replace(/\bafc\b/g,'').replace(/\bfc\b/g,'').replace(/\butd\b/g,'united')
+    .replace(/\bhotspur\b/g,'').replace(/\bwanderers\b/g,'').replace(/\bman\b/g,'manchester')
+    .replace(/\bnottm\b/g,'nottingham').replace(/\bham\b/g,'').replace(/\bblades\b/g,'')
+    .replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();
+  const n = normalize(name);
+  const key = Object.keys(EPL_TEAM_LOGOS).find(k => {
+    const kn = normalize(k);
+    return n.includes(kn) || kn.includes(n) || n.split(' ').some(w => w.length > 3 && kn.includes(w));
+  });
   return key ? 'https://a.espncdn.com/i/teamlogos/soccer/500/' + EPL_TEAM_LOGOS[key] + '.png' : '';
 }
 
@@ -538,6 +547,7 @@ function launchApp() {
   if (state.user.is_admin) {
     document.getElementById('admin-badge').style.display = 'inline-block';
     document.getElementById('nav-admin').style.display   = 'inline-flex';
+    document.getElementById('nav-soccer').style.display  = 'inline-flex';
   }
   showPage('golf');
 }
