@@ -23,6 +23,14 @@ db.defaults({
   settings: {}
 }).write();
 
+// Migration: ensure is_super_admin exists on all users
+const users = db.get('users').value();
+users.forEach((u, i) => {
+  if (u.is_super_admin === undefined) {
+    db.get('users').find({ id: u.id }).assign({ is_super_admin: i === 0 }).write();
+  }
+});
+
 function nextId(collection) {
   const items = db.get(collection).value();
   return items.length === 0 ? 1 : Math.max(...items.map(i => i.id)) + 1;
