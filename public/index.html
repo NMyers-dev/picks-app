@@ -149,7 +149,10 @@
   /* ── Soccer ── */
   .game-card { background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; position: relative; overflow: hidden; }
   .game-card::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent, transparent 49.5%, rgba(34,139,34,0.03) 49.5%, rgba(34,139,34,0.03) 50.5%, transparent 50.5%); pointer-events: none; }
-  .game-card .emblem { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 70px; height: 70px; opacity: 0.08; pointer-events: none; object-fit: contain; }
+  .game-card::after { content: ''; position: absolute; left: 50%; top: 50%; width: 55px; height: 55px; border: 1px solid rgba(34,139,34,0.04); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+  .game-card .emblem { position: absolute; top: 50%; transform: translateY(-50%); width: 60px; height: 60px; opacity: 0.07; pointer-events: none; object-fit: contain; }
+  .game-card .emblem.home { left: 8px; }
+  .game-card .emblem.away { right: 8px; }
   .game-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; position: relative; z-index: 1; }
   .game-teams { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1rem; color: var(--text); position: relative; z-index: 1; }
   .vs-divider { color: var(--muted); font-size: 0.8rem; font-weight: 600; }
@@ -249,7 +252,7 @@
     <div class="header-logo"><img src="https://a.espncdn.com/i/leaguelogos/soccer/500/23.png" style="width:22px;height:22px;border-radius:4px" alt=""/> The Boys Picks</div>
     <nav class="header-nav">
       <button class="nav-btn" id="nav-golf"   onclick="showPage('golf')">🏌️ <span>PGA</span></button>
-      <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')" style="display:none">⚽ <span>EPL</span></button>
+      <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')">⚽ <span>EPL</span></button>
       <button class="nav-btn" id="nav-admin"  onclick="showPage('admin')" style="display:none">⚙️ <span>Admin</span></button>
     </nav>
     <div class="header-user">
@@ -345,7 +348,7 @@
             <button class="btn btn-primary" onclick="adminCreateTournament()">Create Tournament</button>
           </div>
 
-          <div class="card admin-section" style="margin-bottom:1.25rem">
+          <div class="card admin-section" style="margin-bottom:1.25rem" id="a-epl-create">
             <div class="admin-section-title">⚽ Create EPL Week</div>
             <div class="form-group"><label>Week Name</label>
               <input type="text" id="a-week-name" placeholder="e.g. GW29 – 22 Mar"/></div>
@@ -377,7 +380,7 @@
             <div class="admin-section-title">🏆 Enter Golf Results</div>
             <div id="a-golf-results-list"><div class="loading">Loading…</div></div>
           </div>
-          <div class="card admin-section" style="margin-bottom:1.25rem">
+          <div class="card admin-section" style="margin-bottom:1.25rem" id="a-epl-results">
             <div class="admin-section-title">📊 Enter EPL Results</div>
             <div id="a-soccer-results-list"><div class="loading">Loading…</div></div>
           </div>
@@ -547,7 +550,6 @@ function launchApp() {
   if (state.user.is_admin) {
     document.getElementById('admin-badge').style.display = 'inline-block';
     document.getElementById('nav-admin').style.display   = 'inline-flex';
-    document.getElementById('nav-soccer').style.display  = 'inline-flex';
   }
   showPage('golf');
 }
@@ -565,7 +567,16 @@ function showPage(page) {
   });
   if (page === 'golf')   { loadGolfTournaments(); loadGolfLeaderboard(); }
   if (page === 'soccer') { loadSoccerWeeks(); loadSoccerLeaderboard(); }
-  if (page === 'admin')  { loadAdminGolfResults(); loadAdminSoccerResults(); loadAdminUsers(); }
+  if (page === 'admin')  {
+    loadAdminGolfResults();
+    const isSuperAdmin = state.user?.is_super_admin;
+    const eplCreate = document.getElementById('a-epl-create');
+    const eplResults = document.getElementById('a-epl-results');
+    if (eplCreate) eplCreate.style.display = isSuperAdmin ? 'block' : 'none';
+    if (eplResults) eplResults.style.display = isSuperAdmin ? 'block' : 'none';
+    if (isSuperAdmin) { loadAdminSoccerResults(); }
+    loadAdminUsers();
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -704,7 +715,8 @@ function renderSoccerWeekCard(w, isActive) {
           </div>`;
         })() : '<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;position:relative;z-index:1">No pick submitted</div>';
         return `<div class="game-card" style="margin-bottom:0.75rem">
-          <img class="emblem" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
+          <img class="emblem home" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
+          <img class="emblem away" src="${getTeamLogo(g.away_team)}" alt="" onerror="this.style.display='none'"/>
           <div class="game-header">
             <div class="game-teams"><span>${g.home_team}</span><span class="vs-divider">vs</span><span>${g.away_team}</span></div>
             ${myPick ? `<span class="pill pill-gold" style="font-size:0.7rem">Picked</span>` : ''}
@@ -721,7 +733,8 @@ function renderSoccerWeekCard(w, isActive) {
     }
     const gamesHtml = w.games.map(g => `
       <div class="game-card" style="margin-bottom:0.75rem">
-        <img class="emblem" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
+        <img class="emblem home" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
+        <img class="emblem away" src="${getTeamLogo(g.away_team)}" alt="" onerror="this.style.display='none'"/>
         <div class="game-header">
           <div class="game-teams"><span>${g.home_team}</span><span class="vs-divider">vs</span><span>${g.away_team}</span></div>
           ${g.my_pick ? `<span class="pill pill-gold" style="font-size:0.7rem">Picked</span>` : ''}
@@ -758,7 +771,8 @@ function renderSoccerWeekCard(w, isActive) {
         </div>`;
       })() : '';
       return `<div class="game-card" style="margin-bottom:0.75rem">
-        <img class="emblem" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
+        <img class="emblem home" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
+        <img class="emblem away" src="${getTeamLogo(g.away_team)}" alt="" onerror="this.style.display='none'"/>
         <div class="game-header">
           <div class="game-teams"><span>${g.home_team}</span><span class="vs-divider">vs</span><span>${g.away_team}</span></div>
           <div class="actual-score"><span class="score">${result}</span></div>
@@ -817,7 +831,7 @@ async function loadSoccerLeaderboard() {
   try {
     const rows = await api('/soccer/leaderboard');
     if (!rows.length) { el.innerHTML = '<div class="empty-state" style="padding:1rem"><p>No data yet</p></div>'; return; }
-    const isAdmin = state.user?.is_admin;
+    const isAdmin = state.user?.is_super_admin;
     el.innerHTML = `<table class="lb-table"><thead><tr><th>#</th><th>Player</th><th>Pts</th><th>🎯 Exact</th><th>✅ Result</th>${isAdmin ? '<th>Edit</th>' : ''}</tr></thead><tbody>
       ${rows.map((r,i) => `<tr>
         <td class="lb-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>

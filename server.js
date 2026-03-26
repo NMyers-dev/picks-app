@@ -50,6 +50,11 @@ function adminOnly(req, res, next) {
   next();
 }
 
+function superAdminOnly(req, res, next) {
+  if (!req.user?.is_super_admin) return res.status(403).json({ error: 'Super admin access required' });
+  next();
+}
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 app.post('/api/auth/register', async (req, res) => {
   try {
@@ -73,13 +78,14 @@ app.post('/api/auth/register', async (req, res) => {
       email: email.trim().toLowerCase(),
       password_hash: hash,
       is_admin: isFirstUser,
+      is_super_admin: isFirstUser,
       created_at: now()
     };
 
     db.get('users').push(user).write();
 
-    const token = jwt.sign({ id: user.id, username: user.username, is_admin: user.is_admin }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ token, user: { id: user.id, username: user.username, email: user.email, is_admin: user.is_admin } });
+    const token = jwt.sign({ id: user.id, username: user.username, is_admin: user.is_admin, is_super_admin: user.is_super_admin }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, user: { id: user.id, username: user.username, email: user.email, is_admin: user.is_admin, is_super_admin: user.is_super_admin } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Registration failed' });
@@ -93,8 +99,8 @@ app.post('/api/auth/login', async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password_hash)))
       return res.status(401).json({ error: 'Invalid username or password' });
 
-    const token = jwt.sign({ id: user.id, username: user.username, is_admin: user.is_admin }, JWT_SECRET, { expiresIn: '30d' });
-    res.json({ token, user: { id: user.id, username: user.username, email: user.email, is_admin: user.is_admin } });
+    const token = jwt.sign({ id: user.id, username: user.username, is_admin: user.is_admin, is_super_admin: user.is_super_admin }, JWT_SECRET, { expiresIn: '30d' });
+    res.json({ token, user: { id: user.id, username: user.username, email: user.email, is_admin: user.is_admin, is_super_admin: user.is_super_admin || false } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Login failed' });
@@ -255,7 +261,7 @@ app.get('/api/golf/leaderboard', auth, (req, res) => {
 });
 
 // ─── Soccer Weeks ─────────────────────────────────────────────────────────────
-app.get('/api/soccer/weeks', auth, adminOnly, (req, res) => {
+app.get('/api/soccer/weeks', auth, (req, res) => {
   const weeks = db.get('soccer_weeks').orderBy('created_at', 'desc').value();
   const allGames = db.get('soccer_games').value();
   const myPicks = db.get('soccer_picks').filter({ user_id: req.user.id }).value();
@@ -270,7 +276,7 @@ app.get('/api/soccer/weeks', auth, adminOnly, (req, res) => {
   })));
 });
 
-app.post('/api/soccer/weeks', auth, adminOnly, (req, res) => {
+app.post('/api/soccer/weeks', auth, superAdminOnly, (req, res) => {
   const { week_name, deadline, games } = req.body || {};
   if (!week_name?.trim()) return res.status(400).json({ error: 'Week name required' });
   if (!Array.isArray(games) || games.length !== 3) return res.status(400).json({ error: 'Exactly 3 games required' });
@@ -295,7 +301,7 @@ app.post('/api/soccer/weeks', auth, adminOnly, (req, res) => {
   res.json({ id: week.id });
 });
 
-app.delete('/api/soccer/weeks/:id', auth, adminOnly, (req, res) => {
+app.delete('/api/soccer/weeks/:id', auth, superAdminOnly, (req, res) => {
   const weekId = parseInt(req.params.id);
   const games = db.get('soccer_games').filter({ week_id: weekId }).value();
   games.forEach(g => db.get('soccer_picks').remove({ game_id: g.id }).write());
@@ -304,7 +310,7 @@ app.delete('/api/soccer/weeks/:id', auth, adminOnly, (req, res) => {
   res.json({ success: true });
 });
 
-app.get('/api/soccer/weeks/:id/picks', auth, adminOnly, (req, res) => {
+app.get('/api/soccer/weeks/:id/picks', auth, (req, res) => {
   const weekId = parseInt(req.params.id);
   const week = db.get('soccer_weeks').find({ id: weekId }).value();
   const games = db.get('soccer_games').filter({ week_id: weekId }).value();
@@ -334,7 +340,7 @@ app.get('/api/soccer/weeks/:id/picks', auth, adminOnly, (req, res) => {
   res.json(result);
 });
 
-app.post('/api/soccer/weeks/:id/picks', auth, adminOnly, (req, res) => {
+app.post('/api/soccer/weeks/:id/picks', auth, (req, res) => {
   const { picks } = req.body || {};
   const weekId = parseInt(req.params.id);
   const week = db.get('soccer_weeks').find({ id: weekId }).value();
@@ -368,7 +374,7 @@ app.post('/api/soccer/weeks/:id/picks', auth, adminOnly, (req, res) => {
   res.json({ success: true });
 });
 
-app.put('/api/soccer/weeks/:id/results', auth, adminOnly, (req, res) => {
+app.put('/api/soccer/weeks/:id/results', auth, superAdminOnly, (req, res) => {
   const { game_results } = req.body || {};
   const outcome = (h, a) => h > a ? 'H' : a > h ? 'A' : 'D';
 
@@ -391,7 +397,7 @@ app.put('/api/soccer/weeks/:id/results', auth, adminOnly, (req, res) => {
   res.json({ success: true });
 });
 
-app.get('/api/soccer/leaderboard', auth, adminOnly, (req, res) => {
+app.get('/api/soccer/leaderboard', auth, (req, res) => {
   const users = db.get('users').value();
   const allPicks = db.get('soccer_picks').value();
 
@@ -410,7 +416,7 @@ app.get('/api/soccer/leaderboard', auth, adminOnly, (req, res) => {
   res.json(leaderboard);
 });
 
-app.put('/api/soccer/leaderboard/:userId', auth, adminOnly, (req, res) => {
+app.put('/api/soccer/leaderboard/:userId', auth, superAdminOnly, (req, res) => {
   const userId = parseInt(req.params.userId);
   const { adjustment } = req.body || {};
   if (!Number.isInteger(adjustment)) return res.status(400).json({ error: 'Adjustment must be an integer' });
