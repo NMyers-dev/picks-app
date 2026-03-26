@@ -500,8 +500,8 @@ const GOLFERS = [
 function getTeamLogo(name) {
   if (!name) return '';
   const normalize = s => s.toLowerCase().replace(/\bafc\b/g,'').replace(/\bfc\b/g,'').replace(/\butd\b/g,'united')
-    .replace(/\bhotspur\b/g,'').replace(/\bwanderers\b/g,'').replace(/\bwolves\b/g,'wolverhampton')
-    .replace(/\bman\b/g,'manchester').replace(/\bnottm\b/g,'nottingham').replace(/\bblades\b/g,'')
+    .replace(/\bhotspur\b/g,'tottenham').replace(/\bspurs\b/g,'tottenham').replace(/\bwanderers\b/g,'')
+    .replace(/\bwolves\b/g,'wolverhampton').replace(/\bman\b/g,'manchester').replace(/\bnottm\b/g,'nottingham').replace(/\bblades\b/g,'')
     .replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();
   const n = normalize(name);
   const keys = Object.keys(EPL_TEAM_LOGOS);
