@@ -85,6 +85,7 @@
   .nav-btn { background: none; border: none; color: var(--muted); padding: 0.5rem 0.9rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all .15s; }
   .nav-btn:hover { background: var(--surface2); color: var(--text); }
   .nav-btn.active-golf   { background: rgba(201,162,39,.12); color: var(--gold); }
+  .nav-btn.active-home  { background: rgba(201,162,39,.12); color: var(--gold); }
   .nav-btn.active-soccer { background: rgba(55,65,81,.08); color: var(--slate); }
   .nav-btn.active-admin  { background: rgba(201,162,39,.12); color: var(--gold); }
   .header-user { display: flex; align-items: center; gap: 0.75rem; }
@@ -251,6 +252,7 @@
   <header>
     <div class="header-logo"><img src="https://a.espncdn.com/i/leaguelogos/soccer/500/23.png" style="width:22px;height:22px;border-radius:4px" alt=""/> The Boys Picks</div>
     <nav class="header-nav">
+      <button class="nav-btn" id="nav-home"  onclick="showPage('home')">🏠 <span>Home</span></button>
       <button class="nav-btn" id="nav-golf"   onclick="showPage('golf')">🏌️ <span>PGA</span></button>
       <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')">⚽ <span>EPL</span></button>
       <button class="nav-btn" id="nav-admin"  onclick="showPage('admin')" style="display:none">⚙️ <span>Admin</span></button>
@@ -263,6 +265,32 @@
   </header>
 
   <main>
+    <!-- ── Home / News Page ─────────────────────────────────────────── -->
+    <div class="page" id="page-home" style="display:none">
+      <div style="margin-bottom:1.5rem">
+        <div class="section-title" style="font-size:1.5rem">🏠 The Boys Picks</div>
+        <div class="section-subtitle">Weekly predictions for PGA &amp; EPL</div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="card" style="margin-bottom:1.5rem">
+            <div class="section-title" style="color:var(--gold)">🏌️ PGA Leaderboard</div>
+            <div id="home-golf-lb"><div class="loading">Loading...</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:1.5rem">
+            <div class="section-title" style="color:var(--slate)">⚽ EPL Leaderboard</div>
+            <div id="home-soccer-lb"><div class="loading">Loading...</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:1.5rem" id="recent-activity">
+        <div class="section-title">📰 Recent Results</div>
+        <div id="recent-results-list"><div class="loading">Loading...</div></div>
+      </div>
+    </div>
+
     <!-- ── PGA Page ─────────────────────────────────────────────── -->
     <datalist id="golfer-list"></datalist>
     <div class="page" id="page-golf">
@@ -371,6 +399,16 @@
           <div class="card admin-section">
             <div class="admin-section-title">🔑 API Settings</div>
             <div class="info-box">EPL and Golf data now come from ESPN — no API key needed!</div>
+            <div class="form-group"><label>SMTP Host (e.g. smtp.gmail.com)</label>
+              <input type="text" id="a-smtp-host" placeholder="smtp.gmail.com"/></div>
+            <div class="form-group"><label>SMTP Port</label>
+              <input type="number" id="a-smtp-port" placeholder="587" value="587"/></div>
+            <div class="form-group"><label>SMTP Username</label>
+              <input type="text" id="a-smtp-user" placeholder="your@email.com"/></div>
+            <div class="form-group"><label>SMTP Password / App Password</label>
+              <input type="password" id="a-smtp-password" placeholder="xxxx xxxx xxxx xxxx"/></div>
+            <button class="btn btn-ghost btn-sm" onclick="saveSettings()">Save Email Settings</button>
+            <span id="settings-status" style="font-size:0.8rem;color:var(--muted);margin-left:0.5rem"></span>
           </div>
         </div>
 
@@ -557,7 +595,7 @@ function launchApp() {
     document.getElementById('admin-badge').style.display = 'inline-block';
     document.getElementById('nav-admin').style.display   = 'inline-flex';
   }
-  showPage('golf');
+  showPage('home');
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -567,14 +605,16 @@ function showPage(page) {
   state.currentPage = page;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  ['golf','soccer','admin'].forEach(p => {
+  ['home','golf','soccer','admin'].forEach(p => {
     const btn = document.getElementById('nav-' + p);
-    btn.className = 'nav-btn' + (p === page ? ' active-' + p : '');
+    btn.className = 'nav-btn' + (p === page ? ' active-' + (p === 'home' ? 'golf' : p) : '');
   });
+  if (page === 'home')  { loadHomePage(); }
   if (page === 'golf')   { loadGolfTournaments(); loadGolfLeaderboard(); }
   if (page === 'soccer') { loadSoccerWeeks(); loadSoccerLeaderboard(); }
   if (page === 'admin')  {
     loadAdminGolfResults();
+    loadSettings();
     const isSuperAdmin = state.user?.is_super_admin;
     const eplCreate = document.getElementById('a-epl-create');
     const eplResults = document.getElementById('a-epl-results');
@@ -683,6 +723,59 @@ async function loadGolfLeaderboard() {
       </tr>`).join('')}
     </tbody></table>`;
   } catch (e) { el.innerHTML = `<p style="color:var(--red)">${e.message}</p>`; }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// HOME / NEWS
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadHomePage() {
+  const golfEl = document.getElementById('home-golf-lb');
+  const soccerEl = document.getElementById('home-soccer-lb');
+  const recentEl = document.getElementById('recent-results-list');
+
+  try {
+    const [golfRows, soccerRows] = await Promise.all([
+      api('/golf/leaderboard'),
+      api('/soccer/leaderboard').catch(() => [])
+    ]);
+
+    if (!golfRows.length) {
+      golfEl.innerHTML = '<p style="color:var(--muted);padding:0.5rem">No data yet</p>';
+    } else {
+      golfEl.innerHTML = `<table class="lb-table" style="font-size:0.85rem"><thead><tr><th>#</th><th>Player</th><th>Pts</th></tr></thead><tbody>` +
+        golfRows.slice(0, 10).map((r,i) => `<tr><td>${i+1}</td><td>${uname(r.username)}</td><td style="font-weight:700;color:var(--gold)">${r.total_points}</td></tr>`).join('') +
+        '</tbody></table>';
+    }
+
+    if (!soccerRows.length) {
+      soccerEl.innerHTML = '<p style="color:var(--muted);padding:0.5rem">No data yet</p>';
+    } else {
+      soccerEl.innerHTML = `<table class="lb-table" style="font-size:0.85rem"><thead><tr><th>#</th><th>Player</th><th>Pts</th></tr></thead><tbody>` +
+        soccerRows.slice(0, 10).map((r,i) => `<tr><td>${i+1}</td><td>${uname(r.username)}</td><td style="font-weight:700;color:var(--slate)">${r.total_points}</td></tr>`).join('') +
+        '</tbody></table>';
+    }
+
+    const [golfTours, soccerWeeks] = await Promise.all([
+      api('/golf/tournaments').catch(() => []),
+      api('/soccer/weeks').catch(() => [])
+    ]);
+
+    const completedGolf = (golfTours || []).filter(t => t.results_entered).slice(-2);
+    const completedSoccer = (soccerWeeks || []).filter(w => w.results_entered).slice(-2);
+
+    let recentHtml = '';
+    completedGolf.forEach(t => {
+      recentHtml += `<div style="padding:0.5rem;border-bottom:1px solid var(--border)"><div style="font-weight:600;color:var(--gold)">🏌️ ${t.name}</div><div style="font-size:0.8rem;color:var(--muted)">Completed</div></div>`;
+    });
+    completedSoccer.forEach(w => {
+      recentHtml += `<div style="padding:0.5rem;border-bottom:1px solid var(--border)"><div style="font-weight:600;color:var(--slate)">⚽ ${w.week_name}</div><div style="font-size:0.8rem;color:var(--muted)">Results in</div></div>`;
+    });
+
+    recentEl.innerHTML = recentHtml || '<p style="color:var(--muted);padding:0.5rem">No recent results</p>';
+
+  } catch (e) {
+    golfEl.innerHTML = '<p style="color:var(--red)">Failed to load</p>';
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1372,7 +1465,28 @@ async function toggleAdmin(userId, makeAdmin) {
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 async function loadSettings() {
-  // Settings are now managed by ESPN — no keys needed
+  try {
+    const s = await api('/settings');
+    const statusEl = document.getElementById('settings-status');
+    statusEl.textContent = s.has_smtp ? '✅ Email reminders configured' : 'No email set up';
+  } catch {}
+}
+
+async function saveSettings() {
+  const smtpHost = document.getElementById('a-smtp-host').value.trim();
+  const smtpPort = parseInt(document.getElementById('a-smtp-port').value, 10) || 587;
+  const smtpUser = document.getElementById('a-smtp-user').value.trim();
+  const smtpPassword = document.getElementById('a-smtp-password').value;
+  if (!smtpHost || !smtpUser) {
+    toast('SMTP host and user are required', 'error');
+    return;
+  }
+  try {
+    await api('/settings', { method: 'PUT', body: { smtp_host: smtpHost, smtp_port: smtpPort, smtp_user: smtpUser, smtp_password: smtpPassword } });
+    toast('✅ Email settings saved!');
+    loadSettings();
+    ['a-smtp-host','a-smtp-user','a-smtp-password'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

@@ -445,13 +445,16 @@ app.put('/api/soccer/leaderboard/:userId', auth, superAdminOnly, (req, res) => {
 // ─── Settings ─────────────────────────────────────────────────────────────────
 app.get('/api/settings', auth, adminOnly, (req, res) => {
   const s = db.get('settings').value();
-  res.json({ has_football_api_key: Boolean(s.football_data_api_key), has_live_golf_api_key: Boolean(s.live_golf_api_key) });
+  res.json({ has_smtp: Boolean(s.smtp_host && s.smtp_user) });
 });
 
 app.put('/api/settings', auth, adminOnly, (req, res) => {
-  const { football_data_api_key, live_golf_api_key } = req.body || {};
-  if (football_data_api_key !== undefined) db.get('settings').assign({ football_data_api_key: football_data_api_key || '' }).write();
-  if (live_golf_api_key !== undefined) db.get('settings').assign({ live_golf_api_key: live_golf_api_key || '' }).write();
+  const { smtp_host, smtp_port, smtp_user, smtp_password } = req.body || {};
+  if (smtp_host !== undefined) db.get('settings').assign({ smtp_host: smtp_host || '' }).write();
+  if (smtp_port !== undefined) db.get('settings').assign({ smtp_port: smtp_port }).write();
+  if (smtp_user !== undefined) db.get('settings').assign({ smtp_user: smtp_user || '' }).write();
+  if (smtp_password !== undefined) db.get('settings').assign({ smtp_password: smtp_password || '' }).write();
+  initEmail();
   res.json({ success: true });
 });
 
@@ -485,5 +488,80 @@ app.get('/api/external/epl-fixtures', auth, adminOnly, async (req, res) => {
   res.status(410).json({ error: 'This endpoint is deprecated. EPL data now comes from ESPN on the frontend.' });
 });
 
+// Email settings & reminder system
+let emailTransporter = null;
+
+function initEmail() {
+  const s = db.get('settings').value();
+  if (s.smtp_host && s.smtp_user && s.smtp_password) {
+    emailTransporter = require('nodemailer').createTransport({
+      host: s.smtp_host,
+      port: s.smtp_port || 587,
+      secure: false,
+      auth: { user: s.smtp_user, pass: s.smtp_password }
+    });
+  }
+}
+
+// Check for pending picks and send reminders every minute
+setInterval(async () => {
+  if (!emailTransporter) return;
+  const now = new Date();
+  const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+
+  // Check golf tournaments
+  const golfTournaments = db.get('golf_tournaments').value();
+  for (const t of golfTournaments) {
+    if (t.results_entered || !t.deadline) continue;
+    const dl = new Date(t.deadline);
+    if (dl > now && dl <= oneHourFromNow) {
+      const picks = db.get('golf_picks').filter({ tournament_id: t.id }).value();
+      const users = db.get('users').value();
+      const pickedUserIds = new Set(picks.map(p => p.user_id));
+
+      const usersWithoutPicks = users.filter(u => u.email && !pickedUserIds.has(u.id));
+      for (const u of usersWithoutPicks) {
+        try {
+          await emailTransporter.sendMail({
+            from: '"The Boys Picks" <noreply@theboyspicks.com>',
+            to: u.email,
+            subject: `⛳ Reminder: ${t.name} - 1 hour to pick!`,
+            text: `Hi ${u.username},\n\nOnly 1 hour left to make your pick for ${t.name}!\n\nPick a golfer NOT in the predicted Top 5.\n\nGo to https://theboyspicks.com to make your pick.\n\nGood luck!`
+          });
+          console.log(`Reminder sent to ${u.email} for ${t.name}`);
+        } catch (e) { console.error('Email failed:', e.message); }
+      }
+    }
+  }
+
+  // Check soccer weeks
+  const soccerWeeks = db.get('soccer_weeks').value();
+  for (const w of soccerWeeks) {
+    if (w.results_entered || !w.deadline) continue;
+    const dl = new Date(w.deadline);
+    if (dl > now && dl <= oneHourFromNow) {
+      const games = db.get('soccer_games').filter({ week_id: w.id }).value();
+      const gameIds = games.map(g => g.id);
+      const picks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
+      const users = db.get('users').value();
+      const pickedUserIds = new Set(picks.map(p => p.user_id));
+
+      const usersWithoutPicks = users.filter(u => u.email && !pickedUserIds.has(u.id));
+      for (const u of usersWithoutPicks) {
+        try {
+          await emailTransporter.sendMail({
+            from: '"The Boys Picks" <noreply@theboyspicks.com>',
+            to: u.email,
+            subject: `⚽ Reminder: ${w.week_name} - 1 hour to pick!`,
+            text: `Hi ${u.username},\n\nOnly 1 hour left to make your picks for ${w.week_name}!\n\nGo to https://theboyspicks.com to make your 3 score predictions.\n\nGood luck!`
+          });
+          console.log(`Reminder sent to ${u.email} for ${w.week_name}`);
+        } catch (e) { console.error('Email failed:', e.message); }
+      }
+    }
+  }
+}, 60 * 1000); // Check every minute
+
 // ─── Start ────────────────────────────────────────────────────────────────────
+initEmail();
 app.listen(PORT, () => console.log(`🏌️⚽  Picks app running on http://localhost:${PORT}`));
