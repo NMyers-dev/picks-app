@@ -14,13 +14,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production-set-JWT_SE
 let db;
 let dbReady = false;
 
+function getDb() {
+  if (!dbReady || !db) throw new Error('Database not ready');
+  return db;
+}
+
 function initDb() {
   try {
     const dbPath = process.env.DB_PATH || 'picks.json';
     const adapter = new FileSync(dbPath);
     db = low(adapter);
     
-    getDb().defaults({
+    db.defaults({
       users: [],
       golf_tournaments: [],
       golf_picks: [],
@@ -31,12 +36,12 @@ function initDb() {
     }).write();
     
     try {
-      const users = getDb().get('users').value();
-      users.forEach((u, i) => {
+      const users = db.get('users').value();
+      users.forEach((u, i => {
         if (u.is_super_admin === undefined) {
-          getDb().get('users').find({ id: u.id }).assign({ is_super_admin: i === 0 }).write();
+          db.get('users').find({ id: u.id }).assign({ is_super_admin: i === 0 }).write();
         }
-      });
+      }));
     } catch (e) { console.log('Migration:', e.message); }
     
     dbReady = true;
@@ -49,18 +54,8 @@ function initDb() {
 
 initDb();
 
-function getDb() {
-  if (!dbReady || !db) throw new Error('Database not ready');
-  return db;
-}
-
-function getDb() {
-  if (!dbReady || !db) throw new Error('Database not ready');
-  return db;
-}
-
 function nextId(collection) {
-  const items = getDb().get(collection).value();
+  const items = db.get(collection).value();
   return items.length === 0 ? 1 : Math.max(...items.map(i => i.id)) + 1;
 }
 
@@ -100,7 +95,7 @@ app.post('/api/auth/register', async (req, res) => {
     if (password.length < 6)
       return res.status(400).json({ error: 'Password must be at least 6 characters' });
 
-    const users = getDb().get('users').value();
+    const users = db.get('users').value();
     if (users.some(u => u.username.toLowerCase() === username.trim().toLowerCase()))
       return res.status(409).json({ error: 'Username already taken' });
     if (users.some(u => u.email.toLowerCase() === email.trim().toLowerCase()))
@@ -118,7 +113,7 @@ app.post('/api/auth/register', async (req, res) => {
       created_at: now()
     };
 
-    getDb().get('users').push(user).write();
+    db.get('users').push(user).write();
 
     const token = jwt.sign({ id: user.id, username: user.username, is_admin: user.is_admin, is_super_admin: user.is_super_admin }, JWT_SECRET, { expiresIn: '30d' });
     res.json({ token, user: { id: user.id, username: user.username, email: user.email, is_admin: user.is_admin, is_super_admin: user.is_super_admin } });
@@ -131,7 +126,7 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body || {};
-    const user = getDb().get('users').find(u => u.username.toLowerCase() === (username || '').toLowerCase()).value();
+    const user = db.get('users').find(u => u.username.toLowerCase() === (username || '').toLowerCase()).value();
     if (!user || !(await bcrypt.compare(password, user.password_hash)))
       return res.status(401).json({ error: 'Invalid username or password' });
 
@@ -145,7 +140,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 // ─── User Management ──────────────────────────────────────────────────────────
 app.get('/api/users', auth, adminOnly, (req, res) => {
-  const users = getDb().get('users').map(u => ({
+  const users = db.get('users').map(u => ({
     id: u.id, username: u.username, email: u.email, is_admin: u.is_admin, created_at: u.created_at
   })).sortBy('username').value();
   res.json(users);
@@ -154,17 +149,17 @@ app.get('/api/users', auth, adminOnly, (req, res) => {
 app.put('/api/users/:id/admin', auth, adminOnly, (req, res) => {
   const targetId = parseInt(req.params.id);
   if (targetId === req.user.id) return res.status(400).json({ error: 'You cannot change your own admin status' });
-  const user = getDb().get('users').find({ id: targetId }).value();
+  const user = db.get('users').find({ id: targetId }).value();
   if (!user) return res.status(404).json({ error: 'User not found' });
-  getDb().get('users').find({ id: targetId }).assign({ is_admin: Boolean(req.body.is_admin) }).write();
+  db.get('users').find({ id: targetId }).assign({ is_admin: Boolean(req.body.is_admin) }).write();
   res.json({ success: true });
 });
 
 // ─── Golf Tournaments ─────────────────────────────────────────────────────────
 app.get('/api/golf/tournaments', (req, res) => {
   try {
-    const tournaments = getDb().get('golf_tournaments').orderBy('created_at', 'desc').value();
-    const myPicks = req.user ? getDb().get('golf_picks').filter({ user_id: req.user.id }).value() : [];
+    const tournaments = db.get('golf_tournaments').orderBy('created_at', 'desc').value();
+    const myPicks = req.user ? db.get('golf_picks').filter({ user_id: req.user.id }).value() : [];
     const pickMap = Object.fromEntries(myPicks.map(p => [p.tournament_id, p]));
 
     res.json(tournaments.map(t => ({
@@ -200,22 +195,22 @@ app.post('/api/golf/tournaments', auth, adminOnly, (req, res) => {
     created_at: now()
   };
 
-  getDb().get('golf_tournaments').push(tournament).write();
+  db.get('golf_tournaments').push(tournament).write();
   res.json({ id: tournament.id });
 });
 
 app.delete('/api/golf/tournaments/:id', auth, adminOnly, (req, res) => {
   const id = parseInt(req.params.id);
-  getDb().get('golf_picks').remove({ tournament_id: id }).write();
-  getDb().get('golf_tournaments').remove({ id }).write();
+  db.get('golf_picks').remove({ tournament_id: id }).write();
+  db.get('golf_tournaments').remove({ id }).write();
   res.json({ success: true });
 });
 
 app.get('/api/golf/tournaments/:id/picks', auth, (req, res) => {
   const tournamentId = parseInt(req.params.id);
-  const tournament = getDb().get('golf_tournaments').find({ id: tournamentId }).value();
-  const picks = getDb().get('golf_picks').filter({ tournament_id: tournamentId }).value();
-  const users = getDb().get('users').value();
+  const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
+  const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
+  const users = db.get('users').value();
 
   // Hide other users' picks until deadline or results entered
   const deadlinePassed = tournament && (tournament.results_entered || (tournament.deadline && new Date() >= new Date(tournament.deadline)));
@@ -238,18 +233,18 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
   if (!picked_golfer?.trim()) return res.status(400).json({ error: 'Golfer name required' });
 
   const tournamentId = parseInt(req.params.id);
-  const tournament = getDb().get('golf_tournaments').find({ id: tournamentId }).value();
+  const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
   if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
   if (tournament.results_entered) return res.status(400).json({ error: 'Results already entered — picks are locked' });
 
   if (tournament.predicted_top5.some(g => g.toLowerCase() === picked_golfer.trim().toLowerCase()))
     return res.status(400).json({ error: `${picked_golfer.trim()} is in the predicted Top 5 — you must pick someone else!` });
 
-  const existing = getDb().get('golf_picks').find({ tournament_id: tournamentId, user_id: req.user.id }).value();
+  const existing = db.get('golf_picks').find({ tournament_id: tournamentId, user_id: req.user.id }).value();
   if (existing) {
-    getDb().get('golf_picks').find({ id: existing.id }).assign({ picked_golfer: picked_golfer.trim(), result_category: null, points_earned: 0 }).write();
+    db.get('golf_picks').find({ id: existing.id }).assign({ picked_golfer: picked_golfer.trim(), result_category: null, points_earned: 0 }).write();
   } else {
-    getDb().get('golf_picks').push({
+    db.get('golf_picks').push({
       id: nextId('golf_picks'),
       tournament_id: tournamentId,
       user_id: req.user.id,
@@ -266,23 +261,23 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
 app.put('/api/golf/tournaments/:id/results', auth, adminOnly, (req, res) => {
   const { results } = req.body || {};
   const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
-  const tournament = getDb().get('golf_tournaments').find({ id: parseInt(req.params.id) }).value();
+  const tournament = db.get('golf_tournaments').find({ id: parseInt(req.params.id) }).value();
   const multiplier = tournament?.event_type === 'major' ? 1.5 : tournament?.event_type === 'signature' ? 1.25 : 1;
 
   for (const [pickId, category] of Object.entries(results)) {
     const basePoints = pointsMap[category] ?? 0;
     const points = Math.round(basePoints * multiplier * 10) / 10;
-    getDb().get('golf_picks').find({ id: parseInt(pickId) }).assign({ result_category: category, points_earned: points }).write();
+    db.get('golf_picks').find({ id: parseInt(pickId) }).assign({ result_category: category, points_earned: points }).write();
   }
-  getDb().get('golf_tournaments').find({ id: parseInt(req.params.id) }).assign({ results_entered: true }).write();
+  db.get('golf_tournaments').find({ id: parseInt(req.params.id) }).assign({ results_entered: true }).write();
 
   res.json({ success: true });
 });
 
 app.get('/api/golf/leaderboard', (req, res) => {
   try {
-    const users = getDb().get('users').value();
-    const allPicks = getDb().get('golf_picks').value();
+    const users = db.get('users').value();
+    const allPicks = db.get('golf_picks').value();
 
     const leaderboard = users.map(u => {
       const picks = allPicks.filter(p => p.user_id === u.id);
@@ -307,9 +302,9 @@ app.get('/api/golf/leaderboard', (req, res) => {
 // ─── Soccer Weeks ─────────────────────────────────────────────────────────────
 app.get('/api/soccer/weeks', (req, res) => {
   try {
-    const weeks = getDb().get('soccer_weeks').orderBy('created_at', 'desc').value();
-    const allGames = getDb().get('soccer_games').value();
-    const myPicks = req.user ? getDb().get('soccer_picks').filter({ user_id: req.user.id }).value() : [];
+    const weeks = db.get('soccer_weeks').orderBy('created_at', 'desc').value();
+    const allGames = db.get('soccer_games').value();
+    const myPicks = req.user ? db.get('soccer_picks').filter({ user_id: req.user.id }).value() : [];
     const picksByGame = Object.fromEntries(myPicks.map(p => [p.game_id, p]));
 
     res.json(weeks.map(w => ({
@@ -332,10 +327,10 @@ app.post('/api/soccer/weeks', auth, superAdminOnly, (req, res) => {
     return res.status(400).json({ error: 'Each game needs a home and away team' });
 
   const week = { id: nextId('soccer_weeks'), week_name: week_name.trim(), deadline: deadline || null, results_entered: false, created_at: now() };
-  getDb().get('soccer_weeks').push(week).write();
+  db.get('soccer_weeks').push(week).write();
 
   games.forEach((g, i) => {
-    getDb().get('soccer_games').push({
+    db.get('soccer_games').push({
       id: nextId('soccer_games'),
       week_id: week.id,
       home_team: g.home_team.trim(),
@@ -351,24 +346,24 @@ app.post('/api/soccer/weeks', auth, superAdminOnly, (req, res) => {
 
 app.delete('/api/soccer/weeks/:id', auth, superAdminOnly, (req, res) => {
   const weekId = parseInt(req.params.id);
-  const games = getDb().get('soccer_games').filter({ week_id: weekId }).value();
-  games.forEach(g => getDb().get('soccer_picks').remove({ game_id: g.id }).write());
-  getDb().get('soccer_games').remove({ week_id: weekId }).write();
-  getDb().get('soccer_weeks').remove({ id: weekId }).write();
+  const games = db.get('soccer_games').filter({ week_id: weekId }).value();
+  games.forEach(g => db.get('soccer_picks').remove({ game_id: g.id }).write());
+  db.get('soccer_games').remove({ week_id: weekId }).write();
+  db.get('soccer_weeks').remove({ id: weekId }).write();
   res.json({ success: true });
 });
 
 app.get('/api/soccer/weeks/:id/picks', auth, (req, res) => {
   const weekId = parseInt(req.params.id);
-  const week = getDb().get('soccer_weeks').find({ id: weekId }).value();
-  const games = getDb().get('soccer_games').filter({ week_id: weekId }).value();
+  const week = db.get('soccer_weeks').find({ id: weekId }).value();
+  const games = db.get('soccer_games').filter({ week_id: weekId }).value();
   const gameIds = games.map(g => g.id);
 
   // Hide other users' picks until deadline or results entered
   const deadlinePassed = week && (week.results_entered || (week.deadline && new Date() >= new Date(week.deadline)));
   if (!deadlinePassed) {
-    const myPicks = getDb().get('soccer_picks').filter(p => gameIds.includes(p.game_id) && p.user_id === req.user.id).value();
-    const users = getDb().get('users').value();
+    const myPicks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id) && p.user_id === req.user.id).value();
+    const users = db.get('users').value();
     const user = users.find(u => u.id === req.user.id);
     return res.json(myPicks.map(p => {
       const game = games.find(g => g.id === p.game_id);
@@ -376,8 +371,8 @@ app.get('/api/soccer/weeks/:id/picks', auth, (req, res) => {
     }));
   }
 
-  const picks = getDb().get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
-  const users = getDb().get('users').value();
+  const picks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
+  const users = db.get('users').value();
 
   const result = picks.map(p => {
     const user = users.find(u => u.id === p.user_id);
@@ -391,7 +386,7 @@ app.get('/api/soccer/weeks/:id/picks', auth, (req, res) => {
 app.post('/api/soccer/weeks/:id/picks', auth, (req, res) => {
   const { picks } = req.body || {};
   const weekId = parseInt(req.params.id);
-  const week = getDb().get('soccer_weeks').find({ id: weekId }).value();
+  const week = db.get('soccer_weeks').find({ id: weekId }).value();
   if (!week) return res.status(404).json({ error: 'Week not found' });
   if (week.results_entered) return res.status(400).json({ error: 'Results already entered — picks are locked' });
   if (week.deadline) {
@@ -403,11 +398,11 @@ app.post('/api/soccer/weeks/:id/picks', auth, (req, res) => {
     return res.status(400).json({ error: 'Invalid scores — must be non-negative numbers' });
 
   picks.forEach(p => {
-    const existing = getDb().get('soccer_picks').find({ game_id: p.game_id, user_id: req.user.id }).value();
+    const existing = db.get('soccer_picks').find({ game_id: p.game_id, user_id: req.user.id }).value();
     if (existing) {
-      getDb().get('soccer_picks').find({ id: existing.id }).assign({ predicted_home: p.predicted_home, predicted_away: p.predicted_away, points_earned: 0 }).write();
+      db.get('soccer_picks').find({ id: existing.id }).assign({ predicted_home: p.predicted_home, predicted_away: p.predicted_away, points_earned: 0 }).write();
     } else {
-      getDb().get('soccer_picks').push({
+      db.get('soccer_picks').push({
         id: nextId('soccer_picks'),
         game_id: p.game_id,
         user_id: req.user.id,
@@ -427,9 +422,9 @@ app.put('/api/soccer/weeks/:id/results', auth, superAdminOnly, (req, res) => {
   const outcome = (h, a) => h > a ? 'H' : a > h ? 'A' : 'D';
 
   for (const r of game_results) {
-    getDb().get('soccer_games').find({ id: r.game_id }).assign({ actual_home_score: r.home_score, actual_away_score: r.away_score }).write();
+    db.get('soccer_games').find({ id: r.game_id }).assign({ actual_home_score: r.home_score, actual_away_score: r.away_score }).write();
     const actual = outcome(r.home_score, r.away_score);
-    const picks = getDb().get('soccer_picks').filter({ game_id: r.game_id }).value();
+    const picks = db.get('soccer_picks').filter({ game_id: r.game_id }).value();
     picks.forEach(pick => {
       let pts = 0;
       if (pick.predicted_home === r.home_score && pick.predicted_away === r.away_score) {
@@ -437,18 +432,18 @@ app.put('/api/soccer/weeks/:id/results', auth, superAdminOnly, (req, res) => {
       } else if (outcome(pick.predicted_home, pick.predicted_away) === actual) {
         pts = 1;
       }
-      getDb().get('soccer_picks').find({ id: pick.id }).assign({ points_earned: pts }).write();
+      db.get('soccer_picks').find({ id: pick.id }).assign({ points_earned: pts }).write();
     });
   }
 
-  getDb().get('soccer_weeks').find({ id: parseInt(req.params.id) }).assign({ results_entered: true }).write();
+  db.get('soccer_weeks').find({ id: parseInt(req.params.id) }).assign({ results_entered: true }).write();
   res.json({ success: true });
 });
 
 app.get('/api/soccer/leaderboard', (req, res) => {
   try {
-    const users = getDb().get('users').value();
-    const allPicks = getDb().get('soccer_picks').value();
+    const users = db.get('users').value();
+    const allPicks = db.get('soccer_picks').value();
 
     const leaderboard = users.map(u => {
       const picks = allPicks.filter(p => p.user_id === u.id);
@@ -472,39 +467,39 @@ app.put('/api/soccer/leaderboard/:userId', auth, superAdminOnly, (req, res) => {
   const userId = parseInt(req.params.userId);
   const { adjustment } = req.body || {};
   if (!Number.isInteger(adjustment)) return res.status(400).json({ error: 'Adjustment must be an integer' });
-  const user = getDb().get('users').find({ id: userId }).value();
+  const user = db.get('users').find({ id: userId }).value();
   if (!user) return res.status(404).json({ error: 'User not found' });
-  const picks = getDb().get('soccer_picks').filter({ user_id: userId }).value();
+  const picks = db.get('soccer_picks').filter({ user_id: userId }).value();
   if (!picks.length && adjustment !== 0) {
-    getDb().get('soccer_picks').push({ id: nextId('soccer_picks'), game_id: 0, user_id: userId, predicted_home: 0, predicted_away: 0, points_earned: adjustment, created_at: now() }).write();
+    db.get('soccer_picks').push({ id: nextId('soccer_picks'), game_id: 0, user_id: userId, predicted_home: 0, predicted_away: 0, points_earned: adjustment, created_at: now() }).write();
   } else if (picks.length) {
     const totalPts = picks.reduce((s, p) => s + (p.points_earned || 0), 0);
     const lastPick = picks[picks.length - 1];
     const newLast = (lastPick.points_earned || 0) + adjustment;
-    getDb().get('soccer_picks').find({ id: lastPick.id }).assign({ points_earned: Math.max(0, newLast) }).write();
+    db.get('soccer_picks').find({ id: lastPick.id }).assign({ points_earned: Math.max(0, newLast) }).write();
   }
   res.json({ success: true });
 });
 
 // ─── Settings ─────────────────────────────────────────────────────────────────
 app.get('/api/settings', auth, adminOnly, (req, res) => {
-  const s = getDb().get('settings').value();
+  const s = db.get('settings').value();
   res.json({ has_smtp: Boolean(s.smtp_host && s.smtp_user) });
 });
 
 app.put('/api/settings', auth, adminOnly, (req, res) => {
   const { smtp_host, smtp_port, smtp_user, smtp_password } = req.body || {};
-  if (smtp_host !== undefined) getDb().get('settings').assign({ smtp_host: smtp_host || '' }).write();
-  if (smtp_port !== undefined) getDb().get('settings').assign({ smtp_port: smtp_port }).write();
-  if (smtp_user !== undefined) getDb().get('settings').assign({ smtp_user: smtp_user || '' }).write();
-  if (smtp_password !== undefined) getDb().get('settings').assign({ smtp_password: smtp_password || '' }).write();
+  if (smtp_host !== undefined) db.get('settings').assign({ smtp_host: smtp_host || '' }).write();
+  if (smtp_port !== undefined) db.get('settings').assign({ smtp_port: smtp_port }).write();
+  if (smtp_user !== undefined) db.get('settings').assign({ smtp_user: smtp_user || '' }).write();
+  if (smtp_password !== undefined) db.get('settings').assign({ smtp_password: smtp_password || '' }).write();
   initEmail();
   res.json({ success: true });
 });
 
 // ─── External APIs ────────────────────────────────────────────────────────────
 app.get('/api/external/golf-events', auth, adminOnly, async (req, res) => {
-  const s = getDb().get('settings').value();
+  const s = db.get('settings').value();
   const apiKey = s.live_golf_api_key;
   if (!apiKey) return res.status(400).json({ error: 'Set your Live Golf API key in Admin → API Settings first.' });
   try {
@@ -536,7 +531,7 @@ app.get('/api/external/epl-fixtures', auth, adminOnly, async (req, res) => {
 let emailTransporter = null;
 
 function initEmail() {
-  const s = getDb().get('settings').value();
+  const s = db.get('settings').value();
   if (s.smtp_host && s.smtp_user && s.smtp_password) {
     emailTransporter = require('nodemailer').createTransport({
       host: s.smtp_host,
@@ -555,13 +550,13 @@ setInterval(async () => {
     const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
 
     // Check golf tournaments
-    const golfTournaments = getDb().get('golf_tournaments').value();
+    const golfTournaments = db.get('golf_tournaments').value();
   for (const t of golfTournaments) {
     if (t.results_entered || !t.deadline) continue;
     const dl = new Date(t.deadline);
     if (dl > now && dl <= oneHourFromNow) {
-      const picks = getDb().get('golf_picks').filter({ tournament_id: t.id }).value();
-      const users = getDb().get('users').value();
+      const picks = db.get('golf_picks').filter({ tournament_id: t.id }).value();
+      const users = db.get('users').value();
       const pickedUserIds = new Set(picks.map(p => p.user_id));
 
       const usersWithoutPicks = users.filter(u => u.email && !pickedUserIds.has(u.id));
@@ -580,15 +575,15 @@ setInterval(async () => {
   }
 
   // Check soccer weeks
-  const soccerWeeks = getDb().get('soccer_weeks').value();
+  const soccerWeeks = db.get('soccer_weeks').value();
   for (const w of soccerWeeks) {
     if (w.results_entered || !w.deadline) continue;
     const dl = new Date(w.deadline);
     if (dl > now && dl <= oneHourFromNow) {
-      const games = getDb().get('soccer_games').filter({ week_id: w.id }).value();
+      const games = db.get('soccer_games').filter({ week_id: w.id }).value();
       const gameIds = games.map(g => g.id);
-      const picks = getDb().get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
-      const users = getDb().get('users').value();
+      const picks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
+      const users = db.get('users').value();
       const pickedUserIds = new Set(picks.map(p => p.user_id));
 
       const usersWithoutPicks = users.filter(u => u.email && !pickedUserIds.has(u.id));
