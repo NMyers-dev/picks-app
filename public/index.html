@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>The Boys Picks</title>
-<link rel="stylesheet" href="https://unpkg.com/neobrutalismcss@latest" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/OshekharO/Neubrutalism@main/neubrutalism.css" />
 <style>
   :root {
     --bg:       #f0f0f0;
@@ -249,46 +249,57 @@
 </div>
 
 <!--  App Screen  -->
-<div id="app-screen" style="display:none;flex-direction:column;min-height:100vh">
-  <header>
-    <div class="header-logo"><img src="https://a.espncdn.com/i/leaguelogos/soccer/500/23.png" style="width:22px;height:22px;border-radius:4px" alt=""/> The Boys Picks</div>
-    <nav class="header-nav">
-      <button class="nav-btn" id="nav-home"  onclick="showPage('home')"> <span>Home</span></button>
-      <button class="nav-btn" id="nav-golf"   onclick="showPage('golf')"> <span>PGA</span></button>
-      <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')"> <span>EPL</span></button>
-      <button class="nav-btn" id="nav-admin"  onclick="showPage('admin')" style="display:none"> <span>Admin</span></button>
+<div id="app-screen" style="display:none;flex-direction:column;min-height:100vh; background: #f5f5f5;">
+  <header style="background: #fff; border-bottom: 4px solid #000; padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 4px 4px 0 #000;">
+    <div style="font-size: 1.25rem; font-weight: 900; color: #000; letter-spacing: -0.5px;">
+      <span style="background: #FFD700; padding: 2px 8px; border: 2px solid #000; margin-right: 4px;">THE BOYS PICKS</span>
+    </div>
+    <nav style="display: flex; gap: 0.5rem;">
+      <button class="nb-btn" id="nav-home" onclick="showPage('home')" style="background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">HOME</button>
+      <button class="nb-btn" id="nav-golf" onclick="showPage('golf')" style="background: #FFD700; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">PGA</button>
+      <button class="nb-btn" id="nav-soccer" onclick="showPage('soccer')" style="background: #1a1a1a; color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">EPL</button>
+      <button class="nb-btn" id="nav-admin" onclick="showPage('admin')" style="display:none; background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">ADMIN</button>
     </nav>
-    <div class="header-user">
-      <span class="admin-badge" id="admin-badge" style="display:none">ADMIN</span>
-      <span class="user-badge" id="username-display"></span>
-      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Logout</button>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span id="admin-badge" style="display:none; background: #e74c3c; color: #fff; padding: 2px 8px; border: 2px solid #000; font-weight: 700; font-size: 0.7rem;">ADMIN</span>
+      <span id="username-display" style="background: #f0f0f0; padding: 4px 12px; border: 2px solid #000; font-weight: 600;"></span>
+      <button class="nb-btn" onclick="doLogout()" style="background: #fff; border: 2px solid #000; box-shadow: 2px 2px 0 #000; font-size: 0.75rem; padding: 4px 8px;">LOGOUT</button>
     </div>
   </header>
 
-  <main>
+  <main style="padding: 1.5rem;">
     <!--  Home / News Page  -->
     <div class="page" id="page-home" style="display:none">
-      <div style="margin-bottom:1.5rem">
-        <div class="section-title" style="font-size:1.5rem"> The Boys Picks</div>
-        <div class="section-subtitle">Weekly predictions for PGA &amp; EPL</div>
+      <div class="nb-card" style="margin-bottom: 1.5rem; padding: 1.5rem; background: var(--surface); border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+        <h1 class="nb-title" style="font-size: 2rem; margin-bottom: 0.5rem;">THE BOYS PICKS</h1>
+        <p class="nb-subtitle" style="color: var(--muted);">Weekly predictions for PGA Tour & EPL</p>
       </div>
-      <div class="grid-2">
-        <div>
-          <div class="card" style="margin-bottom:1.5rem">
-            <div class="section-title" style="color:var(--gold)"> PGA Leaderboard</div>
-            <div id="home-golf-lb"><div class="loading">Loading...</div></div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="nb-card" style="padding: 1rem; background: #FFD700; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+          <h3 class="nb-title" style="font-size: 1.25rem; margin-bottom: 1rem;">PGA LEADERBOARD</h3>
+          <div id="home-golf-lb">
+            <div class="nb-badge" style="background: #000; color: #fff; padding: 0.5rem;">Loading...</div>
           </div>
         </div>
-        <div>
-          <div class="card" style="margin-bottom:1.5rem">
-            <div class="section-title" style="color:var(--slate)"> EPL Leaderboard</div>
-            <div id="home-soccer-lb"><div class="loading">Loading...</div></div>
+        
+        <div class="nb-card" style="padding: 1rem; background: #1a1a1a; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+          <h3 class="nb-title" style="font-size: 1.25rem; margin-bottom: 1rem; color: #fff;">EPL LEADERBOARD</h3>
+          <div id="home-soccer-lb">
+            <div class="nb-badge" style="background: #fff; color: #000; padding: 0.5rem;">Loading...</div>
           </div>
         </div>
       </div>
-      <div class="card" style="margin-bottom:1.5rem" id="recent-activity">
-        <div class="section-title"> Recent Results</div>
-        <div id="recent-results-list"><div class="loading">Loading...</div></div>
+      
+      <div class="nb-card" style="padding: 1.5rem; background: var(--surface); border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+        <h3 class="nb-title" style="font-size: 1.25rem; margin-bottom: 1rem;">RECENT RESULTS</h3>
+        <div id="recent-results-list">
+          <div class="nb-badge" style="background: #f0f0f0; padding: 0.5rem;">Loading...</div>
+        </div>
+      </div>
+      
+      <div class="nb-card" style="margin-top: 1.5rem; padding: 1rem; background: #000; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+        <p style="color: #fff; text-align: center; font-weight: 600;">Log in to make your picks!</p>
       </div>
     </div>
 
@@ -741,19 +752,25 @@ async function loadHomePage() {
     ]);
 
     if (!golfRows.length) {
-      golfEl.innerHTML = '<p style="color:var(--muted);padding:0.5rem">No data yet</p>';
+      golfEl.innerHTML = '<div class="nb-alert" style="background: #f0f0f0; border: 2px solid #000;">No data yet</div>';
     } else {
-      golfEl.innerHTML = `<table class="lb-table" style="font-size:0.85rem"><thead><tr><th>#</th><th>Player</th><th>Pts</th></tr></thead><tbody>` +
-        golfRows.slice(0, 10).map((r,i) => `<tr><td>${i+1}</td><td>${uname(r.username)}</td><td style="font-weight:700;color:var(--gold)">${r.total_points}</td></tr>`).join('') +
-        '</tbody></table>';
+      golfEl.innerHTML = golfRows.slice(0, 10).map((r,i) => 
+        `<div class="nb-flex" style="justify-content: space-between; padding: 0.5rem; border-bottom: 2px solid #000;">
+          <span><span class="nb-badge" style="background: #000; color: #fff;">${i+1}</span> ${uname(r.username)}</span>
+          <span class="nb-badge" style="background: #FFD700; color: #000;">${r.total_points} pts</span>
+        </div>`
+      ).join('');
     }
 
     if (!soccerRows.length) {
-      soccerEl.innerHTML = '<p style="color:var(--muted);padding:0.5rem">No data yet</p>';
+      soccerEl.innerHTML = '<div class="nb-alert" style="background: #333; color: #fff;">No data yet</div>';
     } else {
-      soccerEl.innerHTML = `<table class="lb-table" style="font-size:0.85rem"><thead><tr><th>#</th><th>Player</th><th>Pts</th></tr></thead><tbody>` +
-        soccerRows.slice(0, 10).map((r,i) => `<tr><td>${i+1}</td><td>${uname(r.username)}</td><td style="font-weight:700;color:var(--slate)">${r.total_points}</td></tr>`).join('') +
-        '</tbody></table>';
+      soccerEl.innerHTML = soccerRows.slice(0, 10).map((r,i) => 
+        `<div class="nb-flex" style="justify-content: space-between; padding: 0.5rem; border-bottom: 2px solid #fff;">
+          <span style="color: #fff;"><span class="nb-badge" style="background: #fff; color: #000;">${i+1}</span> ${uname(r.username)}</span>
+          <span class="nb-badge" style="background: #fff; color: #000;">${r.total_points} pts</span>
+        </div>`
+      ).join('');
     }
 
     const [golfTours, soccerWeeks] = await Promise.all([
@@ -766,16 +783,22 @@ async function loadHomePage() {
 
     let recentHtml = '';
     completedGolf.forEach(t => {
-      recentHtml += `<div style="padding:0.5rem;border-bottom:1px solid var(--border)"><div style="font-weight:600;color:var(--gold)"> ${t.name}</div><div style="font-size:0.8rem;color:var(--muted)">Completed</div></div>`;
+      recentHtml += `<div class="nb-list-group-item" style="border-bottom: 2px solid #000;">
+        <strong style="color: #000;">${t.name}</strong>
+        <span class="nb-badge" style="background: #2ecc71; color: #000;">COMPLETE</span>
+      </div>`;
     });
     completedSoccer.forEach(w => {
-      recentHtml += `<div style="padding:0.5rem;border-bottom:1px solid var(--border)"><div style="font-weight:600;color:var(--slate)"> ${w.week_name}</div><div style="font-size:0.8rem;color:var(--muted)">Results in</div></div>`;
+      recentHtml += `<div class="nb-list-group-item" style="border-bottom: 2px solid #000;">
+        <strong style="color: #000;">${w.week_name}</strong>
+        <span class="nb-badge" style="background: #3498db; color: #fff;">COMPLETE</span>
+      </div>`;
     });
 
-    recentEl.innerHTML = recentHtml || '<p style="color:var(--muted);padding:0.5rem">No recent results</p>';
+    recentEl.innerHTML = recentHtml || '<div class="nb-alert" style="background: #f0f0f0; border: 2px solid #000;">No recent results</div>';
 
   } catch (e) {
-    golfEl.innerHTML = '<p style="color:var(--red)">Failed to load</p>';
+    golfEl.innerHTML = '<div class="nb-alert nb-alert-danger">Error: ' + e.message + '</div>';
   }
 }
 
