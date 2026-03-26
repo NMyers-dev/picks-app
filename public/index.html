@@ -306,120 +306,136 @@
     <!--  PGA Page  -->
     <datalist id="golfer-list"></datalist>
     <div class="page" id="page-golf">
-      <div class="grid-2" style="margin-bottom:1.5rem">
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
         <div>
-          <div class="section-head">
-            <div>
-              <div class="section-title" style="color:var(--gold)"> PGA Picks  Stage 2</div>
-              <div class="section-subtitle">Pick a golfer outside the predicted Top 5</div>
-            </div>
+          <div style="margin-bottom: 1rem; padding: 1rem; background: #FFD700; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+            <div style="font-size: 1.5rem; font-weight: 900; color: #000;">PGA PICKS - STAGE 2</div>
+            <div style="font-size: 0.85rem; color: #000; opacity: 0.7;">Pick a golfer outside the predicted Top 5</div>
           </div>
-          <div id="golf-tournaments-list"><div class="loading">Loading tournaments</div></div>
+          <div id="golf-tournaments-list"><div style="padding: 1rem; border: 2px solid #000; background: #f0f0f0;">Loading tournaments...</div></div>
         </div>
         <div>
-          <div class="section-head">
-            <div><div class="section-title">Leaderboard</div>
-              <div class="section-subtitle">Overall PGA standings</div></div>
-            <button class="btn btn-ghost btn-sm" onclick="loadGolfLeaderboard()"></button>
+          <div style="margin-bottom: 1rem; padding: 1rem; background: #fff; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+            <div style="font-size: 1rem; font-weight: 800; margin-bottom: 0.5rem;">LEADERBOARD</div>
+            <button class="nb-btn" onclick="loadGolfLeaderboard()" style="background: #000; color: #fff; border: 2px solid #000; padding: 4px 8px; font-size: 0.75rem; margin-bottom: 0.5rem;">REFRESH</button>
           </div>
-          <div class="card" id="golf-leaderboard"><div class="loading">Loading</div></div>
+          <div id="golf-leaderboard" style="background: #fff; border: 3px solid #000; box-shadow: 4px 4px 0 #000; padding: 0.5rem;"></div>
         </div>
       </div>
     </div>
 
     <!--  EPL Page  -->
     <div class="page" id="page-soccer">
-      <div class="grid-2" style="margin-bottom:1.5rem">
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
         <div>
-          <div class="section-head">
-            <div>
-              <div class="section-title" style="color:var(--slate)"> EPL Picks</div>
-              <div class="section-subtitle">3pts exact score  1pt correct result</div>
-            </div>
+          <div style="margin-bottom: 1rem; padding: 1rem; background: #1a1a1a; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+            <div style="font-size: 1.5rem; font-weight: 900; color: #fff;">EPL PICKS</div>
+            <div style="font-size: 0.85rem; color: #aaa;">3pts exact score | 1pt correct result</div>
           </div>
-          <div id="soccer-weeks-list"><div class="loading">Loading weeks</div></div>
+          <div id="soccer-weeks-list"><div style="padding:1rem;border:2px solid #000;background:#f0f0f0;">Loading weeks...</div></div>
         </div>
         <div>
-          <div class="section-head">
-            <div><div class="section-title">Leaderboard</div>
-              <div class="section-subtitle">Overall EPL standings</div></div>
-            <button class="btn btn-ghost btn-sm" onclick="loadSoccerLeaderboard()"></button>
+          <div style="margin-bottom: 1rem; padding: 1rem; background: #fff; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+            <div style="font-size: 1rem; font-weight: 800; margin-bottom: 0.5rem;">LEADERBOARD</div>
           </div>
-          <div class="card" id="soccer-leaderboard"><div class="loading">Loading</div></div>
+          <div id="soccer-leaderboard" style="background: #fff; border: 3px solid #000; box-shadow: 4px 4px 0 #000; padding: 0.5rem;"></div>
         </div>
       </div>
     </div>
 
     <!--  Admin Page  -->
     <div class="page" id="page-admin">
-      <div class="section-title" style="color:var(--gold2);margin-bottom:1.5rem"> Admin Panel</div>
-      <div class="grid-2">
+      <div style="margin-bottom: 1.5rem; padding: 1rem; background: #e74c3c; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+        <div style="font-size: 1.5rem; font-weight: 900; color: #fff;">ADMIN PANEL</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
         <!-- Left col -->
         <div>
-          <div class="card admin-section" style="margin-bottom:1.25rem">
-            <div class="admin-section-title"> Create PGA Tournament</div>
-            <button class="btn btn-signal btn-sm" onclick="fetchGolfEvents()" style="margin-bottom:0.75rem"> Fetch PGA Schedule from ESPN</button>
+          <div style="margin-bottom:1.25rem;padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;">
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#FFD700;padding:0.5rem;border:2px solid #000;">CREATE PGA TOURNAMENT</div>
+            <button onclick="fetchGolfEvents()" style="margin-bottom:0.75rem;background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">FETCH PGA SCHEDULE</button>
             <div id="golf-events-list" style="display:none;margin-bottom:0.75rem"></div>
-            <div class="form-group"><label>Tournament Name</label>
-              <input type="text" id="a-tour-name" placeholder="e.g. The Masters 2025"/></div>
-            <div class="form-group"><label>Course (optional)</label>
-              <input type="text" id="a-tour-course" placeholder="e.g. Augusta National"/></div>
-            <div class="form-group"><label>Event Type</label>
-              <select id="a-tour-type">
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">TOURNAMENT NAME</label>
+              <input type="text" id="a-tour-name" placeholder="e.g. The Masters 2025" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">COURSE (optional)</label>
+              <input type="text" id="a-tour-course" placeholder="e.g. Augusta National" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">EVENT TYPE</label>
+              <select id="a-tour-type" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;">
                 <option value="regular">Regular</option>
                 <option value="signature">Signature Event (x1.25)</option>
                 <option value="major">Major (x1.5)</option>
               </select></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
-              <div class="form-group"><label>Start Date</label>
-                <input type="date" id="a-tour-date"/></div>
-              <div class="form-group"><label>Pick Deadline</label>
-                <input type="datetime-local" id="a-tour-deadline"/></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.75rem">
+              <div><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">START DATE</label>
+                <input type="date" id="a-tour-date" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+              <div><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">DEADLINE</label>
+                <input type="datetime-local" id="a-tour-deadline" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
             </div>
-            <div class="form-group"><label>Predicted Top 5 Golfers</label>
-              <div class="golfer-inputs">
-                <input type="text" id="a-g1" placeholder="#1 favourite"/>
-                <input type="text" id="a-g2" placeholder="#2"/>
-                <input type="text" id="a-g3" placeholder="#3"/>
-                <input type="text" id="a-g4" placeholder="#4"/>
-                <input type="text" id="a-g5" placeholder="#5"/>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">PREDICTED TOP 5</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+                <input type="text" id="a-g1" placeholder="#1 favourite" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+                <input type="text" id="a-g2" placeholder="#2" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+                <input type="text" id="a-g3" placeholder="#3" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+                <input type="text" id="a-g4" placeholder="#4" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+                <input type="text" id="a-g5" placeholder="#5" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
               </div>
             </div>
-            <button class="btn btn-primary" onclick="adminCreateTournament()">Create Tournament</button>
+            <button onclick="adminCreateTournament()" style="background:#FFD700;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.75rem 1.5rem;font-weight:900;cursor:pointer;">CREATE TOURNAMENT</button>
           </div>
 
-          <div class="card admin-section" style="margin-bottom:1.25rem" id="a-epl-create">
-            <div class="admin-section-title"> Create EPL Week</div>
-            <div class="form-group"><label>Week Name</label>
-              <input type="text" id="a-week-name" placeholder="e.g. GW29  22 Mar"/></div>
-            <button class="btn btn-signal btn-sm" onclick="fetchEplFixtures()" style="margin-bottom:0.75rem"> Fetch Upcoming Fixtures from API</button>
+          <div style="margin-bottom:1.25rem;padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;" id="a-epl-create">
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#1a1a1a;color:#fff;padding:0.5rem;border:2px solid #000;">CREATE EPL WEEK</div>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">WEEK NAME</label>
+              <input type="text" id="a-week-name" placeholder="e.g. GW29 22 Mar" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+            <button onclick="fetchEplFixtures()" style="margin-bottom:0.75rem;background:#000;color:#fff;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">FETCH FIXTURES</button>
             <div id="epl-fixtures-list" style="display:none;margin-bottom:0.75rem"></div>
-            <div class="form-group"><label>Pick Deadline</label>
-              <input type="datetime-local" id="a-week-deadline"/></div>
-            <div class="form-group"><label>3 Games</label>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">PICK DEADLINE</label>
+              <input type="datetime-local" id="a-week-deadline" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">3 GAMES</label>
               <datalist id="pl-teams"></datalist>
               <div id="a-games-container">
-                <div class="game-inputs-row"><input type="text" placeholder="Home team" class="a-home" list="pl-teams"/><div class="vs">vs</div><input type="text" placeholder="Away team" class="a-away" list="pl-teams"/></div>
-                <div class="game-inputs-row"><input type="text" placeholder="Home team" class="a-home" list="pl-teams"/><div class="vs">vs</div><input type="text" placeholder="Away team" class="a-away" list="pl-teams"/></div>
-                <div class="game-inputs-row"><input type="text" placeholder="Home team" class="a-home" list="pl-teams"/><div class="vs">vs</div><input type="text" placeholder="Away team" class="a-away" list="pl-teams"/></div>
+                <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="text" placeholder="Home" class="a-home" list="pl-teams" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/><span style="font-weight:700;color:#666;">vs</span><input type="text" placeholder="Away" class="a-away" list="pl-teams" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+                <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="text" placeholder="Home" class="a-home" list="pl-teams" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/><span style="font-weight:700;color:#666;">vs</span><input type="text" placeholder="Away" class="a-away" list="pl-teams" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+                <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="text" placeholder="Home" class="a-home" list="pl-teams" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/><span style="font-weight:700;color:#666;">vs</span><input type="text" placeholder="Away" class="a-away" list="pl-teams" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
               </div>
             </div>
-            <button class="btn btn-blue" onclick="adminCreateSoccerWeek()">Create Week</button>
+            <button onclick="adminCreateSoccerWeek()" style="background:#1a1a1a;color:#fff;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.75rem 1.5rem;font-weight:900;cursor:pointer;">CREATE WEEK</button>
           </div>
 
           <!-- Settings -->
-          <div class="card admin-section">
-            <div class="admin-section-title"> API Settings</div>
-            <div class="info-box">EPL and Golf data now come from ESPN  no API key needed!</div>
-            <div class="form-group"><label>SMTP Host (e.g. smtp.gmail.com)</label>
-              <input type="text" id="a-smtp-host" placeholder="smtp.gmail.com"/></div>
-            <div class="form-group"><label>SMTP Port</label>
-              <input type="number" id="a-smtp-port" placeholder="587" value="587"/></div>
-            <div class="form-group"><label>SMTP Username</label>
-              <input type="text" id="a-smtp-user" placeholder="your@email.com"/></div>
-            <div class="form-group"><label>SMTP Password / App Password</label>
-              <input type="password" id="a-smtp-password" placeholder="xxxx xxxx xxxx xxxx"/></div>
-            <button class="btn btn-ghost btn-sm" onclick="saveSettings()">Save Email Settings</button>
+          <div style="padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;">
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#87CEEB;padding:0.5rem;border:2px solid #000;">EMAIL SETTINGS</div>
+            <div style="background:#fff3cd;border:2px solid #000;padding:0.5rem;margin-bottom:0.75rem;font-size:0.8rem;font-weight:600;">ESPN API - no key needed!</div>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">SMTP HOST</label>
+              <input type="text" id="a-smtp-host" placeholder="smtp.gmail.com" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">SMTP PORT</label>
+              <input type="number" id="a-smtp-port" placeholder="587" value="587" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">SMTP USER</label>
+              <input type="text" id="a-smtp-user" placeholder="your@email.com" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">SMTP PASSWORD</label>
+              <input type="password" id="a-smtp-password" placeholder="xxxx xxxx xxxx xxxx" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+            <button onclick="saveSettings()" style="background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">SAVE SETTINGS</button>
+            <span id="settings-status" style="font-size:0.8rem;margin-left:0.5rem;"></span>
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div>
+          <div style="margin-bottom:1.25rem;padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;">
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#FFD700;padding:0.5rem;border:2px solid #000;">GOLF RESULTS</div>
+            <div id="a-golf-results-list"><div style="padding:1rem;">Loading...</div></div>
+          </div>
+          <div style="margin-bottom:1.25rem;padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;" id="a-epl-results">
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#1a1a1a;color:#fff;padding:0.5rem;border:2px solid #000;">EPL RESULTS</div>
+            <div id="a-soccer-results-list"><div style="padding:1rem;">Loading...</div></div>
+          </div>
+          <div style="padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;">
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#87CEEB;padding:0.5rem;border:2px solid #000;">USER MANAGEMENT</div>
+            <div id="a-users-list"><div style="padding:1rem;">Loading...</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
             <span id="settings-status" style="font-size:0.8rem;color:var(--muted);margin-left:0.5rem"></span>
           </div>
         </div>
@@ -666,28 +682,31 @@ function togglePast(btn, id) {
 function renderTournamentCard(t, isActive) {
   const top5 = t.predicted_top5.map(g => {
     const img = getGolferImg(g);
-    return img ? `<span class="top5-item"><img src="${img}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;margin-right:2px"/>${g}</span>` : `<span class="top5-item">${g}</span>`;
+    return img ? `<span style="background:#fff;border:2px solid #000;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:700;"><img src="${img}" style="width:18px;height:18px;border-radius:50%;vertical-align:middle;margin-right:4px"/>${g}</span>` : `<span style="background:#fff;border:2px solid #000;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:700;">${g}</span>`;
   }).join('');
-  const deadline = t.deadline ? `  Deadline: ${new Date(t.deadline).toLocaleDateString()}` : '';
-  const eventType = t.event_type === 'major' ? ' Major (x1.5)' : t.event_type === 'signature' ? ' Signature (x1.25)' : '';
+  const deadline = t.deadline ? ` | Deadline: ${new Date(t.deadline).toLocaleDateString()}` : '';
+  const eventType = t.event_type === 'major' ? ' | Major (x1.5)' : t.event_type === 'signature' ? ' | Signature (x1.25)' : '';
   let pickHtml = '';
   if (isActive) {
     pickHtml = t.my_pick
-      ? `<div class="my-pick-display"><span>My pick: </span><span class="golfer-name">${getGolferImg(t.my_pick.picked_golfer) ? '<img src="'+getGolferImg(t.my_pick.picked_golfer)+'" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px"/>' : ''} ${t.my_pick.picked_golfer}</span><span style="color:var(--muted);font-size:0.8rem;margin-left:auto">Change below</span></div>
-         <div class="pick-form" style="margin-top:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}"/><button class="btn btn-primary btn-sm" onclick="submitGolfPick(${t.id})">Update</button></div>`
-      : `<div class="info-box">Pick a golfer NOT in the predicted Top 5.</div>
-         <div class="pick-form"><input type="text" list="golfer-list" id="pick-input-${t.id}" placeholder="Search golfer..."/><button class="btn btn-primary btn-sm" onclick="submitGolfPick(${t.id})">Lock In</button></div>`;
+      ? `<div style="margin-top:0.75rem;padding:0.6rem;background:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;">
+           <span style="font-weight:700;">Your pick: </span><span style="font-weight:900;">${getGolferImg(t.my_pick.picked_golfer) ? '<img src="'+getGolferImg(t.my_pick.picked_golfer)+'" style="width:20px;height:20px;border-radius:50%;vertical-align:middle;margin-right:4px"/>' : ''} ${t.my_pick.picked_golfer}</span>
+           <span style="float:right;font-size:0.7rem;color:#000;">Change below</span>
+         </div>
+         <div style="display:flex;gap:0.5rem;margin-top:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}" style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">UPDATE</button></div>`
+      : `<div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;font-size:0.85rem;font-weight:700;">Pick a golfer NOT in the predicted Top 5</div>
+         <div style="display:flex;gap:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" placeholder="Search golfer..." style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#FFD700;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">LOCK IN</button></div>`;
   } else {
-    pickHtml = `<button class="btn btn-ghost btn-sm" style="margin-top:0.75rem" onclick="loadGolfPicks(${t.id},this)"> View All Picks</button><div id="golf-picks-${t.id}"></div>`;
+    pickHtml = `<button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.75rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
   }
-  return `<div class="card tournament-card">
-    <div class="card-header">
-      <div><div class="card-title">${t.name}</div>
-        <div class="card-meta">${t.course ? t.course + '  ' : ''}${t.start_date ? new Date(t.start_date).toLocaleDateString() : ''}${deadline}${eventType ? '  ' + eventType : ''}</div></div>
-      <span class="pill ${isActive ? 'pill-green' : 'pill-muted'}">${isActive ? 'ACTIVE' : 'COMPLETE'}</span>
+  return `<div style="background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:1rem;margin-bottom:1rem;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
+      <div><div style="font-size:1.1rem;font-weight:900;color:#000;">${t.name}</div>
+        <div style="font-size:0.75rem;color:#666;font-weight:600;">${t.course ? t.course + ' | ' : ''}${t.start_date ? new Date(t.start_date).toLocaleDateString() : ''}${deadline}${eventType}</div></div>
+      <span style="background:${isActive?'#2ecc71':'#999'};color:#fff;border:2px solid #000;padding:2px 8px;font-size:0.7rem;font-weight:700;border-radius:4px;">${isActive ? 'ACTIVE' : 'COMPLETE'}</span>
     </div>
-    <div style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.35rem">Predicted Top 5</div>
-    <div class="top5-list">${top5}</div>
+    <div style="font-size:0.75rem;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;background:#FFD700;padding:0.25rem 0.5rem;border:2px solid #000;display:inline-block;">PREDICTED TOP 5</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">${top5}</div>
     ${pickHtml}
   </div>`;
 }
@@ -705,13 +724,13 @@ async function loadGolfPicks(tournamentId, btn) {
   if (el.innerHTML) { el.innerHTML = ''; return; }
   try {
     const picks = await api(`/golf/tournaments/${tournamentId}/picks`);
-    if (!picks.length) { el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;margin-top:0.5rem">No picks yet.</p>'; return; }
-    el.innerHTML = `<div class="picks-grid" style="margin-top:0.75rem">${picks.map(p => {
+    if (!picks.length) { el.innerHTML = '<p style="font-size:0.85rem;margin-top:0.5rem;">No picks yet.</p>'; return; }
+    el.innerHTML = `<div style="margin-top:0.75rem;border:2px solid #000;">${picks.map(p => {
       const img = getGolferImg(p.picked_golfer);
-      return `<div class="pick-row">
-        <span class="pick-user"> ${uname(p.username)}</span>
-        <span class="pick-golfer">${img ? '<img src="'+img+'" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px"/>' : ''} ${p.picked_golfer}</span>
-        ${p.result_category ? `<span class="result-badge result-${p.result_category}">${formatResult(p.result_category)}  ${p.points_earned}pts</span>` : ''}
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem;border-bottom:2px solid #000;${p.result_category?'background:#fff':''}">
+        <span style="font-weight:700;">${uname(p.username)}</span>
+        <span style="font-weight:900;color:#000;">${img ? '<img src="'+img+'" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;margin-right:4px"/>' : ''} ${p.picked_golfer}</span>
+        ${p.result_category ? `<span style="background:${p.result_category==='winner'?'#FFD700':p.result_category==='top5'?'#87CEEB':p.result_category==='top10'?'#90EE90':'#ccc'};border:2px solid #000;padding:2px 8px;font-size:0.75rem;font-weight:700;">${formatResult(p.result_category)} ${p.points_earned}pts</span>` : ''}
       </div>`;
     }).join('')}</div>`;
   } catch (e) { toast(e.message, 'error'); }
@@ -725,57 +744,72 @@ async function loadGolfLeaderboard() {
   const el = document.getElementById('golf-leaderboard');
   try {
     const rows = await api('/golf/leaderboard');
-    if (!rows.length) { el.innerHTML = '<div class="empty-state" style="padding:1rem"><p>No data yet</p></div>'; return; }
-    el.innerHTML = `<table class="lb-table"><thead><tr><th>#</th><th>Player</th><th>Pts</th><th>W</th><th>T5</th><th>T10</th></tr></thead><tbody>
-      ${rows.map((r,i) => `<tr>
-        <td class="lb-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i===0?'':i===1?'':i===2?'':i+1}</td>
-        <td>${uname(r.username)}</td>
-        <td class="lb-pts" style="color:var(--gold)">${r.total_points}</td>
-        <td style="color:var(--gold2)">${r.wins}</td><td>${r.top5s}</td><td style="color:var(--muted)">${r.top10s}</td>
+    if (!rows.length) { el.innerHTML = '<div style="padding:1rem;font-weight:700;">No data yet</div>'; return; }
+    el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+      <thead><tr style="background:#000;color:#fff;">
+        <th style="padding:0.5rem;text-align:left;border:2px solid #000;">#</th>
+        <th style="padding:0.5rem;text-align:left;border:2px solid #000;">PLAYER</th>
+        <th style="padding:0.5rem;text-align:center;border:2px solid #000;">PTS</th>
+        <th style="padding:0.5rem;text-align:center;border:2px solid #000;">W</th>
+        <th style="padding:0.5rem;text-align:center;border:2px solid #000;">T5</th>
+        <th style="padding:0.5rem;text-align:center;border:2px solid #000;">T10</th>
+      </tr></thead><tbody>
+      ${rows.map((r,i) => `<tr style="background:${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'#fff'};border:2px solid #000;">
+        <td style="padding:0.5rem;border:2px solid #000;font-weight:900;">${i+1}</td>
+        <td style="padding:0.5rem;border:2px solid #000;font-weight:700;">${uname(r.username)}</td>
+        <td style="padding:0.5rem;border:2px solid #000;font-weight:900;text-align:center;">${r.total_points}</td>
+        <td style="padding:0.5rem;border:2px solid #000;text-align:center;font-weight:700;">${r.wins}</td>
+        <td style="padding:0.5rem;border:2px solid #000;text-align:center;">${r.top5s}</td>
+        <td style="padding:0.5rem;border:2px solid #000;text-align:center;color:#666;">${r.top10s}</td>
       </tr>`).join('')}
     </tbody></table>`;
-  } catch (e) { el.innerHTML = `<p style="color:var(--red)">${e.message}</p>`; }
+  } catch (e) { el.innerHTML = `<p style="color:red;font-weight:700;">${e.message}</p>`; }
 }
 
 // 
 // HOME / NEWS
 // 
 async function loadHomePage() {
+  console.log('Loading home page...');
   const golfEl = document.getElementById('home-golf-lb');
   const soccerEl = document.getElementById('home-soccer-lb');
   const recentEl = document.getElementById('recent-results-list');
 
   try {
+    console.log('Fetching leaderboards...');
     const [golfRows, soccerRows] = await Promise.all([
-      api('/golf/leaderboard'),
-      api('/soccer/leaderboard').catch(() => [])
+      fetch('/api/golf/leaderboard').then(r => r.json()).catch(e => { console.error('Golf LB error:', e); return []; }),
+      fetch('/api/soccer/leaderboard').then(r => r.ok ? r.json() : []).catch(e => { console.error('Soccer LB error:', e); return []; })
     ]);
 
-    if (!golfRows.length) {
-      golfEl.innerHTML = '<div class="nb-alert" style="background: #f0f0f0; border: 2px solid #000;">No data yet</div>';
+    console.log('Golf rows:', golfRows);
+    console.log('Soccer rows:', soccerRows);
+
+    if (!golfRows || !golfRows.length) {
+      golfEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #000; background: #f0f0f0;">No PGA data yet</div>';
     } else {
       golfEl.innerHTML = golfRows.slice(0, 10).map((r,i) => 
-        `<div class="nb-flex" style="justify-content: space-between; padding: 0.5rem; border-bottom: 2px solid #000;">
-          <span><span class="nb-badge" style="background: #000; color: #fff;">${i+1}</span> ${uname(r.username)}</span>
-          <span class="nb-badge" style="background: #FFD700; color: #000;">${r.total_points} pts</span>
+        `<div style="display: flex; justify-content: space-between; padding: 0.5rem; border: 2px solid #000; margin-bottom: 4px; background: ${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'#fff'};">
+          <span style="font-weight: 700;"><span style="background: #000; color: #fff; padding: 2px 6px; margin-right: 8px;">${i+1}</span> ${r.username}</span>
+          <span style="font-weight: 900; background: #000; color: #FFD700; padding: 2px 8px;">${r.total_points}</span>
         </div>`
       ).join('');
     }
 
-    if (!soccerRows.length) {
-      soccerEl.innerHTML = '<div class="nb-alert" style="background: #333; color: #fff;">No data yet</div>';
+    if (!soccerRows || !soccerRows.length) {
+      soccerEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #fff; background: #333; color: #fff;">No EPL data yet</div>';
     } else {
       soccerEl.innerHTML = soccerRows.slice(0, 10).map((r,i) => 
-        `<div class="nb-flex" style="justify-content: space-between; padding: 0.5rem; border-bottom: 2px solid #fff;">
-          <span style="color: #fff;"><span class="nb-badge" style="background: #fff; color: #000;">${i+1}</span> ${uname(r.username)}</span>
-          <span class="nb-badge" style="background: #fff; color: #000;">${r.total_points} pts</span>
+        `<div style="display: flex; justify-content: space-between; padding: 0.5rem; border: 2px solid #fff; margin-bottom: 4px; background: ${i===0?'#fff':i===1?'#eee':i===2?'#ddd':'#1a1a1a'}; color: ${i<3?'#000':'#fff'};">
+          <span style="font-weight: 700;"><span style="background: #fff; color: #000; padding: 2px 6px; margin-right: 8px;">${i+1}</span> ${r.username}</span>
+          <span style="font-weight: 900; background: #fff; color: #000; padding: 2px 8px;">${r.total_points}</span>
         </div>`
       ).join('');
     }
 
     const [golfTours, soccerWeeks] = await Promise.all([
-      api('/golf/tournaments').catch(() => []),
-      api('/soccer/weeks').catch(() => [])
+      fetch('/api/golf/tournaments').then(r => r.json()).catch(() => []),
+      fetch('/api/soccer/weeks').then(r => r.ok ? r.json() : []).catch(() => [])
     ]);
 
     const completedGolf = (golfTours || []).filter(t => t.results_entered).slice(-2);
@@ -783,28 +817,30 @@ async function loadHomePage() {
 
     let recentHtml = '';
     completedGolf.forEach(t => {
-      recentHtml += `<div class="nb-list-group-item" style="border-bottom: 2px solid #000;">
-        <strong style="color: #000;">${t.name}</strong>
-        <span class="nb-badge" style="background: #2ecc71; color: #000;">COMPLETE</span>
+      recentHtml += `<div style="padding: 0.75rem; border: 2px solid #000; margin-bottom: 4px; background: #2ecc71;">
+        <strong>${t.name}</strong>
+        <span style="float: right; background: #000; color: #fff; padding: 2px 6px; font-size: 0.7rem;">DONE</span>
       </div>`;
     });
     completedSoccer.forEach(w => {
-      recentHtml += `<div class="nb-list-group-item" style="border-bottom: 2px solid #000;">
-        <strong style="color: #000;">${w.week_name}</strong>
-        <span class="nb-badge" style="background: #3498db; color: #fff;">COMPLETE</span>
+      recentHtml += `<div style="padding: 0.75rem; border: 2px solid #000; margin-bottom: 4px; background: #3498db;">
+        <strong>${w.week_name}</strong>
+        <span style="float: right; background: #000; color: #fff; padding: 2px 6px; font-size: 0.7rem;">DONE</span>
       </div>`;
     });
 
-    recentEl.innerHTML = recentHtml || '<div class="nb-alert" style="background: #f0f0f0; border: 2px solid #000;">No recent results</div>';
+    recentEl.innerHTML = recentHtml || '<div style="padding: 0.75rem; border: 2px solid #000; background: #f0f0f0;">No recent results</div>';
 
+    console.log('Home page loaded successfully');
   } catch (e) {
-    golfEl.innerHTML = '<div class="nb-alert nb-alert-danger">Error: ' + e.message + '</div>';
+    console.error('Home page error:', e);
+    golfEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #000; background: #e74c3c; color: #fff;">Error: ' + e.message + '</div>';
   }
 }
 
 // 
 // SOCCER
-// 
+//
 async function loadSoccerWeeks() {
   const el = document.getElementById('soccer-weeks-list');
   try {
@@ -824,91 +860,75 @@ async function loadSoccerWeeks() {
 function renderSoccerWeekCard(w, isActive) {
   const now = new Date();
   const deadlinePassed = w.deadline && now >= new Date(w.deadline);
-  const deadlineStr = w.deadline ? `  Deadline: ${new Date(w.deadline).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}` : '';
+  const deadlineStr = w.deadline ? ` | Deadline: ${new Date(w.deadline).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}` : '';
   if (isActive) {
     if (deadlinePassed) {
       const gamesHtml = w.games.map(g => {
         const myPick = g.my_pick;
-        const myPickHtml = myPick ? (() => {
-          const ptsCls = myPick.points_earned === 3 ? 'pts-3' : myPick.points_earned === 1 ? 'pts-1' : 'pts-0';
-        return `<div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;position:relative;z-index:1">
-            <span style="font-size:0.8rem;color:var(--muted)">Your pick:</span>
-            <span style="font-weight:700">${myPick.predicted_home}  ${myPick.predicted_away}</span>
-            ${myPick.points_earned > 0 ? `<span class="pts-earned ${ptsCls}">${myPick.points_earned===3?' 3pts':' 1pt'}</span>` : ''}
-          </div>`;
-        })() : '<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;position:relative;z-index:1">No pick submitted</div>';
-        return `<div class="game-card" style="margin-bottom:0.75rem">
-          <img class="emblem home" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
-          <img class="emblem away" src="${getTeamLogo(g.away_team)}" alt="" onerror="this.style.display='none'"/>
-          <div class="game-header">
-            <div class="game-teams"><span>${g.home_team}</span><span class="vs-divider">vs</span><span>${g.away_team}</span></div>
-            ${myPick ? `<span class="pill pill-gold" style="font-size:0.7rem">Picked</span>` : ''}
+        const myPickHtml = myPick ? `<div style="margin-top:0.5rem;font-weight:700;">
+            <span style="font-size:0.8rem;color:#666;">Your pick:</span> ${myPick.predicted_home}-${myPick.predicted_away}
+            ${myPick.points_earned > 0 ? `<span style="background:${myPick.points_earned===3?'#FFD700':'#87CEEB'};border:2px solid #000;padding:2px 6px;font-size:0.7rem;font-weight:700;margin-left:0.5rem;">${myPick.points_earned===3?'3pts':'1pt'}</span>` : ''}
+          </div>` : '<div style="font-size:0.8rem;color:#666;margin-top:0.5rem;">No pick</div>';
+        return `<div style="margin-bottom:0.75rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:0.75rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+            <div style="font-weight:900;font-size:1rem;">${g.home_team} <span style="color:#666;">vs</span> ${g.away_team}</div>
+            ${myPick ? `<span style="background:#FFD700;border:2px solid #000;padding:2px 6px;font-size:0.65rem;font-weight:700;">PICKED</span>` : ''}
           </div>${myPickHtml}
         </div>`;
       }).join('');
-      return `<div class="card" style="margin-bottom:1rem">
-        <div class="card-header">
-          <div><div class="card-title"> ${w.week_name}</div><div class="card-meta">${deadlineStr}</div></div>
-          <span class="pill pill-muted">CLOSED</span>
+      return `<div style="margin-bottom:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <div><div style="font-size:1.1rem;font-weight:900;">${w.week_name}</div><div style="font-size:0.75rem;color:#666;">${deadlineStr}</div></div>
+          <span style="background:#e74c3c;color:#fff;border:2px solid #000;padding:2px 8px;font-size:0.7rem;font-weight:700;border-radius:4px;">CLOSED</span>
         </div>
         ${gamesHtml}
       </div>`;
     }
     const gamesHtml = w.games.map(g => `
-      <div class="game-card" style="margin-bottom:0.75rem">
-        <img class="emblem home" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
-        <img class="emblem away" src="${getTeamLogo(g.away_team)}" alt="" onerror="this.style.display='none'"/>
-        <div class="game-header">
-          <div class="game-teams"><span>${g.home_team}</span><span class="vs-divider">vs</span><span>${g.away_team}</span></div>
-          ${g.my_pick ? `<span class="pill pill-gold" style="font-size:0.7rem">Picked</span>` : ''}
+      <div style="margin-bottom:0.75rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:0.75rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+          <div style="font-weight:900;font-size:1rem;">${g.home_team} <span style="color:#666;">vs</span> ${g.away_team}</div>
+          ${g.my_pick ? `<span style="background:#FFD700;border:2px solid #000;padding:2px 6px;font-size:0.65rem;font-weight:700;">PICKED</span>` : ''}
         </div>
-        <div style="display:flex;align-items:center;gap:0.75rem;position:relative;z-index:1">
-          <span style="font-size:0.8rem;color:var(--muted)">Prediction:</span>
-          <div class="score-inputs">
-            <input type="number" class="score-input" id="pick-h-${g.id}" min="0" max="20" value="${g.my_pick ? g.my_pick.predicted_home : ''}" placeholder="0"/>
-            <span class="score-sep">-</span>
-            <input type="number" class="score-input" id="pick-a-${g.id}" min="0" max="20" value="${g.my_pick ? g.my_pick.predicted_away : ''}" placeholder="0"/>
-          </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.5rem;">
+          <span style="font-size:0.8rem;color:#666;font-weight:600;">SCORE:</span>
+          <input type="number" id="pick-h-${g.id}" min="0" max="20" value="${g.my_pick ? g.my_pick.predicted_home : ''}" placeholder="0" style="width:50px;padding:0.4rem;border:2px solid #000;font-weight:700;text-align:center;font-size:1rem;"/>
+          <span style="font-weight:900;">-</span>
+          <input type="number" id="pick-a-${g.id}" min="0" max="20" value="${g.my_pick ? g.my_pick.predicted_away : ''}" placeholder="0" style="width:50px;padding:0.4rem;border:2px solid #000;font-weight:700;text-align:center;font-size:1rem;"/>
         </div>
       </div>`).join('');
-    return `<div class="card" style="margin-bottom:1rem">
-      <div class="card-header">
-        <div><div class="card-title"> ${w.week_name}</div><div class="card-meta">${deadlineStr}</div></div>
-        <span class="pill pill-blue">ACTIVE</span>
+    return `<div style="margin-bottom:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <div><div style="font-size:1.1rem;font-weight:900;">${w.week_name}</div><div style="font-size:0.75rem;color:#666;">${deadlineStr}</div></div>
+        <span style="background:#2ecc71;color:#fff;border:2px solid #000;padding:2px 8px;font-size:0.7rem;font-weight:700;border-radius:4px;">ACTIVE</span>
       </div>
       ${gamesHtml}
-      <button class="btn btn-blue btn-full" onclick="submitSoccerPicks(${w.id},[${w.games.map(g=>g.id).join(',')}])">
-        ${w.games.every(g=>g.my_pick) ? ' Update Picks' : ' Submit All Picks'}
+      <button onclick="submitSoccerPicks(${w.id},[${w.games.map(g=>g.id).join(',')}])" style="width:100%;background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.75rem;font-size:1rem;font-weight:900;cursor:pointer;">
+        ${w.games.every(g=>g.my_pick) ? 'UPDATE PICKS' : 'SUBMIT ALL PICKS'}
       </button>
     </div>`;
   } else {
     const gamesHtml = w.games.map(g => {
-      const result = g.actual_home_score !== null ? `${g.actual_home_score}  ${g.actual_away_score}` : '';
+      const result = g.actual_home_score !== null ? `${g.actual_home_score}-${g.actual_away_score}` : '';
       const myPick = g.my_pick;
-      const myPickHtml = myPick ? (() => {
-        const ptsCls = myPick.points_earned === 3 ? 'pts-3' : myPick.points_earned === 1 ? 'pts-1' : 'pts-0';
-        return `<div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem">
-          <span style="font-size:0.8rem;color:var(--muted)">Your pick:</span>
-          <span style="font-weight:700">${myPick.predicted_home}  ${myPick.predicted_away}</span>
-          <span class="pts-earned ${ptsCls}">${myPick.points_earned===3?' 3pts':myPick.points_earned===1?' 1pt':' 0pts'}</span>
-        </div>`;
-      })() : '';
-      return `<div class="game-card" style="margin-bottom:0.75rem">
-        <img class="emblem home" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
-        <img class="emblem away" src="${getTeamLogo(g.away_team)}" alt="" onerror="this.style.display='none'"/>
-        <div class="game-header">
-          <div class="game-teams"><span>${g.home_team}</span><span class="vs-divider">vs</span><span>${g.away_team}</span></div>
-          <div class="actual-score"><span class="score">${result}</span></div>
+      const myPickHtml = myPick ? `<div style="margin-top:0.5rem;font-weight:700;">
+          <span style="font-size:0.8rem;color:#666;">Your pick:</span> ${myPick.predicted_home}-${myPick.predicted_away}
+          <span style="background:${myPick.points_earned===3?'#FFD700':myPick.points_earned===1?'#87CEEB':'#ccc'};border:2px solid #000;padding:2px 6px;font-size:0.7rem;font-weight:700;margin-left:0.5rem;">${myPick.points_earned}pt${myPick.points_earned!==1?'s':''}</span>
+        </div>` : '';
+      return `<div style="margin-bottom:0.75rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:0.75rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-weight:900;font-size:1rem;">${g.home_team} <span style="color:#666;">vs</span> ${g.away_team}</div>
+          <div style="font-weight:900;font-size:1.1rem;background:#000;color:#fff;padding:2px 8px;">${result}</div>
         </div>${myPickHtml}
       </div>`;
     }).join('');
-    return `<div class="card" style="margin-bottom:1rem">
-      <div class="card-header">
-        <div><div class="card-title"> ${w.week_name}</div><div class="card-meta">Results in${deadlineStr}</div></div>
-        <span class="pill pill-muted">COMPLETE</span>
+    return `<div style="margin-bottom:1rem;background:#f0f0f0;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <div><div style="font-size:1.1rem;font-weight:900;">${w.week_name}</div><div style="font-size:0.75rem;color:#666;">Results in${deadlineStr}</div></div>
+        <span style="background:#999;color:#fff;border:2px solid #000;padding:2px 8px;font-size:0.7rem;font-weight:700;border-radius:4px;">COMPLETE</span>
       </div>
       ${gamesHtml}
-      <button class="btn btn-ghost btn-sm" style="margin-top:0.5rem" onclick="loadSoccerWeekPicks(${w.id},this)"> View All Picks</button>
+      <button onclick="loadSoccerWeekPicks(${w.id},this)" style="margin-top:0.5rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button>
       <div id="soccer-picks-${w.id}"></div>
     </div>`;
   }
@@ -953,19 +973,27 @@ async function loadSoccerLeaderboard() {
   const el = document.getElementById('soccer-leaderboard');
   try {
     const rows = await api('/soccer/leaderboard');
-    if (!rows.length) { el.innerHTML = '<div class="empty-state" style="padding:1rem"><p>No data yet</p></div>'; return; }
+    if (!rows.length) { el.innerHTML = '<div style="padding:1rem;font-weight:700;">No data yet</div>'; return; }
     const isAdmin = state.user?.is_super_admin;
-    el.innerHTML = `<table class="lb-table"><thead><tr><th>#</th><th>Player</th><th>Pts</th><th> Exact</th><th> Result</th>${isAdmin ? '<th>Edit</th>' : ''}</tr></thead><tbody>
-      ${rows.map((r,i) => `<tr>
-        <td class="lb-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i===0?'':i===1?'':i===2?'':i+1}</td>
-        <td>${uname(r.username)}</td>
-        <td class="lb-pts" style="color:var(--slate)">${r.total_points}</td>
-        <td style="color:var(--gold2)">${r.exact_scores}</td>
-        <td style="color:var(--muted)">${r.correct_results}</td>
-        ${isAdmin ? `<td><input type="number" style="width:50px;padding:2px 4px" id="lb-adj-${r.id}" value="0"/><button class="btn btn-ghost btn-sm" style="padding:2px 6px;margin-left:2px" onclick="adjustSoccerPoints(${r.id})">+</button></td>` : ''}
+    el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+      <thead><tr style="background:#1a1a1a;color:#fff;">
+        <th style="padding:0.5rem;text-align:left;border:2px solid #000;">#</th>
+        <th style="padding:0.5rem;text-align:left;border:2px solid #000;">PLAYER</th>
+        <th style="padding:0.5rem;text-align:center;border:2px solid #000;">PTS</th>
+        <th style="padding:0.5rem;text-align:center;border:2px solid #000;">EXACT</th>
+        <th style="padding:0.5rem;text-align:center;border:2px solid #000;">RESULT</th>
+        ${isAdmin ? '<th style="padding:0.5rem;border:2px solid #000;">EDIT</th>' : ''}
+      </tr></thead><tbody>
+      ${rows.map((r,i) => `<tr style="background:${i===0?'#fff':i===1?'#eee':i===2?'#ddd':'#1a1a1a'};border:2px solid #000;">
+        <td style="padding:0.5rem;border:2px solid #000;font-weight:900;${i>=3?'color:#fff':''}">${i+1}</td>
+        <td style="padding:0.5rem;border:2px solid #000;font-weight:700;${i>=3?'color:#fff':''}">${uname(r.username)}</td>
+        <td style="padding:0.5rem;border:2px solid #000;font-weight:900;text-align:center;font-size:1.1rem;${i>=3?'color:#FFD700':''}">${r.total_points}</td>
+        <td style="padding:0.5rem;border:2px solid #000;text-align:center;font-weight:700;${i>=3?'color:#fff':''}">${r.exact_scores}</td>
+        <td style="padding:0.5rem;border:2px solid #000;text-align:center;${i>=3?'color:#aaa':''}">${r.correct_results}</td>
+        ${isAdmin ? `<td style="padding:0.25rem;border:2px solid #000;"><input type="number" id="lb-adj-${r.id}" value="0" style="width:45px;padding:2px;border:2px solid #000;text-align:center;font-weight:700;"/><button onclick="adjustSoccerPoints(${r.id})" style="background:#000;color:#FFD700;border:2px solid #000;padding:2px 6px;font-weight:700;cursor:pointer;margin-left:2px;">+</button></td>` : ''}
       </tr>`).join('')}
     </tbody></table>`;
-  } catch (e) { el.innerHTML = `<p style="color:var(--red)">${e.message}</p>`; }
+  } catch (e) { el.innerHTML = `<p style="color:red;font-weight:700;">${e.message}</p>`; }
 }
 
 async function adjustSoccerPoints(userId) {
