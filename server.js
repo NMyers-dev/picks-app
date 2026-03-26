@@ -605,6 +605,7 @@ setInterval(async () => {
       }
     }
   }
+  } catch (e) { console.error('Reminder loop error:', e.message); }
 }, 60 * 1000); // Check every minute
 
 // Wait for DB then start
