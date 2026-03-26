@@ -105,9 +105,107 @@
   .card-title { font-size: 1.1rem; font-weight: 700; color: var(--text); }
   .card-meta { color: var(--muted); font-size: 0.8rem; margin-top: 0.2rem; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
-  @media(max-width:768px) { .grid-2 { grid-template-columns: 1fr; } .header-nav .nav-btn span { display: none; } }
+  @media(max-width:768px) { 
+    .grid-2 { grid-template-columns: 1fr; } 
+    .header-nav .nav-btn span { display: none; }
+  }
 
-  /*  Section headers  */
+  /* Mobile Responsive Styles */
+  @media (max-width: 768px) {
+    /* Header */
+    header { padding: 0.5rem 0.75rem !important; height: 50px !important; }
+    header > div:first-child { font-size: 0.9rem !important; }
+    header > div:first-child span { padding: 2px 4px !important; font-size: 0.75rem !important; }
+    nav { gap: 0.25rem !important; }
+    nav button { padding: 0.4rem 0.6rem !important; font-size: 0.7rem !important; box-shadow: 2px 2px 0 #000 !important; }
+    .header-user { gap: 0.4rem !important; }
+    .header-user span { padding: 2px 6px !important; font-size: 0.7rem !important; }
+    .header-user button { padding: 2px 6px !important; font-size: 0.65rem !important; }
+    
+    /* Main content */
+    main { padding: 0.75rem !important; }
+    
+    /* Home page */
+    #page-home .nb-card { padding: 1rem !important; }
+    #page-home .nb-title { font-size: 1.25rem !important; }
+    #page-home .nb-subtitle { font-size: 0.75rem !important; }
+    #page-home > div:nth-child(2) { grid-template-columns: 1fr !important; gap: 0.75rem !important; }
+    #page-home > div:nth-child(2) > div { padding: 0.75rem !important; }
+    #page-home > div:nth-child(2) > div h3 { font-size: 1rem !important; margin-bottom: 0.5rem !important; }
+    #page-home > div:nth-child(4) { padding: 0.75rem !important; }
+    #page-home > div:nth-child(4) > div { font-size: 0.75rem !important; }
+    #page-home > div:nth-child(4) > div > div { font-size: 0.7rem !important; padding: 0.25rem !important; }
+    #page-home > div:nth-child(4) > div > div > div { font-size: 0.7rem !important; }
+    
+    /* PGA Page */
+    #page-golf > div { grid-template-columns: 1fr !important; gap: 1rem !important; }
+    #page-golf > div > div:first-child > div:first-child { font-size: 1.1rem !important; padding: 0.75rem !important; }
+    #page-golf > div > div:first-child > div:nth-child(2) { padding: 0.75rem !important; }
+    #page-golf > div > div:last-child > div:first-child { font-size: 0.9rem !important; padding: 0.75rem !important; }
+    #page-golf > div > div:last-child > div:nth-child(2) { font-size: 0.75rem !important; padding: 0.5rem !important; }
+    #page-golf .rules-section { font-size: 0.75rem !important; }
+    
+    /* PGA Tournament Cards */
+    #page-golf > div > div:first-child > div:nth-child(2) > div { padding: 0.75rem !important; }
+    #page-golf > div > div:first-child > div:nth-child(2) > div > div:first-child { flex-direction: column !important; gap: 0.5rem !important; }
+    #page-golf > div > div:first-child > div:nth-child(2) > div > div:first-child > div { font-size: 0.95rem !important; }
+    #page-golf > div > div:first-child > div:nth-child(2) > div > div:nth-child(2) { font-size: 0.65rem !important; }
+    #page-golf > div > div:first-child > div:nth-child(2) > div > div:nth-child(3) { font-size: 0.7rem !important; }
+    #page-golf > div > div:first-child > div:nth-child(2) > div > div:nth-child(4) > div { font-size: 0.7rem !important; }
+    #page-golf .pick-form { flex-direction: column !important; }
+    #page-golf .pick-form input { width: 100% !important; }
+    #page-golf .pick-form button { width: 100% !important; }
+    
+    /* PGA Rules */
+    #page-golf > div > div:first-child > div:nth-child(3) { padding: 0.75rem !important; margin-top: 1rem !important; }
+    #page-golf > div > div:first-child > div:nth-child(3) > div:first-child { font-size: 0.75rem !important; padding: 0.25rem !important; }
+    #page-golf > div > div:first-child > div:nth-child(3) > div:last-child { font-size: 0.7rem !important; }
+    
+    /* EPL Page */
+    #page-soccer > div { grid-template-columns: 1fr !important; gap: 1rem !important; }
+    #page-soccer > div > div:first-child > div:first-child { font-size: 1.1rem !important; padding: 0.75rem !important; }
+    #page-soccer > div > div:first-child > div:nth-child(2) { padding: 0.75rem !important; }
+    #page-soccer > div > div:first-child > div:nth-child(3) { padding: 0.75rem !important; margin-top: 1rem !important; }
+    #page-soccer > div > div:last-child > div:first-child { font-size: 0.9rem !important; padding: 0.75rem !important; }
+    #page-soccer > div > div:last-child > div:nth-child(2) { font-size: 0.75rem !important; padding: 0.5rem !important; }
+    
+    /* Soccer Game Cards */
+    #page-soccer .game-card { padding: 0.6rem !important; }
+    #page-soccer .game-card > div > div { font-size: 0.85rem !important; }
+    #page-soccer .score-input { width: 40px !important; font-size: 0.9rem !important; }
+    #page-soccer .game-card button { padding: 0.5rem !important; font-size: 0.85rem !important; }
+    #page-soccer .score-result-row { font-size: 0.8rem !important; }
+    
+    /* Admin Page */
+    #page-admin > div:first-child { font-size: 1.1rem !important; padding: 0.75rem !important; }
+    #page-admin > div:last-child { grid-template-columns: 1fr !important; gap: 1rem !important; }
+    #page-admin .admin-section { padding: 0.75rem !important; }
+    #page-admin .admin-section-title { font-size: 0.85rem !important; padding: 0.25rem !important; }
+    #page-admin .form-group { margin-bottom: 0.5rem !important; }
+    #page-admin label { font-size: 0.7rem !important; }
+    #page-admin input, #page-admin select { padding: 0.4rem !important; font-size: 0.85rem !important; }
+    #page-admin .golfer-inputs { grid-template-columns: 1fr !important; }
+    #page-admin button { padding: 0.5rem 0.75rem !important; font-size: 0.8rem !important; }
+    
+    /* Forms */
+    input, select, textarea { padding: 0.5rem !important; font-size: 0.9rem !important; }
+    input[type="number"] { -moz-appearance: textfield; }
+    
+    /* Leaderboard tables */
+    table { font-size: 0.75rem !important; }
+    table th, table td { padding: 0.4rem 0.5rem !important; }
+    
+    /* Toast */
+    #toast { bottom: 0.5rem !important; right: 0.5rem !important; left: 0.5rem !important; max-width: none !important; font-size: 0.8rem !important; padding: 0.5rem 0.75rem !important; }
+    
+    /* Auth screen */
+    #auth-screen { padding: 0.5rem !important; }
+    .auth-card { padding: 1.5rem !important; max-width: 100% !important; }
+    .auth-logo h1 { font-size: 1.5rem !important; }
+    .tab-btn { padding: 0.4rem !important; font-size: 0.85rem !important; }
+  }
+
+  /* Section headers  */
   .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
   .section-title { font-size: 1.4rem; font-weight: 800; }
   .section-subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 0.15rem; }
