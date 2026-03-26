@@ -133,7 +133,7 @@ app.put('/api/users/:id/admin', auth, adminOnly, (req, res) => {
 });
 
 // ─── Golf Tournaments ─────────────────────────────────────────────────────────
-app.get('/api/golf/tournaments', auth, (req, res) => {
+app.get('/api/golf/tournaments', (req, res) => {
   const tournaments = db.get('golf_tournaments').orderBy('created_at', 'desc').value();
   const myPicks = db.get('golf_picks').filter({ user_id: req.user.id }).value();
   const pickMap = Object.fromEntries(myPicks.map(p => [p.tournament_id, p]));
@@ -247,7 +247,7 @@ app.put('/api/golf/tournaments/:id/results', auth, adminOnly, (req, res) => {
   res.json({ success: true });
 });
 
-app.get('/api/golf/leaderboard', auth, (req, res) => {
+app.get('/api/golf/leaderboard', (req, res) => {
   const users = db.get('users').value();
   const allPicks = db.get('golf_picks').value();
 
@@ -269,7 +269,7 @@ app.get('/api/golf/leaderboard', auth, (req, res) => {
 });
 
 // ─── Soccer Weeks ─────────────────────────────────────────────────────────────
-app.get('/api/soccer/weeks', auth, (req, res) => {
+app.get('/api/soccer/weeks', (req, res) => {
   const weeks = db.get('soccer_weeks').orderBy('created_at', 'desc').value();
   const allGames = db.get('soccer_games').value();
   const myPicks = db.get('soccer_picks').filter({ user_id: req.user.id }).value();
@@ -405,7 +405,7 @@ app.put('/api/soccer/weeks/:id/results', auth, superAdminOnly, (req, res) => {
   res.json({ success: true });
 });
 
-app.get('/api/soccer/leaderboard', auth, (req, res) => {
+app.get('/api/soccer/leaderboard', (req, res) => {
   const users = db.get('users').value();
   const allPicks = db.get('soccer_picks').value();
 
