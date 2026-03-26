@@ -255,10 +255,10 @@
       <span style="background: #FFD700; padding: 2px 8px; border: 2px solid #000; margin-right: 4px;">THE BOYS PICKS</span>
     </div>
     <nav style="display: flex; gap: 0.5rem;">
-      <button class="nb-btn" id="nav-home" onclick="showPage('home')" style="background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">HOME</button>
-      <button class="nb-btn" id="nav-golf" onclick="showPage('golf')" style="background: #FFD700; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">PGA</button>
-      <button class="nb-btn" id="nav-soccer" onclick="showPage('soccer')" style="background: #1a1a1a; color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">EPL</button>
-      <button class="nb-btn" id="nav-admin" onclick="showPage('admin')" style="display:none; background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">ADMIN</button>
+      <button class="nb-btn" id="nav-home" onclick="console.log('Home clicked'); showPage('home')" style="background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">HOME</button>
+      <button class="nb-btn" id="nav-golf" onclick="console.log('Golf clicked'); showPage('golf')" style="background: #FFD700; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">PGA</button>
+      <button class="nb-btn" id="nav-soccer" onclick="console.log('Soccer clicked'); showPage('soccer')" style="background: #1a1a1a; color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">EPL</button>
+      <button class="nb-btn" id="nav-admin" onclick="console.log('Admin clicked'); showPage('admin')" style="display:none; background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">ADMIN</button>
     </nav>
     <div style="display: flex; align-items: center; gap: 0.75rem;">
       <span id="admin-badge" style="display:none; background: #e74c3c; color: #fff; padding: 2px 8px; border: 2px solid #000; font-weight: 700; font-size: 0.7rem;">ADMIN</span>
@@ -639,16 +639,17 @@ function launchApp() {
 function showPage(page) {
   console.log('showPage called:', page);
   state.currentPage = page;
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   const pageEl = document.getElementById('page-' + page);
   pageEl.classList.add('active');
   pageEl.style.display = 'block';
-  console.log('Page element:', pageEl.id, 'display:', pageEl.style.display);
+  console.log('Page element:', pageEl.id, 'display:', window.getComputedStyle(pageEl).display);
   ['home','golf','soccer','admin'].forEach(p => {
     const btn = document.getElementById('nav-' + p);
     btn.className = 'nav-btn' + (p === page ? ' active-' + (p === 'home' ? 'golf' : p) : '');
   });
-  if (page === 'home')  { console.log('Calling loadHomePage'); loadHomePage(); }
+  console.log('Loading data for:', page);
+  if (page === 'home')  { loadHomePage(); }
   if (page === 'golf')   { loadGolfTournaments(); loadGolfLeaderboard(); }
   if (page === 'soccer') { loadSoccerWeeks(); loadSoccerLeaderboard(); }
   if (page === 'admin')  {
