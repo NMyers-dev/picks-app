@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>The Boys Picks 🏌️⚽</title>
+<title>The Boys Picks</title>
+<link rel="stylesheet" href="https://unpkg.com/neobrutalismcss@latest" />
 <style>
   :root {
     --bg:       #f0f0f0;
@@ -27,7 +28,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
 
-  /* ── Rainbow ── */
+  /*  Rainbow  */
   .rainbow-name {
     background: linear-gradient(90deg, #ff0000, #ff8000, #ffdd00, #00cc44, #0088ff, #7700ff, #ff0000);
     background-size: 300% auto;
@@ -42,7 +43,7 @@
     100% { background-position: 300% center; }
   }
 
-  /* ── Auth ── */
+  /*  Auth  */
   #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
   .auth-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,.1); }
   .auth-logo { text-align: center; margin-bottom: 2rem; }
@@ -52,7 +53,7 @@
   .tab-btn { flex: 1; padding: 0.6rem; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.95rem; font-weight: 600; border-bottom: 2px solid transparent; transition: all .2s; }
   .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
 
-  /* ── Forms ── */
+  /*  Forms  */
   .form-group { margin-bottom: 1rem; }
   label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: .05em; }
   input, select, textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 0.65rem 0.9rem; font-size: 0.95rem; transition: border-color .2s; outline: none; }
@@ -61,7 +62,7 @@
   input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   select option { background: var(--surface); color: var(--text); }
 
-  /* ── Buttons ── */
+  /*  Buttons  */
   .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.25rem; border-radius: 8px; border: none; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all .15s; text-decoration: none; }
   .btn-primary { background: var(--gold); color: #fff; }
   .btn-primary:hover { background: var(--gold2); }
@@ -77,7 +78,7 @@
   .btn-signal { background: rgba(201,162,39,.12); border: 1px solid rgba(201,162,39,.3); color: var(--gold2); }
   .btn-signal:hover { background: rgba(201,162,39,.2); }
 
-  /* ── App Layout ── */
+  /*  App Layout  */
   #app-screen { display: none; min-height: 100vh; flex-direction: column; }
   header { background: var(--surface); border-bottom: 2px solid var(--gold); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
   .header-logo { font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), #8a6500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -94,11 +95,11 @@
 
   main { flex: 1; padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
 
-  /* ── Page sections ── */
+  /*  Page sections  */
   .page { display: none; }
   .page.active { display: block; }
 
-  /* ── Cards ── */
+  /*  Cards  */
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
   .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; gap: 1rem; }
   .card-title { font-size: 1.1rem; font-weight: 700; color: var(--text); }
@@ -106,12 +107,12 @@
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
   @media(max-width:768px) { .grid-2 { grid-template-columns: 1fr; } .header-nav .nav-btn span { display: none; } }
 
-  /* ── Section headers ── */
+  /*  Section headers  */
   .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
   .section-title { font-size: 1.4rem; font-weight: 800; }
   .section-subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 0.15rem; }
 
-  /* ── Badges / Pills ── */
+  /*  Badges / Pills  */
   .pill { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
   .pill-green  { background: rgba(201,162,39,.12); color: var(--gold2); }
   .pill-blue   { background: rgba(55,65,81,.08);   color: var(--slate); }
@@ -119,7 +120,7 @@
   .pill-red    { background: rgba(220,38,38,.1);   color: var(--red); }
   .pill-muted  { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
 
-  /* ── Leaderboard ── */
+  /*  Leaderboard  */
   .lb-table { width: 100%; border-collapse: collapse; }
   .lb-table th { text-align: left; color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: .05em; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
   .lb-table td { padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text); }
@@ -131,7 +132,7 @@
   .rank-3 { color: #b87333; }
   .lb-pts { font-weight: 800; font-size: 1.05rem; }
 
-  /* ── Tournament card ── */
+  /*  Tournament card  */
   .tournament-card { margin-bottom: 1rem; }
   .top5-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 0; }
   .top5-item { background: rgba(201,162,39,.1); border: 1px solid rgba(201,162,39,.25); border-radius: 6px; padding: 0.25rem 0.65rem; font-size: 0.8rem; color: var(--gold2); font-weight: 600; }
@@ -147,7 +148,7 @@
   .result-made_cut { background: var(--surface2);      color: var(--muted); }
   .result-other    { background: rgba(220,38,38,.08);  color: var(--red); }
 
-  /* ── Soccer ── */
+  /*  Soccer  */
   .game-card { background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; position: relative; overflow: hidden; }
   .game-card::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent, transparent 49.5%, rgba(34,139,34,0.03) 49.5%, rgba(34,139,34,0.03) 50.5%, transparent 50.5%); pointer-events: none; }
   .game-card::after { content: ''; position: absolute; left: 50%; top: 50%; width: 55px; height: 55px; border: 1px solid rgba(34,139,34,0.04); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
@@ -167,7 +168,7 @@
   .pts-1 { background: rgba(55,65,81,.08);   color: var(--slate); }
   .pts-0 { background: rgba(220,38,38,.08);  color: #aaa; }
 
-  /* ── Admin ── */
+  /*  Admin  */
   .admin-section { margin-bottom: 1.5rem; }
   .admin-section-title { font-size: 1rem; font-weight: 700; color: var(--gold2); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
   .golfer-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
@@ -179,7 +180,7 @@
   .results-table select { padding: 0.35rem 0.6rem; font-size: 0.85rem; }
   .score-result-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 
-  /* ── Live panel ── */
+  /*  Live panel  */
   .live-panel { background: var(--surface2); border: 1px solid rgba(201,162,39,.25); border-radius: 10px; padding: 1rem; margin-top: 0.75rem; }
   .live-panel-title { font-size: 0.8rem; font-weight: 700; color: var(--gold2); text-transform: uppercase; letter-spacing:.05em; margin-bottom: 0.6rem; }
   .live-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
@@ -187,19 +188,19 @@
   .live-pos { width: 28px; font-weight: 800; color: var(--gold2); }
   .live-score { margin-left: auto; color: var(--muted); font-size: 0.8rem; }
 
-  /* ── All-picks view ── */
+  /*  All-picks view  */
   .picks-grid { display: flex; flex-direction: column; gap: 0.5rem; }
   .pick-row { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.9rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; }
   .pick-user { font-weight: 600; font-size: 0.9rem; color: var(--text); }
   .pick-golfer { color: var(--gold2); font-weight: 700; }
 
-  /* ── Toast ── */
+  /*  Toast  */
   #toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1.25rem; font-size: 0.9rem; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all .3s; z-index: 9999; max-width: 320px; box-shadow: 0 4px 16px rgba(0,0,0,.1); color: var(--text); }
   #toast.show { transform: translateY(0); opacity: 1; }
   #toast.toast-success { border-color: var(--gold); color: var(--gold2); }
   #toast.toast-error   { border-color: var(--red);  color: var(--red); }
 
-  /* ── Misc ── */
+  /*  Misc  */
   .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
   .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
   .empty-state .icon { font-size: 3rem; margin-bottom: 0.75rem; }
@@ -214,7 +215,7 @@
 
 <div id="toast"></div>
 
-<!-- ══ Auth Screen ════════════════════════════════════════════════════════════ -->
+<!--  Auth Screen  -->
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
@@ -247,15 +248,15 @@
   </div>
 </div>
 
-<!-- ══ App Screen ═════════════════════════════════════════════════════════════ -->
+<!--  App Screen  -->
 <div id="app-screen" style="display:none;flex-direction:column;min-height:100vh">
   <header>
     <div class="header-logo"><img src="https://a.espncdn.com/i/leaguelogos/soccer/500/23.png" style="width:22px;height:22px;border-radius:4px" alt=""/> The Boys Picks</div>
     <nav class="header-nav">
-      <button class="nav-btn" id="nav-home"  onclick="showPage('home')">🏠 <span>Home</span></button>
-      <button class="nav-btn" id="nav-golf"   onclick="showPage('golf')">🏌️ <span>PGA</span></button>
-      <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')">⚽ <span>EPL</span></button>
-      <button class="nav-btn" id="nav-admin"  onclick="showPage('admin')" style="display:none">⚙️ <span>Admin</span></button>
+      <button class="nav-btn" id="nav-home"  onclick="showPage('home')"> <span>Home</span></button>
+      <button class="nav-btn" id="nav-golf"   onclick="showPage('golf')"> <span>PGA</span></button>
+      <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')"> <span>EPL</span></button>
+      <button class="nav-btn" id="nav-admin"  onclick="showPage('admin')" style="display:none"> <span>Admin</span></button>
     </nav>
     <div class="header-user">
       <span class="admin-badge" id="admin-badge" style="display:none">ADMIN</span>
@@ -265,88 +266,88 @@
   </header>
 
   <main>
-    <!-- ── Home / News Page ─────────────────────────────────────────── -->
+    <!--  Home / News Page  -->
     <div class="page" id="page-home" style="display:none">
       <div style="margin-bottom:1.5rem">
-        <div class="section-title" style="font-size:1.5rem">🏠 The Boys Picks</div>
+        <div class="section-title" style="font-size:1.5rem"> The Boys Picks</div>
         <div class="section-subtitle">Weekly predictions for PGA &amp; EPL</div>
       </div>
       <div class="grid-2">
         <div>
           <div class="card" style="margin-bottom:1.5rem">
-            <div class="section-title" style="color:var(--gold)">🏌️ PGA Leaderboard</div>
+            <div class="section-title" style="color:var(--gold)"> PGA Leaderboard</div>
             <div id="home-golf-lb"><div class="loading">Loading...</div></div>
           </div>
         </div>
         <div>
           <div class="card" style="margin-bottom:1.5rem">
-            <div class="section-title" style="color:var(--slate)">⚽ EPL Leaderboard</div>
+            <div class="section-title" style="color:var(--slate)"> EPL Leaderboard</div>
             <div id="home-soccer-lb"><div class="loading">Loading...</div></div>
           </div>
         </div>
       </div>
       <div class="card" style="margin-bottom:1.5rem" id="recent-activity">
-        <div class="section-title">📰 Recent Results</div>
+        <div class="section-title"> Recent Results</div>
         <div id="recent-results-list"><div class="loading">Loading...</div></div>
       </div>
     </div>
 
-    <!-- ── PGA Page ─────────────────────────────────────────────── -->
+    <!--  PGA Page  -->
     <datalist id="golfer-list"></datalist>
     <div class="page" id="page-golf">
       <div class="grid-2" style="margin-bottom:1.5rem">
         <div>
           <div class="section-head">
             <div>
-              <div class="section-title" style="color:var(--gold)">🏌️ PGA Picks — Stage 2</div>
+              <div class="section-title" style="color:var(--gold)"> PGA Picks  Stage 2</div>
               <div class="section-subtitle">Pick a golfer outside the predicted Top 5</div>
             </div>
           </div>
-          <div id="golf-tournaments-list"><div class="loading">Loading tournaments…</div></div>
+          <div id="golf-tournaments-list"><div class="loading">Loading tournaments</div></div>
         </div>
         <div>
           <div class="section-head">
             <div><div class="section-title">Leaderboard</div>
               <div class="section-subtitle">Overall PGA standings</div></div>
-            <button class="btn btn-ghost btn-sm" onclick="loadGolfLeaderboard()">↻</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadGolfLeaderboard()"></button>
           </div>
-          <div class="card" id="golf-leaderboard"><div class="loading">Loading…</div></div>
+          <div class="card" id="golf-leaderboard"><div class="loading">Loading</div></div>
         </div>
       </div>
     </div>
 
-    <!-- ── EPL Page ────────────────────────────────────────────── -->
+    <!--  EPL Page  -->
     <div class="page" id="page-soccer">
       <div class="grid-2" style="margin-bottom:1.5rem">
         <div>
           <div class="section-head">
             <div>
-              <div class="section-title" style="color:var(--slate)">⚽ EPL Picks</div>
-              <div class="section-subtitle">3pts exact score · 1pt correct result</div>
+              <div class="section-title" style="color:var(--slate)"> EPL Picks</div>
+              <div class="section-subtitle">3pts exact score  1pt correct result</div>
             </div>
           </div>
-          <div id="soccer-weeks-list"><div class="loading">Loading weeks…</div></div>
+          <div id="soccer-weeks-list"><div class="loading">Loading weeks</div></div>
         </div>
         <div>
           <div class="section-head">
             <div><div class="section-title">Leaderboard</div>
               <div class="section-subtitle">Overall EPL standings</div></div>
-            <button class="btn btn-ghost btn-sm" onclick="loadSoccerLeaderboard()">↻</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadSoccerLeaderboard()"></button>
           </div>
-          <div class="card" id="soccer-leaderboard"><div class="loading">Loading…</div></div>
+          <div class="card" id="soccer-leaderboard"><div class="loading">Loading</div></div>
         </div>
       </div>
     </div>
 
-    <!-- ── Admin Page ─────────────────────────────────────────────── -->
+    <!--  Admin Page  -->
     <div class="page" id="page-admin">
-      <div class="section-title" style="color:var(--gold2);margin-bottom:1.5rem">⚙️ Admin Panel</div>
+      <div class="section-title" style="color:var(--gold2);margin-bottom:1.5rem"> Admin Panel</div>
       <div class="grid-2">
         <!-- Left col -->
         <div>
           <div class="card admin-section" style="margin-bottom:1.25rem">
-            <div class="admin-section-title">🏌️ Create PGA Tournament</div>
-            <button class="btn btn-signal btn-sm" onclick="fetchGolfEvents()" style="margin-bottom:0.75rem">📡 Fetch PGA Schedule from ESPN</button>
+            <div class="admin-section-title"> Create PGA Tournament</div>
+            <button class="btn btn-signal btn-sm" onclick="fetchGolfEvents()" style="margin-bottom:0.75rem"> Fetch PGA Schedule from ESPN</button>
             <div id="golf-events-list" style="display:none;margin-bottom:0.75rem"></div>
             <div class="form-group"><label>Tournament Name</label>
               <input type="text" id="a-tour-name" placeholder="e.g. The Masters 2025"/></div>
@@ -377,10 +378,10 @@
           </div>
 
           <div class="card admin-section" style="margin-bottom:1.25rem" id="a-epl-create">
-            <div class="admin-section-title">⚽ Create EPL Week</div>
+            <div class="admin-section-title"> Create EPL Week</div>
             <div class="form-group"><label>Week Name</label>
-              <input type="text" id="a-week-name" placeholder="e.g. GW29 – 22 Mar"/></div>
-            <button class="btn btn-signal btn-sm" onclick="fetchEplFixtures()" style="margin-bottom:0.75rem">📡 Fetch Upcoming Fixtures from API</button>
+              <input type="text" id="a-week-name" placeholder="e.g. GW29  22 Mar"/></div>
+            <button class="btn btn-signal btn-sm" onclick="fetchEplFixtures()" style="margin-bottom:0.75rem"> Fetch Upcoming Fixtures from API</button>
             <div id="epl-fixtures-list" style="display:none;margin-bottom:0.75rem"></div>
             <div class="form-group"><label>Pick Deadline</label>
               <input type="datetime-local" id="a-week-deadline"/></div>
@@ -397,8 +398,8 @@
 
           <!-- Settings -->
           <div class="card admin-section">
-            <div class="admin-section-title">🔑 API Settings</div>
-            <div class="info-box">EPL and Golf data now come from ESPN — no API key needed!</div>
+            <div class="admin-section-title"> API Settings</div>
+            <div class="info-box">EPL and Golf data now come from ESPN  no API key needed!</div>
             <div class="form-group"><label>SMTP Host (e.g. smtp.gmail.com)</label>
               <input type="text" id="a-smtp-host" placeholder="smtp.gmail.com"/></div>
             <div class="form-group"><label>SMTP Port</label>
@@ -415,16 +416,16 @@
         <!-- Right col -->
         <div>
           <div class="card admin-section" style="margin-bottom:1.25rem">
-            <div class="admin-section-title">🏆 Enter Golf Results</div>
-            <div id="a-golf-results-list"><div class="loading">Loading…</div></div>
+            <div class="admin-section-title"> Enter Golf Results</div>
+            <div id="a-golf-results-list"><div class="loading">Loading</div></div>
           </div>
           <div class="card admin-section" style="margin-bottom:1.25rem" id="a-epl-results">
-            <div class="admin-section-title">📊 Enter EPL Results</div>
-            <div id="a-soccer-results-list"><div class="loading">Loading…</div></div>
+            <div class="admin-section-title"> Enter EPL Results</div>
+            <div id="a-soccer-results-list"><div class="loading">Loading</div></div>
           </div>
           <div class="card admin-section">
-            <div class="admin-section-title">👥 User Management</div>
-            <div id="a-users-list"><div class="loading">Loading…</div></div>
+            <div class="admin-section-title"> User Management</div>
+            <div id="a-users-list"><div class="loading">Loading</div></div>
           </div>
         </div>
       </div>
@@ -433,9 +434,9 @@
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 // State & helpers
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 const state = { user: null, token: null, currentPage: 'golf' };
 const PREMIER_LEAGUE_TEAMS = [
   'Arsenal','Aston Villa','Bournemouth','Brentford','Brighton',
@@ -541,9 +542,9 @@ function uname(username) {
     : username;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 // Toast
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 let toastTimer;
 function toast(msg, type = 'success') {
   const el = document.getElementById('toast');
@@ -553,9 +554,9 @@ function toast(msg, type = 'success') {
   toastTimer = setTimeout(() => { el.className = ''; }, 3500);
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 // Auth
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 function switchAuthTab(tab) {
   document.getElementById('login-form').style.display    = tab === 'login'    ? 'block' : 'none';
   document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
@@ -598,9 +599,9 @@ function launchApp() {
   showPage('home');
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 // Navigation
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 function showPage(page) {
   state.currentPage = page;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -625,19 +626,19 @@ function showPage(page) {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 // GOLF
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 async function loadGolfTournaments() {
   const el = document.getElementById('golf-tournaments-list');
   try {
     const tournaments = await api('/golf/tournaments');
-    if (!tournaments.length) { el.innerHTML = `<div class="empty-state"><div class="icon">⛳</div><p>No tournaments yet.</p></div>`; return; }
+    if (!tournaments.length) { el.innerHTML = `<div class="empty-state"><div class="icon"></div><p>No tournaments yet.</p></div>`; return; }
     const active = tournaments.filter(t => !t.results_entered);
     const past   = tournaments.filter(t =>  t.results_entered);
     let html = active.map(t => renderTournamentCard(t, true)).join('');
     if (past.length) {
-      html += `<button class="collapse-toggle" onclick="togglePast(this,'past-golf-list')">▾ Past Tournaments (${past.length})</button>`;
+      html += `<button class="collapse-toggle" onclick="togglePast(this,'past-golf-list')"> Past Tournaments (${past.length})</button>`;
       html += `<div id="past-golf-list" style="display:none">${past.map(t => renderTournamentCard(t, false)).join('')}</div>`;
     }
     el.innerHTML = html;
@@ -648,7 +649,7 @@ function togglePast(btn, id) {
   const el = document.getElementById(id);
   const open = el.style.display !== 'none';
   el.style.display = open ? 'none' : 'block';
-  btn.textContent = (open ? '▾' : '▴') + btn.textContent.slice(1);
+  btn.textContent = (open ? '' : '') + btn.textContent.slice(1);
 }
 
 function renderTournamentCard(t, isActive) {
@@ -656,22 +657,22 @@ function renderTournamentCard(t, isActive) {
     const img = getGolferImg(g);
     return img ? `<span class="top5-item"><img src="${img}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;margin-right:2px"/>${g}</span>` : `<span class="top5-item">${g}</span>`;
   }).join('');
-  const deadline = t.deadline ? ` · Deadline: ${new Date(t.deadline).toLocaleDateString()}` : '';
-  const eventType = t.event_type === 'major' ? '🏆 Major (x1.5)' : t.event_type === 'signature' ? '⭐ Signature (x1.25)' : '';
+  const deadline = t.deadline ? `  Deadline: ${new Date(t.deadline).toLocaleDateString()}` : '';
+  const eventType = t.event_type === 'major' ? ' Major (x1.5)' : t.event_type === 'signature' ? ' Signature (x1.25)' : '';
   let pickHtml = '';
   if (isActive) {
     pickHtml = t.my_pick
-      ? `<div class="my-pick-display"><span>My pick: </span><span class="golfer-name">${getGolferImg(t.my_pick.picked_golfer) ? '<img src="'+getGolferImg(t.my_pick.picked_golfer)+'" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px"/>' : '🏌️'} ${t.my_pick.picked_golfer}</span><span style="color:var(--muted);font-size:0.8rem;margin-left:auto">Change below</span></div>
+      ? `<div class="my-pick-display"><span>My pick: </span><span class="golfer-name">${getGolferImg(t.my_pick.picked_golfer) ? '<img src="'+getGolferImg(t.my_pick.picked_golfer)+'" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px"/>' : ''} ${t.my_pick.picked_golfer}</span><span style="color:var(--muted);font-size:0.8rem;margin-left:auto">Change below</span></div>
          <div class="pick-form" style="margin-top:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}"/><button class="btn btn-primary btn-sm" onclick="submitGolfPick(${t.id})">Update</button></div>`
       : `<div class="info-box">Pick a golfer NOT in the predicted Top 5.</div>
          <div class="pick-form"><input type="text" list="golfer-list" id="pick-input-${t.id}" placeholder="Search golfer..."/><button class="btn btn-primary btn-sm" onclick="submitGolfPick(${t.id})">Lock In</button></div>`;
   } else {
-    pickHtml = `<button class="btn btn-ghost btn-sm" style="margin-top:0.75rem" onclick="loadGolfPicks(${t.id},this)">📊 View All Picks</button><div id="golf-picks-${t.id}"></div>`;
+    pickHtml = `<button class="btn btn-ghost btn-sm" style="margin-top:0.75rem" onclick="loadGolfPicks(${t.id},this)"> View All Picks</button><div id="golf-picks-${t.id}"></div>`;
   }
   return `<div class="card tournament-card">
     <div class="card-header">
       <div><div class="card-title">${t.name}</div>
-        <div class="card-meta">${t.course ? t.course + ' · ' : ''}${t.start_date ? new Date(t.start_date).toLocaleDateString() : ''}${deadline}${eventType ? ' · ' + eventType : ''}</div></div>
+        <div class="card-meta">${t.course ? t.course + '  ' : ''}${t.start_date ? new Date(t.start_date).toLocaleDateString() : ''}${deadline}${eventType ? '  ' + eventType : ''}</div></div>
       <span class="pill ${isActive ? 'pill-green' : 'pill-muted'}">${isActive ? 'ACTIVE' : 'COMPLETE'}</span>
     </div>
     <div style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.35rem">Predicted Top 5</div>
@@ -684,7 +685,7 @@ async function submitGolfPick(tournamentId) {
   const input = document.getElementById('pick-input-' + tournamentId);
   const golfer = input.value.trim();
   if (!golfer) return toast('Enter a golfer name', 'error');
-  try { await api(`/golf/tournaments/${tournamentId}/pick`, { method: 'POST', body: { picked_golfer: golfer } }); toast(`✅ Pick locked: ${golfer}`); loadGolfTournaments(); }
+  try { await api(`/golf/tournaments/${tournamentId}/pick`, { method: 'POST', body: { picked_golfer: golfer } }); toast(` Pick locked: ${golfer}`); loadGolfTournaments(); }
   catch (e) { toast(e.message, 'error'); }
 }
 
@@ -697,16 +698,16 @@ async function loadGolfPicks(tournamentId, btn) {
     el.innerHTML = `<div class="picks-grid" style="margin-top:0.75rem">${picks.map(p => {
       const img = getGolferImg(p.picked_golfer);
       return `<div class="pick-row">
-        <span class="pick-user">👤 ${uname(p.username)}</span>
-        <span class="pick-golfer">${img ? '<img src="'+img+'" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px"/>' : '🏌️'} ${p.picked_golfer}</span>
-        ${p.result_category ? `<span class="result-badge result-${p.result_category}">${formatResult(p.result_category)} · ${p.points_earned}pts</span>` : ''}
+        <span class="pick-user"> ${uname(p.username)}</span>
+        <span class="pick-golfer">${img ? '<img src="'+img+'" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px"/>' : ''} ${p.picked_golfer}</span>
+        ${p.result_category ? `<span class="result-badge result-${p.result_category}">${formatResult(p.result_category)}  ${p.points_earned}pts</span>` : ''}
       </div>`;
     }).join('')}</div>`;
   } catch (e) { toast(e.message, 'error'); }
 }
 
 function formatResult(cat) {
-  return { winner:'🏆 Winner', top5:'Top 5', top10:'Top 10', top20:'Top 20', made_cut:'Made Cut', other:'Missed Cut' }[cat] || cat;
+  return { winner:' Winner', top5:'Top 5', top10:'Top 10', top20:'Top 20', made_cut:'Made Cut', other:'Missed Cut' }[cat] || cat;
 }
 
 async function loadGolfLeaderboard() {
@@ -716,7 +717,7 @@ async function loadGolfLeaderboard() {
     if (!rows.length) { el.innerHTML = '<div class="empty-state" style="padding:1rem"><p>No data yet</p></div>'; return; }
     el.innerHTML = `<table class="lb-table"><thead><tr><th>#</th><th>Player</th><th>Pts</th><th>W</th><th>T5</th><th>T10</th></tr></thead><tbody>
       ${rows.map((r,i) => `<tr>
-        <td class="lb-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+        <td class="lb-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i===0?'':i===1?'':i===2?'':i+1}</td>
         <td>${uname(r.username)}</td>
         <td class="lb-pts" style="color:var(--gold)">${r.total_points}</td>
         <td style="color:var(--gold2)">${r.wins}</td><td>${r.top5s}</td><td style="color:var(--muted)">${r.top10s}</td>
@@ -725,9 +726,9 @@ async function loadGolfLeaderboard() {
   } catch (e) { el.innerHTML = `<p style="color:var(--red)">${e.message}</p>`; }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 // HOME / NEWS
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 async function loadHomePage() {
   const golfEl = document.getElementById('home-golf-lb');
   const soccerEl = document.getElementById('home-soccer-lb');
@@ -765,10 +766,10 @@ async function loadHomePage() {
 
     let recentHtml = '';
     completedGolf.forEach(t => {
-      recentHtml += `<div style="padding:0.5rem;border-bottom:1px solid var(--border)"><div style="font-weight:600;color:var(--gold)">🏌️ ${t.name}</div><div style="font-size:0.8rem;color:var(--muted)">Completed</div></div>`;
+      recentHtml += `<div style="padding:0.5rem;border-bottom:1px solid var(--border)"><div style="font-weight:600;color:var(--gold)"> ${t.name}</div><div style="font-size:0.8rem;color:var(--muted)">Completed</div></div>`;
     });
     completedSoccer.forEach(w => {
-      recentHtml += `<div style="padding:0.5rem;border-bottom:1px solid var(--border)"><div style="font-weight:600;color:var(--slate)">⚽ ${w.week_name}</div><div style="font-size:0.8rem;color:var(--muted)">Results in</div></div>`;
+      recentHtml += `<div style="padding:0.5rem;border-bottom:1px solid var(--border)"><div style="font-weight:600;color:var(--slate)"> ${w.week_name}</div><div style="font-size:0.8rem;color:var(--muted)">Results in</div></div>`;
     });
 
     recentEl.innerHTML = recentHtml || '<p style="color:var(--muted);padding:0.5rem">No recent results</p>';
@@ -778,19 +779,19 @@ async function loadHomePage() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 // SOCCER
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 async function loadSoccerWeeks() {
   const el = document.getElementById('soccer-weeks-list');
   try {
     const weeks = await api('/soccer/weeks');
-    if (!weeks.length) { el.innerHTML = `<div class="empty-state"><div class="icon">⚽</div><p>No weeks yet.</p></div>`; return; }
+    if (!weeks.length) { el.innerHTML = `<div class="empty-state"><div class="icon"></div><p>No weeks yet.</p></div>`; return; }
     const active = weeks.filter(w => !w.results_entered);
     const past   = weeks.filter(w =>  w.results_entered);
     let html = active.map(w => renderSoccerWeekCard(w, true)).join('');
     if (past.length) {
-      html += `<button class="collapse-toggle" onclick="togglePast(this,'past-soccer-list')">▾ Past Weeks (${past.length})</button>`;
+      html += `<button class="collapse-toggle" onclick="togglePast(this,'past-soccer-list')"> Past Weeks (${past.length})</button>`;
       html += `<div id="past-soccer-list" style="display:none">${past.map(w => renderSoccerWeekCard(w, false)).join('')}</div>`;
     }
     el.innerHTML = html;
@@ -800,7 +801,7 @@ async function loadSoccerWeeks() {
 function renderSoccerWeekCard(w, isActive) {
   const now = new Date();
   const deadlinePassed = w.deadline && now >= new Date(w.deadline);
-  const deadlineStr = w.deadline ? ` · Deadline: ${new Date(w.deadline).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}` : '';
+  const deadlineStr = w.deadline ? `  Deadline: ${new Date(w.deadline).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}` : '';
   if (isActive) {
     if (deadlinePassed) {
       const gamesHtml = w.games.map(g => {
@@ -809,8 +810,8 @@ function renderSoccerWeekCard(w, isActive) {
           const ptsCls = myPick.points_earned === 3 ? 'pts-3' : myPick.points_earned === 1 ? 'pts-1' : 'pts-0';
         return `<div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;position:relative;z-index:1">
             <span style="font-size:0.8rem;color:var(--muted)">Your pick:</span>
-            <span style="font-weight:700">${myPick.predicted_home} – ${myPick.predicted_away}</span>
-            ${myPick.points_earned > 0 ? `<span class="pts-earned ${ptsCls}">${myPick.points_earned===3?'🎯 3pts':'✅ 1pt'}</span>` : ''}
+            <span style="font-weight:700">${myPick.predicted_home}  ${myPick.predicted_away}</span>
+            ${myPick.points_earned > 0 ? `<span class="pts-earned ${ptsCls}">${myPick.points_earned===3?' 3pts':' 1pt'}</span>` : ''}
           </div>`;
         })() : '<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;position:relative;z-index:1">No pick submitted</div>';
         return `<div class="game-card" style="margin-bottom:0.75rem">
@@ -824,7 +825,7 @@ function renderSoccerWeekCard(w, isActive) {
       }).join('');
       return `<div class="card" style="margin-bottom:1rem">
         <div class="card-header">
-          <div><div class="card-title">⚽ ${w.week_name}</div><div class="card-meta">${deadlineStr}</div></div>
+          <div><div class="card-title"> ${w.week_name}</div><div class="card-meta">${deadlineStr}</div></div>
           <span class="pill pill-muted">CLOSED</span>
         </div>
         ${gamesHtml}
@@ -849,24 +850,24 @@ function renderSoccerWeekCard(w, isActive) {
       </div>`).join('');
     return `<div class="card" style="margin-bottom:1rem">
       <div class="card-header">
-        <div><div class="card-title">⚽ ${w.week_name}</div><div class="card-meta">${deadlineStr}</div></div>
+        <div><div class="card-title"> ${w.week_name}</div><div class="card-meta">${deadlineStr}</div></div>
         <span class="pill pill-blue">ACTIVE</span>
       </div>
       ${gamesHtml}
       <button class="btn btn-blue btn-full" onclick="submitSoccerPicks(${w.id},[${w.games.map(g=>g.id).join(',')}])">
-        ${w.games.every(g=>g.my_pick) ? '✏️ Update Picks' : '🔒 Submit All Picks'}
+        ${w.games.every(g=>g.my_pick) ? ' Update Picks' : ' Submit All Picks'}
       </button>
     </div>`;
   } else {
     const gamesHtml = w.games.map(g => {
-      const result = g.actual_home_score !== null ? `${g.actual_home_score} – ${g.actual_away_score}` : '–';
+      const result = g.actual_home_score !== null ? `${g.actual_home_score}  ${g.actual_away_score}` : '';
       const myPick = g.my_pick;
       const myPickHtml = myPick ? (() => {
         const ptsCls = myPick.points_earned === 3 ? 'pts-3' : myPick.points_earned === 1 ? 'pts-1' : 'pts-0';
         return `<div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem">
           <span style="font-size:0.8rem;color:var(--muted)">Your pick:</span>
-          <span style="font-weight:700">${myPick.predicted_home} – ${myPick.predicted_away}</span>
-          <span class="pts-earned ${ptsCls}">${myPick.points_earned===3?'🎯 3pts':myPick.points_earned===1?'✅ 1pt':'❌ 0pts'}</span>
+          <span style="font-weight:700">${myPick.predicted_home}  ${myPick.predicted_away}</span>
+          <span class="pts-earned ${ptsCls}">${myPick.points_earned===3?' 3pts':myPick.points_earned===1?' 1pt':' 0pts'}</span>
         </div>`;
       })() : '';
       return `<div class="game-card" style="margin-bottom:0.75rem">
@@ -880,11 +881,11 @@ function renderSoccerWeekCard(w, isActive) {
     }).join('');
     return `<div class="card" style="margin-bottom:1rem">
       <div class="card-header">
-        <div><div class="card-title">⚽ ${w.week_name}</div><div class="card-meta">Results in${deadlineStr}</div></div>
+        <div><div class="card-title"> ${w.week_name}</div><div class="card-meta">Results in${deadlineStr}</div></div>
         <span class="pill pill-muted">COMPLETE</span>
       </div>
       ${gamesHtml}
-      <button class="btn btn-ghost btn-sm" style="margin-top:0.5rem" onclick="loadSoccerWeekPicks(${w.id},this)">📊 View All Picks</button>
+      <button class="btn btn-ghost btn-sm" style="margin-top:0.5rem" onclick="loadSoccerWeekPicks(${w.id},this)"> View All Picks</button>
       <div id="soccer-picks-${w.id}"></div>
     </div>`;
   }
@@ -897,7 +898,7 @@ async function submitSoccerPicks(weekId, gameIds) {
     predicted_away: parseInt(document.getElementById('pick-a-'+gid)?.value ?? '', 10)
   }));
   if (picks.some(p => isNaN(p.predicted_home) || isNaN(p.predicted_away))) return toast('Enter scores for all 3 games', 'error');
-  try { await api(`/soccer/weeks/${weekId}/picks`, { method: 'POST', body: { picks } }); toast('⚽ Picks submitted!'); loadSoccerWeeks(); loadSoccerLeaderboard(); }
+  try { await api(`/soccer/weeks/${weekId}/picks`, { method: 'POST', body: { picks } }); toast(' Picks submitted!'); loadSoccerWeeks(); loadSoccerLeaderboard(); }
   catch (e) { toast(e.message, 'error'); }
 }
 
@@ -914,10 +915,10 @@ async function loadSoccerWeekPicks(weekId) {
         const total = userPicks.reduce((s,p) => s+p.points_earned, 0);
         const gamesHtml = userPicks.sort((a,b)=>a.game_order-b.game_order).map(p => {
           const ptsCls = p.points_earned===3?'pts-3':p.points_earned===1?'pts-1':'pts-0';
-          return `<span style="font-size:0.85rem">${p.home_team} <b>${p.predicted_home}–${p.predicted_away}</b> ${p.away_team} <span class="pts-earned ${ptsCls}">${p.points_earned}pt${p.points_earned!==1?'s':''}</span></span>`;
+          return `<span style="font-size:0.85rem">${p.home_team} <b>${p.predicted_home}${p.predicted_away}</b> ${p.away_team} <span class="pts-earned ${ptsCls}">${p.points_earned}pt${p.points_earned!==1?'s':''}</span></span>`;
         }).join('<br>');
         return `<div class="pick-row" style="flex-direction:column;align-items:flex-start;gap:0.35rem">
-          <div style="display:flex;justify-content:space-between;width:100%"><span class="pick-user">👤 ${uname(username)}</span><span class="lb-pts" style="color:var(--slate)">${total}pts</span></div>
+          <div style="display:flex;justify-content:space-between;width:100%"><span class="pick-user"> ${uname(username)}</span><span class="lb-pts" style="color:var(--slate)">${total}pts</span></div>
           <div>${gamesHtml}</div>
         </div>`;
       }).join('')
@@ -931,9 +932,9 @@ async function loadSoccerLeaderboard() {
     const rows = await api('/soccer/leaderboard');
     if (!rows.length) { el.innerHTML = '<div class="empty-state" style="padding:1rem"><p>No data yet</p></div>'; return; }
     const isAdmin = state.user?.is_super_admin;
-    el.innerHTML = `<table class="lb-table"><thead><tr><th>#</th><th>Player</th><th>Pts</th><th>🎯 Exact</th><th>✅ Result</th>${isAdmin ? '<th>Edit</th>' : ''}</tr></thead><tbody>
+    el.innerHTML = `<table class="lb-table"><thead><tr><th>#</th><th>Player</th><th>Pts</th><th> Exact</th><th> Result</th>${isAdmin ? '<th>Edit</th>' : ''}</tr></thead><tbody>
       ${rows.map((r,i) => `<tr>
-        <td class="lb-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+        <td class="lb-rank ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i===0?'':i===1?'':i===2?'':i+1}</td>
         <td>${uname(r.username)}</td>
         <td class="lb-pts" style="color:var(--slate)">${r.total_points}</td>
         <td style="color:var(--gold2)">${r.exact_scores}</td>
@@ -950,15 +951,15 @@ async function adjustSoccerPoints(userId) {
   if (!val) return toast('Enter a number to adjust', 'error');
   try {
     await api(`/soccer/leaderboard/${userId}`, { method: 'PUT', body: { adjustment: val } });
-    toast('✅ Points adjusted');
+    toast(' Points adjusted');
     input.value = '0';
     loadSoccerLeaderboard();
   } catch (e) { toast(e.message, 'error'); }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 // ADMIN
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 async function adminCreateTournament() {
   const name = document.getElementById('a-tour-name').value.trim();
   const course = document.getElementById('a-tour-course').value.trim();
@@ -970,7 +971,7 @@ async function adminCreateTournament() {
   if (predicted_top5.some(g => !g)) return toast('All 5 predicted golfers required', 'error');
   try {
     await api('/golf/tournaments', { method: 'POST', body: { name, course, start_date, deadline, predicted_top5, event_type } });
-    toast('🏌️ Tournament created!');
+    toast(' Tournament created!');
     ['a-tour-name','a-tour-course','a-tour-date','a-tour-deadline','a-g1','a-g2','a-g3','a-g4','a-g5'].forEach(id => { document.getElementById(id).value = ''; });
     loadAdminGolfResults();
     if (state.currentPage === 'golf') loadGolfTournaments();
@@ -982,7 +983,7 @@ let _golfEvents = [];
 async function fetchGolfEvents() {
   const el = document.getElementById('golf-events-list');
   el.style.display = 'block';
-  el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Fetching PGA schedule…</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Fetching PGA schedule</div>';
   try {
     const resp = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard');
     if (!resp.ok) throw new Error('ESPN API unavailable');
@@ -1012,7 +1013,7 @@ function selectGolfEvent(idx) {
     document.getElementById('a-tour-date').value = event.startDate.split('T')[0];
   }
   document.getElementById('golf-events-list').style.display = 'none';
-  toast('✅ Tournament details filled — add your Top 5 picks!');
+  toast(' Tournament details filled  add your Top 5 picks!');
 }
 
 let _eplFixtures = [];
@@ -1021,7 +1022,7 @@ let _selectedFixtures = [];
 async function fetchEplFixtures() {
   const el = document.getElementById('epl-fixtures-list');
   el.style.display = 'block';
-  el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Fetching upcoming fixtures…</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Fetching upcoming fixtures</div>';
   try {
     const base = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
     const resp = await fetch(base);
@@ -1124,7 +1125,7 @@ async function fetchEplFixtures() {
     }
 
     el.innerHTML = `<div style="max-height:250px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">${html}</div>
-    <div style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted)">Select 3 games · Deadline auto-sets to 1hr before kickoff</div>`;
+    <div style="margin-top:0.4rem;font-size:0.75rem;color:var(--muted)">Select 3 games  Deadline auto-sets to 1hr before kickoff</div>`;
   } catch (e) {
     el.innerHTML = `<div style="color:var(--red);font-size:0.85rem;padding:0.5rem;border:1px solid var(--red);border-radius:8px">Couldn't load ESPN: ${e.message}</div>`;
   }
@@ -1176,7 +1177,7 @@ async function adminCreateSoccerWeek() {
   if (homes.some(h => !h) || aways.some(a => !a)) return toast('All 6 team names required', 'error');
   try {
     await api('/soccer/weeks', { method: 'POST', body: { week_name, deadline, games: homes.map((h,i) => ({ home_team: h, away_team: aways[i] })) } });
-    toast('⚽ Soccer week created!');
+    toast(' Soccer week created!');
     document.getElementById('a-week-name').value = '';
     document.getElementById('a-week-deadline').value = '';
     [...document.querySelectorAll('.a-home,.a-away')].forEach(i => { i.value = ''; });
@@ -1185,7 +1186,7 @@ async function adminCreateSoccerWeek() {
   } catch (e) { toast(e.message, 'error'); }
 }
 
-// ── Golf results with ESPN auto-fill ─────────────────────────────────────────
+//  Golf results with ESPN auto-fill 
 async function loadAdminGolfResults() {
   const el = document.getElementById('a-golf-results-list');
   try {
@@ -1202,8 +1203,8 @@ async function loadAdminGolfResults() {
         <td><b>${uname(p.username)}</b></td>
         <td style="color:var(--gold2)">${p.picked_golfer}</td>
         <td><select id="result-${p.id}">
-          <option value="">— Select —</option>
-          <option value="winner">🏆 Winner (${pts(15)}pts)</option>
+          <option value=""> Select </option>
+          <option value="winner"> Winner (${pts(15)}pts)</option>
           <option value="top5">Top 5 (${pts(10)}pts)</option>
           <option value="top10">Top 10 (${pts(8)}pts)</option>
           <option value="top20">Top 20 (${pts(4)}pts)</option>
@@ -1214,10 +1215,10 @@ async function loadAdminGolfResults() {
       const pickIds = picks.map(p=>p.id);
       const pickGolfers = picks.map(p=>p.picked_golfer);
       return `<div style="margin-bottom:1.25rem">
-        <div style="font-weight:700;margin-bottom:0.5rem">🏌️ ${t.name}${multLabel}</div>
+        <div style="font-weight:700;margin-bottom:0.5rem"> ${t.name}${multLabel}</div>
         <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">
-          <button class="btn btn-signal btn-sm" onclick="espnAutoFill(${t.id},[${pickIds}],${JSON.stringify(pickGolfers).replace(/"/g,"'")})">📡 Auto-fill from ESPN</button>
-          <button class="btn btn-ghost btn-sm" onclick="toggleLivePanel('live-${t.id}')">🏅 Show Leaderboard</button>
+          <button class="btn btn-signal btn-sm" onclick="espnAutoFill(${t.id},[${pickIds}],${JSON.stringify(pickGolfers).replace(/"/g,"'")})"> Auto-fill from ESPN</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleLivePanel('live-${t.id}')"> Show Leaderboard</button>
         </div>
         <div id="live-${t.id}" style="display:none"></div>
         <table class="results-table"><thead><tr><th>Player</th><th>Pick</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table>
@@ -1235,7 +1236,7 @@ async function toggleLivePanel(panelId) {
   const el = document.getElementById(panelId);
   if (el.style.display !== 'none') { el.style.display = 'none'; return; }
   el.style.display = 'block';
-  el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:0.5rem">Fetching ESPN leaderboard…</div>';
+  el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;padding:0.5rem">Fetching ESPN leaderboard</div>';
   try {
     const resp = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard');
     if (!resp.ok) throw new Error('ESPN API unavailable');
@@ -1247,14 +1248,14 @@ async function toggleLivePanel(panelId) {
       .sort((a, b) => parseInt(a.status?.position?.id || 999) - parseInt(b.status?.position?.id || 999))
       .slice(0, 30);
     el.innerHTML = `<div class="live-panel">
-      <div class="live-panel-title">📡 ESPN: ${event.name}</div>
+      <div class="live-panel-title"> ESPN: ${event.name}</div>
       ${players.map(p => {
-        const pos = p.status?.position?.displayName || '–';
+        const pos = p.status?.position?.displayName || '';
         const score = p.score?.displayValue || '';
         const status = p.status?.type?.description?.toLowerCase() || '';
         const cut = status === 'cut' || status === 'wd' || status === 'dq';
         return `<div class="live-row">
-          <span class="live-pos">${cut ? '❌' : pos}</span>
+          <span class="live-pos">${cut ? '' : pos}</span>
           <span style="${cut?'color:var(--muted);text-decoration:line-through':''}">${p.athlete.displayName}</span>
           <span class="live-score">${cut ? status.toUpperCase() : score}</span>
         </div>`;
@@ -1266,7 +1267,7 @@ async function toggleLivePanel(panelId) {
 }
 
 async function espnAutoFill(tournamentId, pickIds, pickGolfers) {
-  toast('Fetching ESPN leaderboard…');
+  toast('Fetching ESPN leaderboard');
   try {
     const resp = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard');
     if (!resp.ok) throw new Error('ESPN API unavailable');
@@ -1302,7 +1303,7 @@ async function espnAutoFill(tournamentId, pickIds, pickGolfers) {
         if (sel) { sel.value = cat; filled++; }
       }
     });
-    toast(`✅ Auto-filled ${filled}/${pickIds.length} picks from ESPN (${event.name})`);
+    toast(` Auto-filled ${filled}/${pickIds.length} picks from ESPN (${event.name})`);
   } catch (e) { toast('Auto-fill failed: ' + e.message, 'error'); }
 }
 
@@ -1313,7 +1314,7 @@ async function adminSubmitGolfResults(tournamentId, pickIds) {
     if (!val) return toast('Select a result for every pick first', 'error');
     results[id] = val;
   }
-  try { await api(`/golf/tournaments/${tournamentId}/results`, { method: 'PUT', body: { results } }); toast('🏆 Golf results saved!'); loadAdminGolfResults(); loadGolfLeaderboard(); if (state.currentPage === 'golf') loadGolfTournaments(); }
+  try { await api(`/golf/tournaments/${tournamentId}/results`, { method: 'PUT', body: { results } }); toast(' Golf results saved!'); loadAdminGolfResults(); loadGolfLeaderboard(); if (state.currentPage === 'golf') loadGolfTournaments(); }
   catch (e) { toast(e.message, 'error'); }
 }
 
@@ -1323,7 +1324,7 @@ async function adminDeleteTournament(id) {
   catch (e) { toast(e.message, 'error'); }
 }
 
-// ── Soccer results with EPL auto-fetch ───────────────────────────────────────
+//  Soccer results with EPL auto-fetch 
 async function loadAdminSoccerResults() {
   const el = document.getElementById('a-soccer-results-list');
   try {
@@ -1345,9 +1346,9 @@ async function loadAdminSoccerResults() {
       const homeTeams = w.games.map(g=>g.home_team);
       const awayTeams = w.games.map(g=>g.away_team);
       return `<div style="margin-bottom:1.25rem">
-        <div style="font-weight:700;margin-bottom:0.5rem">⚽ ${w.week_name}</div>
+        <div style="font-weight:700;margin-bottom:0.5rem"> ${w.week_name}</div>
         <div style="margin-bottom:0.5rem">
-          <button class="btn btn-signal btn-sm" onclick="eplAutoFill([${gameIds}],${JSON.stringify(homeTeams).replace(/"/g,"'")},${JSON.stringify(awayTeams).replace(/"/g,"'")})">📡 Auto-fill EPL Scores</button>
+          <button class="btn btn-signal btn-sm" onclick="eplAutoFill([${gameIds}],${JSON.stringify(homeTeams).replace(/"/g,"'")},${JSON.stringify(awayTeams).replace(/"/g,"'")})"> Auto-fill EPL Scores</button>
         </div>
         ${gamesHtml}
         <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
@@ -1360,7 +1361,7 @@ async function loadAdminSoccerResults() {
 }
 
 async function eplAutoFill(gameIds, homeTeams, awayTeams) {
-  toast('Fetching EPL results…');
+  toast('Fetching EPL results');
   const normalize = s => s.toLowerCase()
     .replace(/\bafc\b/g,'').replace(/\bfc\b/g,'').replace(/\butd\b/g,'united')
     .replace(/\bhotspur\b/g,'').replace(/\bwanderers\b/g,'')
@@ -1420,7 +1421,7 @@ async function eplAutoFill(gameIds, homeTeams, awayTeams) {
         filled++;
       }
     });
-    toast(filled > 0 ? `✅ Auto-filled ${filled}/${gameIds.length} scores from ESPN` : 'No matching games found — check team names match', filled > 0 ? 'success' : 'error');
+    toast(filled > 0 ? ` Auto-filled ${filled}/${gameIds.length} scores from ESPN` : 'No matching games found  check team names match', filled > 0 ? 'success' : 'error');
   } catch (e) { toast('ESPN error: ' + e.message, 'error'); }
 }
 
@@ -1431,7 +1432,7 @@ async function adminSubmitSoccerResults(weekId, gameIds) {
     away_score: parseInt(document.getElementById('res-a-'+gid)?.value ?? '', 10)
   }));
   if (game_results.some(r => isNaN(r.home_score) || isNaN(r.away_score))) return toast('Enter scores for all 3 games', 'error');
-  try { await api(`/soccer/weeks/${weekId}/results`, { method: 'PUT', body: { game_results } }); toast('⚽ Results saved!'); loadAdminSoccerResults(); loadSoccerLeaderboard(); if (state.currentPage === 'soccer') loadSoccerWeeks(); }
+  try { await api(`/soccer/weeks/${weekId}/results`, { method: 'PUT', body: { game_results } }); toast(' Results saved!'); loadAdminSoccerResults(); loadSoccerLeaderboard(); if (state.currentPage === 'soccer') loadSoccerWeeks(); }
   catch (e) { toast(e.message, 'error'); }
 }
 
@@ -1463,12 +1464,12 @@ async function toggleAdmin(userId, makeAdmin) {
   catch (e) { toast(e.message, 'error'); }
 }
 
-// ── Settings ──────────────────────────────────────────────────────────────────
+//  Settings 
 async function loadSettings() {
   try {
     const s = await api('/settings');
     const statusEl = document.getElementById('settings-status');
-    statusEl.textContent = s.has_smtp ? '✅ Email reminders configured' : 'No email set up';
+    statusEl.textContent = s.has_smtp ? ' Email reminders configured' : 'No email set up';
   } catch {}
 }
 
@@ -1483,15 +1484,15 @@ async function saveSettings() {
   }
   try {
     await api('/settings', { method: 'PUT', body: { smtp_host: smtpHost, smtp_port: smtpPort, smtp_user: smtpUser, smtp_password: smtpPassword } });
-    toast('✅ Email settings saved!');
+    toast(' Email settings saved!');
     loadSettings();
     ['a-smtp-host','a-smtp-user','a-smtp-password'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   } catch (e) { toast(e.message, 'error'); }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 // Init
-// ══════════════════════════════════════════════════════════════════════════════
+// 
 function init() {
   const token = localStorage.getItem('token');
   const user  = localStorage.getItem('user');
