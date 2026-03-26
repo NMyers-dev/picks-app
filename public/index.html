@@ -147,9 +147,9 @@
   .result-other    { background: rgba(220,38,38,.08);  color: var(--red); }
 
   /* ── Soccer ── */
-  .game-card { background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%), linear-gradient(90deg, rgba(34,139,34,0.06) 0%, rgba(34,139,34,0.02) 50%, rgba(34,139,34,0.06) 100%); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; position: relative; overflow: hidden; }
-  .game-card::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent, transparent 49.5%, rgba(34,139,34,0.04) 49.5%, rgba(34,139,34,0.04) 50.5%, transparent 50.5%); pointer-events: none; }
-  .game-card::after { content: ''; position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; border: 1px solid rgba(34,139,34,0.05); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+  .game-card { background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; position: relative; overflow: hidden; }
+  .game-card::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent, transparent 49.5%, rgba(34,139,34,0.03) 49.5%, rgba(34,139,34,0.03) 50.5%, transparent 50.5%); pointer-events: none; }
+  .game-card .emblem { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 70px; height: 70px; opacity: 0.08; pointer-events: none; object-fit: contain; }
   .game-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; position: relative; z-index: 1; }
   .game-teams { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1rem; color: var(--text); position: relative; z-index: 1; }
   .vs-divider { color: var(--muted); font-size: 0.8rem; font-weight: 600; }
@@ -215,7 +215,7 @@
   <div class="auth-card">
     <div class="auth-logo">
       <h1>The Boys Picks</h1>
-      <p>Weekly golf &amp; soccer predictions</p>
+      <p>Weekly PGA &amp; EPL predictions</p>
     </div>
     <div class="tab-row" id="auth-tabs">
       <button class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
@@ -246,10 +246,10 @@
 <!-- ══ App Screen ═════════════════════════════════════════════════════════════ -->
 <div id="app-screen" style="display:none;flex-direction:column;min-height:100vh">
   <header>
-    <div class="header-logo">⛳ The Boys Picks</div>
+    <div class="header-logo"><img src="https://a.espncdn.com/i/leaguelogos/soccer/500/23.png" style="width:22px;height:22px;border-radius:4px" alt=""/> The Boys Picks</div>
     <nav class="header-nav">
-      <button class="nav-btn" id="nav-golf"   onclick="showPage('golf')">⛳ <span>Golf</span></button>
-      <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')">⚽ <span>Soccer</span></button>
+      <button class="nav-btn" id="nav-golf"   onclick="showPage('golf')">🏌️ <span>PGA</span></button>
+      <button class="nav-btn" id="nav-soccer" onclick="showPage('soccer')">⚽ <span>EPL</span></button>
       <button class="nav-btn" id="nav-admin"  onclick="showPage('admin')" style="display:none">⚙️ <span>Admin</span></button>
     </nav>
     <div class="header-user">
@@ -260,13 +260,14 @@
   </header>
 
   <main>
-    <!-- ── Golf Page ─────────────────────────────────────────────── -->
+    <!-- ── PGA Page ─────────────────────────────────────────────── -->
+    <datalist id="golfer-list"></datalist>
     <div class="page" id="page-golf">
       <div class="grid-2" style="margin-bottom:1.5rem">
         <div>
           <div class="section-head">
             <div>
-              <div class="section-title" style="color:var(--gold)">⛳ Golf Picks</div>
+              <div class="section-title" style="color:var(--gold)">🏌️ PGA Picks — Stage 2</div>
               <div class="section-subtitle">Pick a golfer outside the predicted Top 5</div>
             </div>
           </div>
@@ -275,7 +276,7 @@
         <div>
           <div class="section-head">
             <div><div class="section-title">Leaderboard</div>
-              <div class="section-subtitle">Overall golf standings</div></div>
+              <div class="section-subtitle">Overall PGA standings</div></div>
             <button class="btn btn-ghost btn-sm" onclick="loadGolfLeaderboard()">↻</button>
           </div>
           <div class="card" id="golf-leaderboard"><div class="loading">Loading…</div></div>
@@ -283,13 +284,13 @@
       </div>
     </div>
 
-    <!-- ── Soccer Page ────────────────────────────────────────────── -->
+    <!-- ── EPL Page ────────────────────────────────────────────── -->
     <div class="page" id="page-soccer">
       <div class="grid-2" style="margin-bottom:1.5rem">
         <div>
           <div class="section-head">
             <div>
-              <div class="section-title" style="color:var(--slate)">⚽ Soccer Picks</div>
+              <div class="section-title" style="color:var(--slate)">⚽ EPL Picks</div>
               <div class="section-subtitle">3pts exact score · 1pt correct result</div>
             </div>
           </div>
@@ -298,7 +299,7 @@
         <div>
           <div class="section-head">
             <div><div class="section-title">Leaderboard</div>
-              <div class="section-subtitle">Overall soccer standings</div></div>
+              <div class="section-subtitle">Overall EPL standings</div></div>
             <button class="btn btn-ghost btn-sm" onclick="loadSoccerLeaderboard()">↻</button>
           </div>
           <div class="card" id="soccer-leaderboard"><div class="loading">Loading…</div></div>
@@ -313,13 +314,19 @@
         <!-- Left col -->
         <div>
           <div class="card admin-section" style="margin-bottom:1.25rem">
-            <div class="admin-section-title">⛳ Create Golf Tournament</div>
+            <div class="admin-section-title">🏌️ Create PGA Tournament</div>
             <button class="btn btn-signal btn-sm" onclick="fetchGolfEvents()" style="margin-bottom:0.75rem">📡 Fetch PGA Schedule from ESPN</button>
             <div id="golf-events-list" style="display:none;margin-bottom:0.75rem"></div>
             <div class="form-group"><label>Tournament Name</label>
               <input type="text" id="a-tour-name" placeholder="e.g. The Masters 2025"/></div>
             <div class="form-group"><label>Course (optional)</label>
               <input type="text" id="a-tour-course" placeholder="e.g. Augusta National"/></div>
+            <div class="form-group"><label>Event Type</label>
+              <select id="a-tour-type">
+                <option value="regular">Regular</option>
+                <option value="signature">Signature Event (x1.25)</option>
+                <option value="major">Major (x1.5)</option>
+              </select></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
               <div class="form-group"><label>Start Date</label>
                 <input type="date" id="a-tour-date"/></div>
@@ -339,7 +346,7 @@
           </div>
 
           <div class="card admin-section" style="margin-bottom:1.25rem">
-            <div class="admin-section-title">⚽ Create Soccer Week</div>
+            <div class="admin-section-title">⚽ Create EPL Week</div>
             <div class="form-group"><label>Week Name</label>
               <input type="text" id="a-week-name" placeholder="e.g. GW29 – 22 Mar"/></div>
             <button class="btn btn-signal btn-sm" onclick="fetchEplFixtures()" style="margin-bottom:0.75rem">📡 Fetch Upcoming Fixtures from API</button>
@@ -371,7 +378,7 @@
             <div id="a-golf-results-list"><div class="loading">Loading…</div></div>
           </div>
           <div class="card admin-section" style="margin-bottom:1.25rem">
-            <div class="admin-section-title">📊 Enter Soccer Results</div>
+            <div class="admin-section-title">📊 Enter EPL Results</div>
             <div id="a-soccer-results-list"><div class="loading">Loading…</div></div>
           </div>
           <div class="card admin-section">
@@ -396,6 +403,68 @@ const PREMIER_LEAGUE_TEAMS = [
   'Newcastle United','Nottingham Forest','Sunderland','Tottenham Hotspur',
   'West Ham United','Wolverhampton Wanderers'
 ];
+
+const EPL_TEAM_LOGOS = {
+  'Arsenal':'359','Aston Villa':'362','Bournemouth':'349','Brentford':'337',
+  'Brighton':'331','Burnley':'379','Chelsea':'363','Crystal Palace':'384',
+  'Everton':'368','Fulham':'370','Leeds United':'357','Liverpool':'364',
+  'Manchester City':'382','Manchester United':'360','Newcastle United':'361',
+  'Nottingham Forest':'393','Sunderland':'366','Tottenham Hotspur':'367',
+  'West Ham United':'371','Wolverhampton Wanderers':'380'
+};
+
+const GOLFERS = [
+  {name:'Scottie Scheffler',id:'9780',img:'https://a.espncdn.com/i/headshots/golf/players/full/9780.png'},
+  {name:'Rory McIlroy',id:'3471',img:'https://a.espncdn.com/i/headshots/golf/players/full/3471.png'},
+  {name:'Xander Schauffele',id:'9776',img:'https://a.espncdn.com/i/headshots/golf/players/full/9776.png'},
+  {name:'Collin Morikawa',id:'40132',img:'https://a.espncdn.com/i/headshots/golf/players/full/40132.png'},
+  {name:'Ludvig Aberg',id:'4686455',img:'https://a.espncdn.com/i/headshots/golf/players/full/4686455.png'},
+  {name:'Hideki Matsuyama',id:'3469',img:'https://a.espncdn.com/i/headshots/golf/players/full/3469.png'},
+  {name:'Wyndham Clark',id:'9784',img:'https://a.espncdn.com/i/headshots/golf/players/full/9784.png'},
+  {name:'Patrick Cantlay',id:'9781',img:'https://a.espncdn.com/i/headshots/golf/players/full/9781.png'},
+  {name:'Viktor Hovland',id:'40161',img:'https://a.espncdn.com/i/headshots/golf/players/full/40161.png'},
+  {name:'Tommy Fleetwood',id:'3474',img:'https://a.espncdn.com/i/headshots/golf/players/full/3474.png'},
+  {name:'Shane Lowry',id:'3475',img:'https://a.espncdn.com/i/headshots/golf/players/full/3475.png'},
+  {name:'Justin Thomas',id:'9782',img:'https://a.espncdn.com/i/headshots/golf/players/full/9782.png'},
+  {name:'Jordan Spieth',id:'9783',img:'https://a.espncdn.com/i/headshots/golf/players/full/9783.png'},
+  {name:'Brooks Koepka',id:'9787',img:'https://a.espncdn.com/i/headshots/golf/players/full/9787.png'},
+  {name:'Bryson DeChambeau',id:'9788',img:'https://a.espncdn.com/i/headshots/golf/players/full/9788.png'},
+  {name:'Jon Rahm',id:'9786',img:'https://a.espncdn.com/i/headshots/golf/players/full/9786.png'},
+  {name:'Tony Finau',id:'9789',img:'https://a.espncdn.com/i/headshots/golf/players/full/9789.png'},
+  {name:'Will Zalatoris',id:'40223',img:'https://a.espncdn.com/i/headshots/golf/players/full/40223.png'},
+  {name:'Max Homa',id:'9790',img:'https://a.espncdn.com/i/headshots/golf/players/full/9790.png'},
+  {name:'Matt Fitzpatrick',id:'9791',img:'https://a.espncdn.com/i/headshots/golf/players/full/9791.png'},
+  {name:'Russell Henley',id:'9795',img:'https://a.espncdn.com/i/headshots/golf/players/full/9795.png'},
+  {name:'Sam Burns',id:'40237',img:'https://a.espncdn.com/i/headshots/golf/players/full/40237.png'},
+  {name:'Cameron Young',id:'40228',img:'https://a.espncdn.com/i/headshots/golf/players/full/40228.png'},
+  {name:'Tyrrell Hatton',id:'9794',img:'https://a.espncdn.com/i/headshots/golf/players/full/9794.png'},
+  {name:'Sungjae Im',id:'40149',img:'https://a.espncdn.com/i/headshots/golf/players/full/40149.png'},
+  {name:'Jason Day',id:'3476',img:'https://a.espncdn.com/i/headshots/golf/players/full/3476.png'},
+  {name:'Sahith Theegala',id:'40168',img:'https://a.espncdn.com/i/headshots/golf/players/full/40168.png'},
+  {name:'Brian Harman',id:'9798',img:'https://a.espncdn.com/i/headshots/golf/players/full/9798.png'},
+  {name:'Sepp Straka',id:'40177',img:'https://a.espncdn.com/i/headshots/golf/players/full/40177.png'},
+  {name:'Min Woo Lee',id:'40220',img:'https://a.espncdn.com/i/headshots/golf/players/full/40220.png'},
+  {name:'Tom Kim',id:'40172',img:'https://a.espncdn.com/i/headshots/golf/players/full/40172.png'},
+  {name:'Justin Rose',id:'3478',img:'https://a.espncdn.com/i/headshots/golf/players/full/3478.png'},
+  {name:'Adam Scott',id:'3479',img:'https://a.espncdn.com/i/headshots/golf/players/full/3479.png'},
+  {name:'Keegan Bradley',id:'9793',img:'https://a.espncdn.com/i/headshots/golf/players/full/9793.png'},
+  {name:'Taylor Pendrith',id:'40185',img:'https://a.espncdn.com/i/headshots/golf/players/full/40185.png'},
+  {name:'Byeong Hun An',id:'9803',img:'https://a.espncdn.com/i/headshots/golf/players/full/9803.png'},
+  {name:'Davis Thompson',id:'40179',img:'https://a.espncdn.com/i/headshots/golf/players/full/40179.png'},
+  {name:'Akshay Bhatia',id:'40186',img:'https://a.espncdn.com/i/headshots/golf/players/full/40186.png'},
+  {name:'Robert MacIntyre',id:'40209',img:'https://a.espncdn.com/i/headshots/golf/players/full/40209.png'},
+  {name:'Maverick McNealy',id:'40226',img:'https://a.espncdn.com/i/headshots/golf/players/full/40226.png'}
+];
+
+function getTeamLogo(name) {
+  const key = Object.keys(EPL_TEAM_LOGOS).find(k => name.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(name.toLowerCase()));
+  return key ? 'https://a.espncdn.com/i/teamlogos/soccer/500/' + EPL_TEAM_LOGOS[key] + '.png' : '';
+}
+
+function getGolferImg(name) {
+  const g = GOLFERS.find(g => g.name.toLowerCase() === name.toLowerCase());
+  return g ? g.img : '';
+}
 
 async function api(path, opts = {}) {
   const res = await fetch('/api' + path, {
@@ -516,22 +585,26 @@ function togglePast(btn, id) {
 }
 
 function renderTournamentCard(t, isActive) {
-  const top5 = t.predicted_top5.map(g => `<span class="top5-item">${g}</span>`).join('');
+  const top5 = t.predicted_top5.map(g => {
+    const img = getGolferImg(g);
+    return img ? `<span class="top5-item"><img src="${img}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;margin-right:2px"/>${g}</span>` : `<span class="top5-item">${g}</span>`;
+  }).join('');
   const deadline = t.deadline ? ` · Deadline: ${new Date(t.deadline).toLocaleDateString()}` : '';
+  const eventType = t.event_type === 'major' ? '🏆 Major (x1.5)' : t.event_type === 'signature' ? '⭐ Signature (x1.25)' : '';
   let pickHtml = '';
   if (isActive) {
     pickHtml = t.my_pick
-      ? `<div class="my-pick-display"><span>My pick: </span><span class="golfer-name">🏌️ ${t.my_pick.picked_golfer}</span><span style="color:var(--muted);font-size:0.8rem;margin-left:auto">Change below</span></div>
-         <div class="pick-form" style="margin-top:0.5rem"><input type="text" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}"/><button class="btn btn-primary btn-sm" onclick="submitGolfPick(${t.id})">Update</button></div>`
+      ? `<div class="my-pick-display"><span>My pick: </span><span class="golfer-name">${getGolferImg(t.my_pick.picked_golfer) ? '<img src="'+getGolferImg(t.my_pick.picked_golfer)+'" style="width:20px;height:20px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px"/>' : '🏌️'} ${t.my_pick.picked_golfer}</span><span style="color:var(--muted);font-size:0.8rem;margin-left:auto">Change below</span></div>
+         <div class="pick-form" style="margin-top:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}"/><button class="btn btn-primary btn-sm" onclick="submitGolfPick(${t.id})">Update</button></div>`
       : `<div class="info-box">Pick a golfer NOT in the predicted Top 5.</div>
-         <div class="pick-form"><input type="text" id="pick-input-${t.id}" placeholder="Golfer name (not in Top 5)"/><button class="btn btn-primary btn-sm" onclick="submitGolfPick(${t.id})">Lock In</button></div>`;
+         <div class="pick-form"><input type="text" list="golfer-list" id="pick-input-${t.id}" placeholder="Search golfer..."/><button class="btn btn-primary btn-sm" onclick="submitGolfPick(${t.id})">Lock In</button></div>`;
   } else {
     pickHtml = `<button class="btn btn-ghost btn-sm" style="margin-top:0.75rem" onclick="loadGolfPicks(${t.id},this)">📊 View All Picks</button><div id="golf-picks-${t.id}"></div>`;
   }
   return `<div class="card tournament-card">
     <div class="card-header">
       <div><div class="card-title">${t.name}</div>
-        <div class="card-meta">${t.course ? t.course + ' · ' : ''}${t.start_date ? new Date(t.start_date).toLocaleDateString() : ''}${deadline}</div></div>
+        <div class="card-meta">${t.course ? t.course + ' · ' : ''}${t.start_date ? new Date(t.start_date).toLocaleDateString() : ''}${deadline}${eventType ? ' · ' + eventType : ''}</div></div>
       <span class="pill ${isActive ? 'pill-green' : 'pill-muted'}">${isActive ? 'ACTIVE' : 'COMPLETE'}</span>
     </div>
     <div style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:0.35rem">Predicted Top 5</div>
@@ -554,12 +627,14 @@ async function loadGolfPicks(tournamentId, btn) {
   try {
     const picks = await api(`/golf/tournaments/${tournamentId}/picks`);
     if (!picks.length) { el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;margin-top:0.5rem">No picks yet.</p>'; return; }
-    el.innerHTML = `<div class="picks-grid" style="margin-top:0.75rem">${picks.map(p => `
-      <div class="pick-row">
+    el.innerHTML = `<div class="picks-grid" style="margin-top:0.75rem">${picks.map(p => {
+      const img = getGolferImg(p.picked_golfer);
+      return `<div class="pick-row">
         <span class="pick-user">👤 ${uname(p.username)}</span>
-        <span class="pick-golfer">🏌️ ${p.picked_golfer}</span>
+        <span class="pick-golfer">${img ? '<img src="'+img+'" style="width:24px;height:24px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px"/>' : '🏌️'} ${p.picked_golfer}</span>
         ${p.result_category ? `<span class="result-badge result-${p.result_category}">${formatResult(p.result_category)} · ${p.points_earned}pts</span>` : ''}
-      </div>`).join('')}</div>`;
+      </div>`;
+    }).join('')}</div>`;
   } catch (e) { toast(e.message, 'error'); }
 }
 
@@ -619,6 +694,7 @@ function renderSoccerWeekCard(w, isActive) {
           </div>`;
         })() : '<div style="font-size:0.8rem;color:var(--muted);margin-top:0.5rem;position:relative;z-index:1">No pick submitted</div>';
         return `<div class="game-card" style="margin-bottom:0.75rem">
+          <img class="emblem" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
           <div class="game-header">
             <div class="game-teams"><span>${g.home_team}</span><span class="vs-divider">vs</span><span>${g.away_team}</span></div>
             ${myPick ? `<span class="pill pill-gold" style="font-size:0.7rem">Picked</span>` : ''}
@@ -635,6 +711,7 @@ function renderSoccerWeekCard(w, isActive) {
     }
     const gamesHtml = w.games.map(g => `
       <div class="game-card" style="margin-bottom:0.75rem">
+        <img class="emblem" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
         <div class="game-header">
           <div class="game-teams"><span>${g.home_team}</span><span class="vs-divider">vs</span><span>${g.away_team}</span></div>
           ${g.my_pick ? `<span class="pill pill-gold" style="font-size:0.7rem">Picked</span>` : ''}
@@ -671,6 +748,7 @@ function renderSoccerWeekCard(w, isActive) {
         </div>`;
       })() : '';
       return `<div class="game-card" style="margin-bottom:0.75rem">
+        <img class="emblem" src="${getTeamLogo(g.home_team)}" alt="" onerror="this.style.display='none'"/>
         <div class="game-header">
           <div class="game-teams"><span>${g.home_team}</span><span class="vs-divider">vs</span><span>${g.away_team}</span></div>
           <div class="actual-score"><span class="score">${result}</span></div>
@@ -763,12 +841,13 @@ async function adminCreateTournament() {
   const course = document.getElementById('a-tour-course').value.trim();
   const start_date = document.getElementById('a-tour-date').value;
   const deadline = document.getElementById('a-tour-deadline').value;
+  const event_type = document.getElementById('a-tour-type').value;
   const predicted_top5 = ['a-g1','a-g2','a-g3','a-g4','a-g5'].map(id => document.getElementById(id).value.trim());
   if (!name) return toast('Tournament name required', 'error');
   if (predicted_top5.some(g => !g)) return toast('All 5 predicted golfers required', 'error');
   try {
-    await api('/golf/tournaments', { method: 'POST', body: { name, course, start_date, deadline, predicted_top5 } });
-    toast('⛳ Tournament created!');
+    await api('/golf/tournaments', { method: 'POST', body: { name, course, start_date, deadline, predicted_top5, event_type } });
+    toast('🏌️ Tournament created!');
     ['a-tour-name','a-tour-course','a-tour-date','a-tour-deadline','a-g1','a-g2','a-g3','a-g4','a-g5'].forEach(id => { document.getElementById(id).value = ''; });
     loadAdminGolfResults();
     if (state.currentPage === 'golf') loadGolfTournaments();
@@ -993,23 +1072,26 @@ async function loadAdminGolfResults() {
     const sections = await Promise.all(pending.map(async t => {
       const picks = await api(`/golf/tournaments/${t.id}/picks`);
       if (!picks.length) return `<div style="margin-bottom:1rem"><strong>${t.name}</strong><br><span style="color:var(--muted);font-size:0.8rem">No picks yet</span></div>`;
+      const mult = t.event_type === 'major' ? 1.5 : t.event_type === 'signature' ? 1.25 : 1;
+      const pts = (base) => mult === 1 ? base : Math.round(base * mult * 10) / 10;
+      const multLabel = mult > 1 ? ` (${mult === 1.5 ? 'Major x1.5' : 'Signature x1.25'})` : '';
       const rows = picks.map(p => `<tr>
         <td><b>${uname(p.username)}</b></td>
         <td style="color:var(--gold2)">${p.picked_golfer}</td>
         <td><select id="result-${p.id}">
           <option value="">— Select —</option>
-          <option value="winner">🏆 Winner (15pts)</option>
-          <option value="top5">Top 5 (10pts)</option>
-          <option value="top10">Top 10 (8pts)</option>
-          <option value="top20">Top 20 (4pts)</option>
-          <option value="made_cut">Made Cut (1pt)</option>
+          <option value="winner">🏆 Winner (${pts(15)}pts)</option>
+          <option value="top5">Top 5 (${pts(10)}pts)</option>
+          <option value="top10">Top 10 (${pts(8)}pts)</option>
+          <option value="top20">Top 20 (${pts(4)}pts)</option>
+          <option value="made_cut">Made Cut (${pts(1)}pts)</option>
           <option value="other">Missed Cut (0pts)</option>
         </select></td>
       </tr>`).join('');
       const pickIds = picks.map(p=>p.id);
       const pickGolfers = picks.map(p=>p.picked_golfer);
       return `<div style="margin-bottom:1.25rem">
-        <div style="font-weight:700;margin-bottom:0.5rem">⛳ ${t.name}</div>
+        <div style="font-weight:700;margin-bottom:0.5rem">🏌️ ${t.name}${multLabel}</div>
         <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">
           <button class="btn btn-signal btn-sm" onclick="espnAutoFill(${t.id},[${pickIds}],${JSON.stringify(pickGolfers).replace(/"/g,"'")})">📡 Auto-fill from ESPN</button>
           <button class="btn btn-ghost btn-sm" onclick="toggleLivePanel('live-${t.id}')">🏅 Show Leaderboard</button>
@@ -1281,6 +1363,9 @@ document.getElementById('reg-password').addEventListener('keydown',  e => { if (
 
 const plDatalist = document.getElementById('pl-teams');
 PREMIER_LEAGUE_TEAMS.forEach(t => { const o = document.createElement('option'); o.value = t; plDatalist.appendChild(o); });
+
+const golferDatalist = document.getElementById('golfer-list');
+GOLFERS.forEach(g => { const o = document.createElement('option'); o.value = g.name; golferDatalist.appendChild(o); });
 
 init();
 </script>

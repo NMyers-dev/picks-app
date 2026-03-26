@@ -135,10 +135,12 @@ app.get('/api/golf/tournaments', auth, (req, res) => {
 });
 
 app.post('/api/golf/tournaments', auth, adminOnly, (req, res) => {
-  const { name, course, start_date, deadline, predicted_top5 } = req.body || {};
+  const { name, course, start_date, deadline, predicted_top5, event_type } = req.body || {};
   if (!name?.trim()) return res.status(400).json({ error: 'Tournament name required' });
   if (!Array.isArray(predicted_top5) || predicted_top5.length !== 5 || predicted_top5.some(g => !g?.trim()))
     return res.status(400).json({ error: 'Exactly 5 predicted top golfers required' });
+  if (!['regular','signature','major'].includes(event_type))
+    return res.status(400).json({ error: 'Event type must be regular, signature, or major' });
 
   const tournament = {
     id: nextId('golf_tournaments'),
@@ -147,6 +149,7 @@ app.post('/api/golf/tournaments', auth, adminOnly, (req, res) => {
     start_date: start_date || null,
     deadline: deadline || null,
     predicted_top5: predicted_top5.map(g => g.trim()),
+    event_type: event_type || 'regular',
     results_entered: false,
     created_at: now()
   };
@@ -164,8 +167,17 @@ app.delete('/api/golf/tournaments/:id', auth, adminOnly, (req, res) => {
 
 app.get('/api/golf/tournaments/:id/picks', auth, (req, res) => {
   const tournamentId = parseInt(req.params.id);
+  const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
   const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
   const users = db.get('users').value();
+
+  // Hide other users' picks until deadline or results entered
+  const deadlinePassed = tournament && (tournament.results_entered || (tournament.deadline && new Date() >= new Date(tournament.deadline)));
+  if (!deadlinePassed) {
+    const myPicks = picks.filter(p => p.user_id === req.user.id);
+    const user = users.find(u => u.id === req.user.id);
+    return res.json(myPicks.map(p => ({ id: p.id, picked_golfer: p.picked_golfer, result_category: p.result_category, points_earned: p.points_earned, username: user?.username })));
+  }
 
   const result = picks.map(p => {
     const user = users.find(u => u.id === p.user_id);
@@ -208,9 +220,12 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
 app.put('/api/golf/tournaments/:id/results', auth, adminOnly, (req, res) => {
   const { results } = req.body || {};
   const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
+  const tournament = db.get('golf_tournaments').find({ id: parseInt(req.params.id) }).value();
+  const multiplier = tournament?.event_type === 'major' ? 1.5 : tournament?.event_type === 'signature' ? 1.25 : 1;
 
   for (const [pickId, category] of Object.entries(results)) {
-    const points = pointsMap[category] ?? 0;
+    const basePoints = pointsMap[category] ?? 0;
+    const points = Math.round(basePoints * multiplier * 10) / 10;
     db.get('golf_picks').find({ id: parseInt(pickId) }).assign({ result_category: category, points_earned: points }).write();
   }
   db.get('golf_tournaments').find({ id: parseInt(req.params.id) }).assign({ results_entered: true }).write();
@@ -291,8 +306,22 @@ app.delete('/api/soccer/weeks/:id', auth, adminOnly, (req, res) => {
 
 app.get('/api/soccer/weeks/:id/picks', auth, (req, res) => {
   const weekId = parseInt(req.params.id);
+  const week = db.get('soccer_weeks').find({ id: weekId }).value();
   const games = db.get('soccer_games').filter({ week_id: weekId }).value();
   const gameIds = games.map(g => g.id);
+
+  // Hide other users' picks until deadline or results entered
+  const deadlinePassed = week && (week.results_entered || (week.deadline && new Date() >= new Date(week.deadline)));
+  if (!deadlinePassed) {
+    const myPicks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id) && p.user_id === req.user.id).value();
+    const users = db.get('users').value();
+    const user = users.find(u => u.id === req.user.id);
+    return res.json(myPicks.map(p => {
+      const game = games.find(g => g.id === p.game_id);
+      return { ...p, username: user?.username, home_team: game?.home_team, away_team: game?.away_team, actual_home_score: game?.actual_home_score, actual_away_score: game?.actual_away_score, game_order: game?.game_order };
+    }));
+  }
+
   const picks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
   const users = db.get('users').value();
 
