@@ -1557,11 +1557,15 @@ async function saveSettings() {
 // Init
 // 
 function init() {
+  console.log('Init running...');
   const token = localStorage.getItem('token');
   const user  = localStorage.getItem('user');
+  console.log('Token:', token ? 'exists' : 'none');
+  console.log('User:', user);
   if (token && user) {
     try { state.token = token; state.user = JSON.parse(user); launchApp(); return; } catch {}
   }
+  console.log('Showing auth screen');
   document.getElementById('auth-screen').style.display = 'flex';
 }
 
