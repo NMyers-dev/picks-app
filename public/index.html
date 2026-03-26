@@ -462,13 +462,19 @@ const GOLFERS = [
 function getTeamLogo(name) {
   if (!name) return '';
   const normalize = s => s.toLowerCase().replace(/\bafc\b/g,'').replace(/\bfc\b/g,'').replace(/\butd\b/g,'united')
-    .replace(/\bhotspur\b/g,'').replace(/\bwanderers\b/g,'').replace(/\bman\b/g,'manchester')
-    .replace(/\bnottm\b/g,'nottingham').replace(/\bham\b/g,'').replace(/\bblades\b/g,'')
+    .replace(/\bhotspur\b/g,'').replace(/\bwanderers\b/g,'').replace(/\bwolves\b/g,'wolverhampton')
+    .replace(/\bman\b/g,'manchester').replace(/\bnottm\b/g,'nottingham').replace(/\bblades\b/g,'')
     .replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();
   const n = normalize(name);
-  const key = Object.keys(EPL_TEAM_LOGOS).find(k => {
+  const keys = Object.keys(EPL_TEAM_LOGOS);
+  // Exact match first
+  let key = keys.find(k => { const kn = normalize(k); return n === kn || n.includes(kn) || kn.includes(n); });
+  if (key) return 'https://a.espncdn.com/i/teamlogos/soccer/500/' + EPL_TEAM_LOGOS[key] + '.png';
+  // Word match as fallback - only if ALL significant words match
+  key = keys.find(k => {
     const kn = normalize(k);
-    return n.includes(kn) || kn.includes(n) || n.split(' ').some(w => w.length > 3 && kn.includes(w));
+    const words = n.split(' ').filter(w => w.length > 2);
+    return words.length > 0 && words.every(w => kn.includes(w));
   });
   return key ? 'https://a.espncdn.com/i/teamlogos/soccer/500/' + EPL_TEAM_LOGOS[key] + '.png' : '';
 }
