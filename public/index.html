@@ -634,14 +634,18 @@ function launchApp() {
 // Navigation
 // 
 function showPage(page) {
+  console.log('showPage called:', page);
   state.currentPage = page;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
+  const pageEl = document.getElementById('page-' + page);
+  pageEl.classList.add('active');
+  pageEl.style.display = 'block';
+  console.log('Page element:', pageEl.id, 'display:', pageEl.style.display);
   ['home','golf','soccer','admin'].forEach(p => {
     const btn = document.getElementById('nav-' + p);
     btn.className = 'nav-btn' + (p === page ? ' active-' + (p === 'home' ? 'golf' : p) : '');
   });
-  if (page === 'home')  { loadHomePage(); }
+  if (page === 'home')  { console.log('Calling loadHomePage'); loadHomePage(); }
   if (page === 'golf')   { loadGolfTournaments(); loadGolfLeaderboard(); }
   if (page === 'soccer') { loadSoccerWeeks(); loadSoccerLeaderboard(); }
   if (page === 'admin')  {
