@@ -314,34 +314,34 @@
 <div id="toast"></div>
 
 <!--  Auth Screen  -->
-<div id="auth-screen">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <h1>The Boys Picks</h1>
-      <p>Weekly PGA &amp; EPL predictions</p>
+<div id="auth-screen" style="background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+  <div style="background: #fff; border: 3px solid #000; box-shadow: 6px 6px 0 #000; padding: 2rem; width: 100%; max-width: 400px;">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <div style="background: #FFD700; border: 3px solid #000; padding: 0.75rem; font-size: 1.5rem; font-weight: 900; margin-bottom: 0.5rem;">THE BOYS PICKS</div>
+      <p style="color: #666; font-size: 0.85rem;">Weekly PGA &amp; EPL predictions</p>
     </div>
-    <div class="tab-row" id="auth-tabs">
-      <button class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
-      <button class="tab-btn" onclick="switchAuthTab('register')">Register</button>
+    <div style="display: flex; border: 2px solid #000; margin-bottom: 1.5rem;">
+      <button onclick="switchAuthTab('login')" id="tab-login" style="flex: 1; padding: 0.6rem; background: #000; color: #FFD700; border: none; font-weight: 700; cursor: pointer;">LOGIN</button>
+      <button onclick="switchAuthTab('register')" id="tab-register" style="flex: 1; padding: 0.6rem; background: #fff; color: #000; border: none; font-weight: 700; cursor: pointer;">REGISTER</button>
     </div>
 
     <div id="login-form">
-      <div class="form-group"><label>Username</label>
-        <input type="text" id="login-username" placeholder="Your username" autocomplete="username"/></div>
-      <div class="form-group"><label>Password</label>
-        <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password"/></div>
-      <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In</button>
+      <div style="margin-bottom: 1rem;"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.35rem;text-transform:uppercase;">Username</label>
+        <input type="text" id="login-username" placeholder="Your username" autocomplete="username" style="width:100%;padding:0.65rem;border:2px solid #000;font-size:0.95rem;font-weight:600;"/></div>
+      <div style="margin-bottom: 1.5rem;"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.35rem;text-transform:uppercase;">Password</label>
+        <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password" style="width:100%;padding:0.65rem;border:2px solid #000;font-size:0.95rem;font-weight:600;"/></div>
+      <button onclick="doLogin()" style="width:100%;background:#FFD700;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.75rem;font-size:1rem;font-weight:900;cursor:pointer;">SIGN IN</button>
     </div>
 
     <div id="register-form" style="display:none">
-      <div class="form-group"><label>Username</label>
-        <input type="text" id="reg-username" placeholder="Choose a username"/></div>
-      <div class="form-group"><label>Email</label>
-        <input type="email" id="reg-email" placeholder="your@email.com"/></div>
-      <div class="form-group"><label>Password</label>
-        <input type="password" id="reg-password" placeholder="Min. 6 characters"/></div>
-      <button class="btn btn-primary btn-full" onclick="doRegister()">Create Account</button>
-      <p style="text-align:center;color:var(--muted);font-size:0.8rem;margin-top:0.75rem">First person to register becomes admin.</p>
+      <div style="margin-bottom: 1rem;"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.35rem;text-transform:uppercase;">Username</label>
+        <input type="text" id="reg-username" placeholder="Choose a username" style="width:100%;padding:0.65rem;border:2px solid #000;font-size:0.95rem;font-weight:600;"/></div>
+      <div style="margin-bottom: 1rem;"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.35rem;text-transform:uppercase;">Email</label>
+        <input type="email" id="reg-email" placeholder="your@email.com" style="width:100%;padding:0.65rem;border:2px solid #000;font-size:0.95rem;font-weight:600;"/></div>
+      <div style="margin-bottom: 1rem;"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.35rem;text-transform:uppercase;">Password</label>
+        <input type="password" id="reg-password" placeholder="Min. 6 characters" style="width:100%;padding:0.65rem;border:2px solid #000;font-size:0.95rem;font-weight:600;"/></div>
+      <button onclick="doRegister()" style="width:100%;background:#1a1a1a;color:#fff;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.75rem;font-size:1rem;font-weight:900;cursor:pointer;margin-bottom:0.5rem;">CREATE ACCOUNT</button>
+      <p style="text-align:center;color:#666;font-size:0.8rem;">First person to register becomes admin.</p>
     </div>
   </div>
 </div>
@@ -689,7 +689,10 @@ function toast(msg, type = 'success') {
 function switchAuthTab(tab) {
   document.getElementById('login-form').style.display    = tab === 'login'    ? 'block' : 'none';
   document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
-  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0) === (tab === 'login')));
+  document.getElementById('tab-login').style.background = tab === 'login' ? '#000' : '#fff';
+  document.getElementById('tab-login').style.color = tab === 'login' ? '#FFD700' : '#000';
+  document.getElementById('tab-register').style.background = tab === 'register' ? '#000' : '#fff';
+  document.getElementById('tab-register').style.color = tab === 'register' ? '#FFD700' : '#000';
 }
 async function doLogin() {
   const username = document.getElementById('login-username').value.trim();
