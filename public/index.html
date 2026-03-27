@@ -1379,14 +1379,14 @@ async function loadAdminGolfResults() {
       return `<div style="margin-bottom:1.25rem">
         <div style="font-weight:700;margin-bottom:0.5rem"> ${t.name}${multLabel}</div>
         <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">
-          <button class="btn btn-signal btn-sm" onclick="espnAutoFill(${t.id},[${pickIds}],${JSON.stringify(pickGolfers).replace(/"/g,"'")})"> Auto-fill from ESPN</button>
-          <button class="btn btn-ghost btn-sm" onclick="toggleLivePanel('live-${t.id}')"> Show Leaderboard</button>
+          <button onclick="espnAutoFill(${t.id},[${pickIds}],${JSON.stringify(pickGolfers).replace(/"/g,"'")})" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">AUTO-FILL FROM ESPN</button>
+          <button onclick="toggleLivePanel('live-${t.id}')" style="background:#fff;color:#000;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">SHOW LEADERBOARD</button>
         </div>
         <div id="live-${t.id}" style="display:none"></div>
         <table class="results-table"><thead><tr><th>Player</th><th>Pick</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table>
         <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
-          <button class="btn btn-primary btn-sm" onclick="adminSubmitGolfResults(${t.id},[${pickIds}])">Save Results</button>
-          <button class="btn btn-danger btn-sm" onclick="adminDeleteTournament(${t.id})">Delete</button>
+          <button onclick="adminSubmitGolfResults(${t.id},[${pickIds}])" style="background:#FFD700;color:#000;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">SAVE RESULTS</button>
+          <button onclick="adminDeleteTournament(${t.id})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">DELETE</button>
         </div>
       </div>`;
     }));
@@ -1510,12 +1510,12 @@ async function loadAdminSoccerResults() {
       return `<div style="margin-bottom:1.25rem">
         <div style="font-weight:700;margin-bottom:0.5rem"> ${w.week_name}</div>
         <div style="margin-bottom:0.5rem">
-          <button class="btn btn-signal btn-sm" onclick="eplAutoFill([${gameIds}],${JSON.stringify(homeTeams).replace(/"/g,"'")},${JSON.stringify(awayTeams).replace(/"/g,"'")})"> Auto-fill EPL Scores</button>
+          <button onclick="eplAutoFill([${gameIds}],${JSON.stringify(homeTeams).replace(/"/g,"'")},${JSON.stringify(awayTeams).replace(/"/g,"'")})" style="background:#000;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">AUTO-FILL EPL SCORES</button>
         </div>
         ${gamesHtml}
         <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
-          <button class="btn btn-blue btn-sm" onclick="adminSubmitSoccerResults(${w.id},[${gameIds}])">Save Results</button>
-          <button class="btn btn-danger btn-sm" onclick="adminDeleteSoccerWeek(${w.id})">Delete</button>
+          <button onclick="adminSubmitSoccerResults(${w.id},[${gameIds}])" style="background:#1a1a1a;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">SAVE RESULTS</button>
+          <button onclick="adminDeleteSoccerWeek(${w.id})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">DELETE</button>
         </div>
       </div>`;
     }).join('<hr class="divider">');
