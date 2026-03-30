@@ -306,7 +306,7 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
 
 app.put('/api/golf/tournaments/:id/results', auth, adminOnly, (req, res) => {
   const { results } = req.body || {};
-  const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
+  const pointsMap = { winner: 3, top5: 2, top10: 1, other: 0 };
   const tournament = db.get('golf_tournaments').find({ id: parseInt(req.params.id) }).value();
   const multiplier = tournament?.event_type === 'major' ? 1.5 : tournament?.event_type === 'signature' ? 1.25 : 1;
 
