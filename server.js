@@ -205,7 +205,7 @@ app.get('/api/golf/tournaments', (req, res) => {
 });
 
 app.post('/api/golf/tournaments', auth, adminOnly, (req, res) => {
-  const { name, course, start_date, deadline, predicted_top5, event_type } = req.body || {};
+  const { name, course, start_date, deadline, predicted_top5, event_type, field } = req.body || {};
   if (!name?.trim()) return res.status(400).json({ error: 'Tournament name required' });
   if (!['regular','signature','major'].includes(event_type))
     return res.status(400).json({ error: 'Event type must be regular, signature, or major' });
@@ -217,6 +217,7 @@ app.post('/api/golf/tournaments', auth, adminOnly, (req, res) => {
     start_date: start_date || null,
     deadline: deadline || null,
     predicted_top5: (predicted_top5 || []).filter(g => g?.trim()),
+    field: (field || []).map(f => f.trim()).filter(f => f),
     event_type: event_type || 'regular',
     results_entered: false,
     created_at: now()
@@ -228,11 +229,14 @@ app.post('/api/golf/tournaments', auth, adminOnly, (req, res) => {
 
 app.put('/api/golf/tournaments/:id', auth, adminOnly, (req, res) => {
   const id = parseInt(req.params.id);
-  const { name, course, event_type } = req.body || {};
+  const { name, course, event_type, start_date, deadline, field } = req.body || {};
   if (name !== undefined) db.get('golf_tournaments').find({ id }).assign({ name: name.trim() }).write();
   if (course !== undefined) db.get('golf_tournaments').find({ id }).assign({ course: course?.trim() || null }).write();
   if (event_type !== undefined && ['regular','signature','major'].includes(event_type)) 
     db.get('golf_tournaments').find({ id }).assign({ event_type }).write();
+  if (start_date !== undefined) db.get('golf_tournaments').find({ id }).assign({ start_date: start_date || null }).write();
+  if (deadline !== undefined) db.get('golf_tournaments').find({ id }).assign({ deadline: deadline || null }).write();
+  if (field !== undefined) db.get('golf_tournaments').find({ id }).assign({ field: (field || []).map(f => f.trim()).filter(f => f) }).write();
   res.json({ success: true });
 });
 
@@ -282,6 +286,10 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
   const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
   if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
   if (tournament.results_entered) return res.status(400).json({ error: 'Results already entered — picks are locked' });
+
+  const field = tournament.field || [];
+  if (field.length > 0 && !field.some(g => g.toLowerCase() === picked_golfer.trim().toLowerCase()))
+    return res.status(400).json({ error: `${picked_golfer.trim()} is not in this tournament's field. Please pick a player who is playing.` });
 
   const top5 = tournament.predicted_top5 || [];
   if (top5.length > 0 && top5.some(g => g.toLowerCase() === picked_golfer.trim().toLowerCase()))
