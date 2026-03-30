@@ -489,7 +489,7 @@
               <div><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">DEADLINE</label>
                 <input type="datetime-local" id="a-tour-deadline" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
             </div>
-            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">PREDICTED TOP 5</label>
+            <div style="margin-bottom:0.75rem"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">PREDICTED TOP 5 (optional - can add later)</label>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
                 <input type="text" id="a-g1" placeholder="#1 favourite" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
                 <input type="text" id="a-g2" placeholder="#2" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
@@ -540,11 +540,17 @@
         <!-- Right col -->
         <div>
           <div style="margin-bottom:1.25rem;padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;">
-            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#FFD700;padding:0.5rem;border:2px solid #000;">GOLF RESULTS</div>
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#FFD700;padding:0.5rem;border:2px solid #000;display:flex;justify-content:space-between;align-items:center;">
+              <span>GOLF RESULTS</span>
+              <button onclick="deleteAllGolfTournaments()" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE ALL PREVIOUS</button>
+            </div>
             <div id="a-golf-results-list"><div style="padding:1rem;">Loading...</div></div>
           </div>
           <div style="margin-bottom:1.25rem;padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;" id="a-epl-results">
-            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#1a1a1a;color:#fff;padding:0.5rem;border:2px solid #000;">EPL RESULTS</div>
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#1a1a1a;color:#fff;padding:0.5rem;border:2px solid #000;display:flex;justify-content:space-between;align-items:center;">
+              <span>EPL RESULTS</span>
+              <button onclick="deleteAllSoccerWeeks()" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE ALL PREVIOUS</button>
+            </div>
             <div id="a-soccer-results-list"><div style="padding:1rem;">Loading...</div></div>
           </div>
           <div style="padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;">
@@ -782,21 +788,23 @@ function togglePast(btn, id) {
 }
 
 function renderTournamentCard(t, isActive) {
-  const top5 = t.predicted_top5.map(g => {
+  const top5Array = t.predicted_top5 || [];
+  const top5 = top5Array.length > 0 ? top5Array.map(g => {
     const img = getGolferImg(g);
     return img ? `<span style="background:#fff;border:2px solid #000;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:700;"><img src="${img}" style="width:18px;height:18px;border-radius:50%;vertical-align:middle;margin-right:4px"/>${g}</span>` : `<span style="background:#fff;border:2px solid #000;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:700;">${g}</span>`;
-  }).join('');
+  }).join('') : '<span style="font-size:0.8rem;color:#666;font-style:italic;">Top 5 to be added soon</span>';
   const deadline = t.deadline ? ` | Deadline: ${new Date(t.deadline).toLocaleDateString()}` : '';
   const eventType = t.event_type === 'major' ? ' | Major (x1.5)' : t.event_type === 'signature' ? ' | Signature (x1.25)' : '';
   let pickHtml = '';
   if (isActive) {
+    const top5Warning = top5Array.length > 0 ? 'Pick a golfer NOT in the predicted Top 5' : 'Pick any golfer';
     pickHtml = t.my_pick
       ? `<div style="margin-top:0.75rem;padding:0.6rem;background:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;">
            <span style="font-weight:700;">Your pick: </span><span style="font-weight:900;">${getGolferImg(t.my_pick.picked_golfer) ? '<img src="'+getGolferImg(t.my_pick.picked_golfer)+'" style="width:20px;height:20px;border-radius:50%;vertical-align:middle;margin-right:4px"/>' : ''} ${t.my_pick.picked_golfer}</span>
            <span style="float:right;font-size:0.7rem;color:#000;">Change below</span>
          </div>
          <div style="display:flex;gap:0.5rem;margin-top:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}" style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">UPDATE</button></div>`
-      : `<div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;font-size:0.85rem;font-weight:700;">Pick a golfer NOT in the predicted Top 5</div>
+      : `<div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;font-size:0.85rem;font-weight:700;">${top5Warning}</div>
          <div style="display:flex;gap:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" placeholder="Search golfer..." style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#FFD700;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">LOCK IN</button></div>`;
   } else {
     pickHtml = `<button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.75rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
@@ -1128,9 +1136,8 @@ async function adminCreateTournament() {
   const start_date = document.getElementById('a-tour-date').value;
   const deadline = document.getElementById('a-tour-deadline').value;
   const event_type = document.getElementById('a-tour-type').value;
-  const predicted_top5 = ['a-g1','a-g2','a-g3','a-g4','a-g5'].map(id => document.getElementById(id).value.trim());
+  const predicted_top5 = ['a-g1','a-g2','a-g3','a-g4','a-g5'].map(id => document.getElementById(id).value.trim()).filter(g => g);
   if (!name) return toast('Tournament name required', 'error');
-  if (predicted_top5.some(g => !g)) return toast('All 5 predicted golfers required', 'error');
   try {
     await api('/golf/tournaments', { method: 'POST', body: { name, course, start_date, deadline, predicted_top5, event_type } });
     toast(' Tournament created!');
@@ -1601,6 +1608,28 @@ async function adminSubmitSoccerResults(weekId, gameIds) {
 async function adminDeleteSoccerWeek(id) {
   if (!confirm('Delete this week and all picks?')) return;
   try { await api(`/soccer/weeks/${id}`, { method: 'DELETE' }); toast('Deleted'); loadAdminSoccerResults(); if (state.currentPage === 'soccer') loadSoccerWeeks(); }
+  catch (e) { toast(e.message, 'error'); }
+}
+
+async function deleteAllGolfTournaments() {
+  if (!confirm('Delete ALL previous completed golf tournaments and all their picks?')) return;
+  try { 
+    const result = await api('/golf/tournaments', { method: 'DELETE' });
+    toast(`Deleted ${result.deleted} tournaments`);
+    loadAdminGolfResults();
+    if (state.currentPage === 'golf') loadGolfTournaments();
+  }
+  catch (e) { toast(e.message, 'error'); }
+}
+
+async function deleteAllSoccerWeeks() {
+  if (!confirm('Delete ALL previous completed EPL weeks and all their picks?')) return;
+  try { 
+    const result = await api('/soccer/weeks', { method: 'DELETE' });
+    toast(`Deleted ${result.deleted} weeks`);
+    loadAdminSoccerResults();
+    if (state.currentPage === 'soccer') loadSoccerWeeks();
+  }
   catch (e) { toast(e.message, 'error'); }
 }
 

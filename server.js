@@ -206,6 +206,15 @@ app.delete('/api/golf/tournaments/:id', auth, adminOnly, (req, res) => {
   res.json({ success: true });
 });
 
+app.delete('/api/golf/tournaments', auth, superAdminOnly, (req, res) => {
+  const completed = db.get('golf_tournaments').filter(t => t.results_entered).value();
+  completed.forEach(t => {
+    db.get('golf_picks').remove({ tournament_id: t.id }).write();
+    db.get('golf_tournaments').remove({ id: t.id }).write();
+  });
+  res.json({ success: true, deleted: completed.length });
+});
+
 app.get('/api/golf/tournaments/:id/picks', auth, (req, res) => {
   const tournamentId = parseInt(req.params.id);
   const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
@@ -351,6 +360,17 @@ app.delete('/api/soccer/weeks/:id', auth, superAdminOnly, (req, res) => {
   db.get('soccer_games').remove({ week_id: weekId }).write();
   db.get('soccer_weeks').remove({ id: weekId }).write();
   res.json({ success: true });
+});
+
+app.delete('/api/soccer/weeks', auth, superAdminOnly, (req, res) => {
+  const completed = db.get('soccer_weeks').filter(w => w.results_entered).value();
+  completed.forEach(w => {
+    const games = db.get('soccer_games').filter({ week_id: w.id }).value();
+    games.forEach(g => db.get('soccer_picks').remove({ game_id: g.id }).write());
+    db.get('soccer_games').remove({ week_id: w.id }).write();
+    db.get('soccer_weeks').remove({ id: w.id }).write();
+  });
+  res.json({ success: true, deleted: completed.length });
 });
 
 app.get('/api/soccer/weeks/:id/picks', auth, (req, res) => {
