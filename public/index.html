@@ -689,7 +689,9 @@ function getTeamLogo(name) {
 }
 
 function getGolferImg(name) {
-  const g = GOLFERS.find(g => g.name.toLowerCase() === name.toLowerCase());
+  if (!name) return '';
+  const n = name.toLowerCase().trim();
+  const g = GOLFERS.find(g => g.name.toLowerCase() === n);
   return g ? g.img : '';
 }
 
@@ -954,9 +956,13 @@ function togglePast(btn, id) {
 function renderTournamentCard(t, isActive) {
   const top5Array = t.predicted_top5 || [];
   const defaultImg = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0yMSAxNnY0Ii8+PC9zdmc+';
-  const top5 = top5Array.length > 0 ? top5Array.map(g => {
+  const top5 = top5Array.length > 0 ? top5Array.map((g, i) => {
     const img = getGolferImg(g);
-    return `<span style="background:#fff;border:2px solid #000;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><img src="${img || defaultImg}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;${img ? '' : 'opacity:0.5;'}"/>${g}</span>`;
+    return `<div style="background:#fff;border:2px solid #000;padding:6px 10px;border-radius:4px;font-size:0.85rem;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <span style="background:#000;color:#FFD700;padding:2px 8px;border-radius:3px;min-width:24px;text-align:center;">${i+1}</span>
+      <img src="${img || defaultImg}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;${img ? '' : 'opacity:0.5;'}"/>
+      <span>${g}</span>
+    </div>`;
   }).join('') : '<span style="font-size:0.8rem;color:#666;font-style:italic;">Top 5 to be added soon</span>';
   const deadline = t.deadline ? ` | Deadline: ${new Date(t.deadline).toLocaleDateString()}` : '';
   const eventType = t.event_type === 'major' ? ' | Major (x1.5)' : t.event_type === 'signature' ? ' | Signature (x1.25)' : '';
@@ -973,8 +979,8 @@ function renderTournamentCard(t, isActive) {
             const myImgStyle = getGolferImg(t.my_pick.picked_golfer) ? '' : 'opacity:0.5;';
             const pickedDate = t.my_pick.created_at ? new Date(t.my_pick.created_at).toLocaleString() : '';
             return `<div style="margin-top:0.75rem;padding:0.75rem;background:#2ecc71;border:2px solid #000;box-shadow:3px 3px 0 #000;">
-             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
-               <span style="font-weight:700;font-size:0.9rem;">LOCKED IN:</span><img src="${myImg}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;font-size:1rem;">${t.my_pick.picked_golfer}</span>
+             <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem;">
+               <span style="font-weight:700;font-size:0.9rem;">LOCKED IN:</span><img src="${myImg}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;font-size:1.1rem;">${t.my_pick.picked_golfer}</span>
              </div>
              <div style="font-size:0.7rem;color:#000;">Picked on ${pickedDate}</div>
            </div>`;
@@ -991,7 +997,7 @@ function renderTournamentCard(t, isActive) {
           const pts = t.my_pick.points_earned || 0;
           const result = t.my_pick.result_category ? ` | ${t.my_pick.result_category.toUpperCase()} (${pts}pts)` : '';
           return `<div style="margin-top:0.75rem;padding:0.6rem;background:#f0f0f0;border:2px solid #000;display:flex;align-items:center;gap:0.5rem;">
-            <span style="font-weight:700;">Your pick:</span><img src="${myImg}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;">${t.my_pick.picked_golfer}</span><span style="font-size:0.8rem;font-weight:700;">${result}</span>
+            <span style="font-weight:700;">Your pick:</span><img src="${myImg}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;">${t.my_pick.picked_golfer}</span><span style="font-size:0.8rem;font-weight:700;">${result}</span>
           </div><button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.5rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
         })()
       : `<button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.75rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
@@ -1028,7 +1034,7 @@ async function loadGolfPicks(tournamentId, btn) {
       const imgStyle = getGolferImg(p.picked_golfer) ? '' : 'opacity:0.5;';
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem;border-bottom:2px solid #000;${p.result_category?'background:#fff':''}">
         <span style="font-weight:700;">${uname(p.username)}</span>
-        <span style="font-weight:900;color:#000;display:flex;align-items:center;gap:6px;"><img src="${img}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;${imgStyle}"/> ${p.picked_golfer}</span>
+        <span style="font-weight:900;color:#000;display:flex;align-items:center;gap:8px;"><img src="${img}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;${imgStyle}"/> ${p.picked_golfer}</span>
         ${p.result_category ? `<span style="background:${p.result_category==='winner'?'#FFD700':p.result_category==='top5'?'#87CEEB':p.result_category==='top10'?'#90EE90':'#ccc'};border:2px solid #000;padding:2px 8px;font-size:0.75rem;font-weight:700;">${formatResult(p.result_category)} ${p.points_earned}pts</span>` : ''}
       </div>`;
     }).join('')}</div>`;
