@@ -283,6 +283,13 @@ app.put('/api/golf/tournaments/:id/results', auth, adminOnly, (req, res) => {
   res.json({ success: true });
 });
 
+app.put('/api/golf/tournaments/:id/top5', auth, adminOnly, (req, res) => {
+  const { predicted_top5 } = req.body || {};
+  if (!Array.isArray(predicted_top5)) return res.status(400).json({ error: 'predicted_top5 must be an array' });
+  db.get('golf_tournaments').find({ id: parseInt(req.params.id) }).assign({ predicted_top5 }).write();
+  res.json({ success: true });
+});
+
 app.get('/api/golf/leaderboard', (req, res) => {
   try {
     const users = db.get('users').value();

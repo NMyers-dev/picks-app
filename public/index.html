@@ -797,15 +797,19 @@ function renderTournamentCard(t, isActive) {
   const eventType = t.event_type === 'major' ? ' | Major (x1.5)' : t.event_type === 'signature' ? ' | Signature (x1.25)' : '';
   let pickHtml = '';
   if (isActive) {
-    const top5Warning = top5Array.length > 0 ? 'Pick a golfer NOT in the predicted Top 5' : 'Pick any golfer';
-    pickHtml = t.my_pick
-      ? `<div style="margin-top:0.75rem;padding:0.6rem;background:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;">
-           <span style="font-weight:700;">Your pick: </span><span style="font-weight:900;">${getGolferImg(t.my_pick.picked_golfer) ? '<img src="'+getGolferImg(t.my_pick.picked_golfer)+'" style="width:20px;height:20px;border-radius:50%;vertical-align:middle;margin-right:4px"/>' : ''} ${t.my_pick.picked_golfer}</span>
-           <span style="float:right;font-size:0.7rem;color:#000;">Change below</span>
-         </div>
-         <div style="display:flex;gap:0.5rem;margin-top:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}" style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">UPDATE</button></div>`
-      : `<div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;font-size:0.85rem;font-weight:700;">${top5Warning}</div>
-         <div style="display:flex;gap:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" placeholder="Search golfer..." style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#FFD700;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">LOCK IN</button></div>`;
+    if (top5Array.length === 0) {
+      pickHtml = `<div style="margin-top:0.75rem;padding:0.75rem;background:#f0f0f0;border:2px solid #000;font-size:0.85rem;font-weight:700;text-align:center;">Picks will open once Top 5 are added</div>`;
+    } else {
+      const top5Warning = 'Pick a golfer NOT in the predicted Top 5';
+      pickHtml = t.my_pick
+        ? `<div style="margin-top:0.75rem;padding:0.6rem;background:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;">
+             <span style="font-weight:700;">Your pick: </span><span style="font-weight:900;">${getGolferImg(t.my_pick.picked_golfer) ? '<img src="'+getGolferImg(t.my_pick.picked_golfer)+'" style="width:20px;height:20px;border-radius:50%;vertical-align:middle;margin-right:4px"/>' : ''} ${t.my_pick.picked_golfer}</span>
+             <span style="float:right;font-size:0.7rem;color:#000;">Change below</span>
+           </div>
+           <div style="display:flex;gap:0.5rem;margin-top:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}" style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">UPDATE</button></div>`
+        : `<div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;font-size:0.85rem;font-weight:700;">${top5Warning}</div>
+           <div style="display:flex;gap:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" placeholder="Search golfer..." style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#FFD700;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">LOCK IN</button></div>`;
+    }
   } else {
     pickHtml = `<button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.75rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
   }
@@ -1383,8 +1387,21 @@ async function loadAdminGolfResults() {
       </tr>`).join('');
       const pickIds = picks.map(p=>p.id);
       const pickGolfers = picks.map(p=>p.picked_golfer);
+      const top5Inputs = (t.predicted_top5 || []).length === 0 ? `
+        <div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;">
+          <div style="font-size:0.75rem;font-weight:700;margin-bottom:0.5rem;">ADD PREDICTED TOP 5</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.25rem">
+            <input type="text" id="top5-1-${t.id}" placeholder="#1" style="padding:0.3rem;border:2px solid #000;font-size:0.8rem;"/>
+            <input type="text" id="top5-2-${t.id}" placeholder="#2" style="padding:0.3rem;border:2px solid #000;font-size:0.8rem;"/>
+            <input type="text" id="top5-3-${t.id}" placeholder="#3" style="padding:0.3rem;border:2px solid #000;font-size:0.8rem;"/>
+            <input type="text" id="top5-4-${t.id}" placeholder="#4" style="padding:0.3rem;border:2px solid #000;font-size:0.8rem;"/>
+            <input type="text" id="top5-5-${t.id}" placeholder="#5" style="padding:0.3rem;border:2px solid #000;font-size:0.8rem;"/>
+          </div>
+          <button onclick="adminAddTop5(${t.id})" style="margin-top:0.5rem;background:#000;color:#FFD700;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">SAVE TOP 5</button>
+        </div>` : '';
       return `<div style="margin-bottom:1.25rem">
         <div style="font-weight:700;margin-bottom:0.5rem"> ${t.name}${multLabel}</div>
+        ${top5Inputs}
         <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">
           <button onclick="espnAutoFill(${t.id},[${pickIds}],${JSON.stringify(pickGolfers).replace(/"/g,"'")})" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">AUTO-FILL FROM ESPN</button>
           <button onclick="toggleLivePanel('live-${t.id}')" style="background:#fff;color:#000;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">SHOW LEADERBOARD</button>
@@ -1485,6 +1502,23 @@ async function adminSubmitGolfResults(tournamentId, pickIds) {
   }
   try { await api(`/golf/tournaments/${tournamentId}/results`, { method: 'PUT', body: { results } }); toast(' Golf results saved!'); loadAdminGolfResults(); loadGolfLeaderboard(); if (state.currentPage === 'golf') loadGolfTournaments(); }
   catch (e) { toast(e.message, 'error'); }
+}
+
+async function adminAddTop5(tournamentId) {
+  const top5 = [
+    document.getElementById('top5-1-' + tournamentId).value.trim(),
+    document.getElementById('top5-2-' + tournamentId).value.trim(),
+    document.getElementById('top5-3-' + tournamentId).value.trim(),
+    document.getElementById('top5-4-' + tournamentId).value.trim(),
+    document.getElementById('top5-5-' + tournamentId).value.trim()
+  ].filter(g => g);
+  if (top5.length === 0) return toast('Enter at least one golfer', 'error');
+  try {
+    await api(`/golf/tournaments/${tournamentId}/top5`, { method: 'PUT', body: { predicted_top5: top5 } });
+    toast(' Top 5 saved!');
+    loadAdminGolfResults();
+    if (state.currentPage === 'golf') loadGolfTournaments();
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 async function adminDeleteTournament(id) {
