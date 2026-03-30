@@ -701,8 +701,40 @@ async function doRegister() {
   const email    = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   if (!username || !email || !password) return toast('Please fill in all fields', 'error');
-  try { const { token, user } = await api('/auth/register', { method: 'POST', body: { username, email, password } }); saveSession(token, user); }
+  try { const { token, user } = await api('/auth/register', { method: 'POST', body: { username, email, password } }); saveSession(token, user); showWelcomePopup(); }
   catch (e) { toast(e.message, 'error'); }
+}
+
+function showWelcomePopup() {
+  const overlay = document.createElement('div');
+  overlay.id = 'welcome-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  overlay.innerHTML = `
+    <div style="background:#fff;border:3px solid #000;box-shadow:8px 8px 0 #000;padding:2rem;max-width:500px;max-height:90vh;overflow-y:auto;text-align:center;">
+      <div style="background:#FFD700;border:2px solid #000;padding:1rem;font-size:1.5rem;font-weight:900;margin-bottom:1.5rem;">WELCOME TO THE BOYS PICKS!</div>
+      <div style="text-align:left;line-height:1.8;font-size:0.95rem;">
+        <p style="font-weight:700;margin-bottom:0.5rem;">Here's how it works:</p>
+        <p style="margin-bottom:1rem;"><span style="background:#FFD700;padding:2px 6px;border:1px solid #000;font-weight:700;">PGA GOLF</span> - Each week, pick a golfer to win. You earn points based on how they finish:</p>
+        <ul style="margin-left:1.5rem;margin-bottom:1rem;">
+          <li>Winner: 15pts (more for Majors/Signature events)</li>
+          <li>Top 5: 10pts</li>
+          <li>Top 10: 8pts</li>
+          <li>Top 20: 4pts</li>
+          <li>Made Cut: 1pt</li>
+        </ul>
+        <p style="margin-bottom:0.5rem;"><strong>Important:</strong> You must pick someone OUTSIDE the predicted Top 5!</p>
+        <p style="margin-bottom:1rem;"><span style="background:#1a1a1a;color:#fff;padding:2px 6px;border:1px solid #000;font-weight:700;">EPL SOCCER</span> - Predict the scores for 3 games each week:</p>
+        <ul style="margin-left:1.5rem;margin-bottom:1rem;">
+          <li>Exact score: 3pts per game</li>
+          <li>Correct result (W/D/L): 1pt per game</li>
+        </ul>
+        <p style="background:#f0f0f0;border:2px solid #000;padding:0.75rem;font-weight:700;text-align:center;">Pick deadline is 1 hour before start time!</p>
+        <p style="margin-top:1.5rem;text-align:center;"><strong>First to register becomes Admin!</strong></p>
+      </div>
+      <button onclick="document.getElementById('welcome-overlay').remove()" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:4px 4px 0 #000;padding:0.75rem 2rem;font-size:1rem;font-weight:900;cursor:pointer;margin-top:1rem;">LET'S GO!</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
 }
 function saveSession(token, user) {
   state.token = token; state.user = user;
