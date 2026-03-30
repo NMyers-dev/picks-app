@@ -21,7 +21,7 @@ function getDb() {
 
 function initDb() {
   try {
-    const dbPath = process.env.DB_PATH || 'picks.json';
+    const dbPath = process.env.DB_PATH || '/app/data/picks.json';
     const adapter = new FileSync(dbPath);
     db = low(adapter);
     
