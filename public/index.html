@@ -971,17 +971,30 @@ function renderTournamentCard(t, isActive) {
         ? (() => {
             const myImg = getGolferImg(t.my_pick.picked_golfer) || defaultImg;
             const myImgStyle = getGolferImg(t.my_pick.picked_golfer) ? '' : 'opacity:0.5;';
-            return `<div style="margin-top:0.75rem;padding:0.6rem;background:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;display:flex;align-items:center;gap:0.5rem;">
-             <span style="font-weight:700;">Your pick: </span><img src="${myImg}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;">${t.my_pick.picked_golfer}</span>
-             <span style="margin-left:auto;font-size:0.7rem;color:#000;">Change below</span>
-           </div>
-           <div style="display:flex;gap:0.5rem;margin-top:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}" style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">UPDATE</button></div>`;
+            const pickedDate = t.my_pick.created_at ? new Date(t.my_pick.created_at).toLocaleString() : '';
+            return `<div style="margin-top:0.75rem;padding:0.75rem;background:#2ecc71;border:2px solid #000;box-shadow:3px 3px 0 #000;">
+             <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+               <span style="font-weight:700;font-size:0.9rem;">LOCKED IN:</span><img src="${myImg}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;font-size:1rem;">${t.my_pick.picked_golfer}</span>
+             </div>
+             <div style="font-size:0.7rem;color:#000;">Picked on ${pickedDate}</div>
+           </div>`;
           })()
         : `<div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;font-size:0.85rem;font-weight:700;">${top5Warning}</div>
            <div style="display:flex;gap:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" placeholder="Search golfer..." style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#FFD700;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">LOCK IN</button></div>`;
     }
   } else {
-    pickHtml = `<button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.75rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
+    const defaultImg = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0yMSAxNnY0Ii8+PC9zdmc+';
+    pickHtml = t.my_pick
+      ? (() => {
+          const myImg = getGolferImg(t.my_pick.picked_golfer) || defaultImg;
+          const myImgStyle = getGolferImg(t.my_pick.picked_golfer) ? '' : 'opacity:0.5;';
+          const pts = t.my_pick.points_earned || 0;
+          const result = t.my_pick.result_category ? ` | ${t.my_pick.result_category.toUpperCase()} (${pts}pts)` : '';
+          return `<div style="margin-top:0.75rem;padding:0.6rem;background:#f0f0f0;border:2px solid #000;display:flex;align-items:center;gap:0.5rem;">
+            <span style="font-weight:700;">Your pick:</span><img src="${myImg}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;">${t.my_pick.picked_golfer}</span><span style="font-size:0.8rem;font-weight:700;">${result}</span>
+          </div><button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.5rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
+        })()
+      : `<button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.75rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
   }
   return `<div style="background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:1rem;margin-bottom:1rem;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">

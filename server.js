@@ -195,7 +195,8 @@ app.get('/api/golf/tournaments', (req, res) => {
       my_pick: pickMap[t.id] ? {
         picked_golfer: pickMap[t.id].picked_golfer,
         result_category: pickMap[t.id].result_category,
-        points_earned: pickMap[t.id].points_earned
+        points_earned: pickMap[t.id].points_earned,
+        created_at: pickMap[t.id].created_at
       } : null
     })));
   } catch (e) {
