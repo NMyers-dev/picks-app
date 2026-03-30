@@ -540,17 +540,11 @@
         <!-- Right col -->
         <div>
           <div style="margin-bottom:1.25rem;padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;">
-            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#FFD700;padding:0.5rem;border:2px solid #000;display:flex;justify-content:space-between;align-items:center;">
-              <span>GOLF RESULTS</span>
-              <button onclick="deleteAllGolfTournaments()" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE ALL PREVIOUS</button>
-            </div>
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#FFD700;padding:0.5rem;border:2px solid #000;">GOLF TOURNAMENTS</div>
             <div id="a-golf-results-list"><div style="padding:1rem;">Loading...</div></div>
           </div>
           <div style="margin-bottom:1.25rem;padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;" id="a-epl-results">
-            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#1a1a1a;color:#fff;padding:0.5rem;border:2px solid #000;display:flex;justify-content:space-between;align-items:center;">
-              <span>EPL RESULTS</span>
-              <button onclick="deleteAllSoccerWeeks()" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE ALL PREVIOUS</button>
-            </div>
+            <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#1a1a1a;color:#fff;padding:0.5rem;border:2px solid #000;">EPL WEEKS</div>
             <div id="a-soccer-results-list"><div style="padding:1rem;">Loading...</div></div>
           </div>
           <div style="padding:1rem;background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;">
@@ -1400,7 +1394,13 @@ async function loadAdminGolfResults() {
           <button onclick="adminAddTop5(${t.id})" style="margin-top:0.5rem;background:#000;color:#FFD700;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">SAVE TOP 5</button>
         </div>` : '';
       return `<div style="margin-bottom:1.25rem">
-        <div style="font-weight:700;margin-bottom:0.5rem"> ${t.name}${multLabel}</div>
+        <div style="font-weight:700;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center;"> 
+          <span>${t.name}${multLabel}</span>
+          <div style="display:flex;gap:0.25rem">
+            <button onclick="showEditGolf(${t.id},'${t.name}','${t.course || ''}','${t.event_type}')" style="background:#3498db;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">EDIT</button>
+            <button onclick="if(confirm('Are you sure you want to delete this tournament?')) adminDeleteTournament(${t.id})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE</button>
+          </div>
+        </div>
         ${top5Inputs}
         <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;flex-wrap:wrap">
           <button onclick="espnAutoFill(${t.id},[${pickIds}],${JSON.stringify(pickGolfers).replace(/"/g,"'")})" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">AUTO-FILL FROM ESPN</button>
@@ -1410,7 +1410,6 @@ async function loadAdminGolfResults() {
         <table class="results-table"><thead><tr><th>Player</th><th>Pick</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table>
         <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
           <button onclick="adminSubmitGolfResults(${t.id},[${pickIds}])" style="background:#FFD700;color:#000;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">SAVE RESULTS</button>
-          <button onclick="adminDeleteTournament(${t.id})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">DELETE</button>
         </div>
       </div>`;
     }));
@@ -1549,14 +1548,19 @@ async function loadAdminSoccerResults() {
       const homeTeams = w.games.map(g=>g.home_team);
       const awayTeams = w.games.map(g=>g.away_team);
       return `<div style="margin-bottom:1.25rem">
-        <div style="font-weight:700;margin-bottom:0.5rem"> ${w.week_name}</div>
+        <div style="font-weight:700;margin-bottom:0.5rem;display:flex;justify-content:space-between;align-items:center;">
+          <span>${w.week_name}</span>
+          <div style="display:flex;gap:0.25rem">
+            <button onclick="showEditSoccer(${w.id},'${w.week_name}','${w.deadline || ''}')" style="background:#3498db;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">EDIT</button>
+            <button onclick="if(confirm('Are you sure you want to delete this week?')) adminDeleteSoccerWeek(${w.id})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE</button>
+          </div>
+        </div>
         <div style="margin-bottom:0.5rem">
           <button onclick="eplAutoFill([${gameIds}],${JSON.stringify(homeTeams).replace(/"/g,"'")},${JSON.stringify(awayTeams).replace(/"/g,"'")})" style="background:#000;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">AUTO-FILL EPL SCORES</button>
         </div>
         ${gamesHtml}
         <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
           <button onclick="adminSubmitSoccerResults(${w.id},[${gameIds}])" style="background:#1a1a1a;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">SAVE RESULTS</button>
-          <button onclick="adminDeleteSoccerWeek(${w.id})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.3rem 0.6rem;font-size:0.75rem;font-weight:700;cursor:pointer;">DELETE</button>
         </div>
       </div>`;
     }).join('<hr class="divider">');
@@ -1718,6 +1722,34 @@ async function saveSettings() {
 // 
 // Init
 // 
+async function showEditGolf(id, name, course, eventType) {
+  const newName = prompt('Tournament Name:', name);
+  if (newName === null) return;
+  const newCourse = prompt('Course:', course);
+  if (newCourse === null) return;
+  const newEventType = prompt('Event Type (regular, signature, major):', eventType);
+  if (newEventType === null) return;
+  try {
+    await api(`/golf/tournaments/${id}`, { method: 'PUT', body: { name: newName, course: newCourse, event_type: newEventType } });
+    toast('Tournament updated!');
+    loadAdminGolfResults();
+    if (state.currentPage === 'golf') loadGolfTournaments();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function showEditSoccer(id, weekName, deadline) {
+  const newName = prompt('Week Name:', weekName);
+  if (newName === null) return;
+  const newDeadline = prompt('Deadline (YYYY-MM-DDTHH:MM):', deadline ? deadline.slice(0,16) : '');
+  if (newDeadline === null) return;
+  try {
+    await api(`/soccer/weeks/${id}`, { method: 'PUT', body: { week_name: newName, deadline: newDeadline || null } });
+    toast('Week updated!');
+    loadAdminSoccerResults();
+    if (state.currentPage === 'soccer') loadSoccerWeeks();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
 function init() {
   const token = localStorage.getItem('token');
   const user  = localStorage.getItem('user');

@@ -197,6 +197,16 @@ app.post('/api/golf/tournaments', auth, adminOnly, (req, res) => {
   res.json({ id: tournament.id });
 });
 
+app.put('/api/golf/tournaments/:id', auth, adminOnly, (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, course, event_type } = req.body || {};
+  if (name !== undefined) db.get('golf_tournaments').find({ id }).assign({ name: name.trim() }).write();
+  if (course !== undefined) db.get('golf_tournaments').find({ id }).assign({ course: course?.trim() || null }).write();
+  if (event_type !== undefined && ['regular','signature','major'].includes(event_type)) 
+    db.get('golf_tournaments').find({ id }).assign({ event_type }).write();
+  res.json({ success: true });
+});
+
 app.delete('/api/golf/tournaments/:id', auth, adminOnly, (req, res) => {
   const id = parseInt(req.params.id);
   db.get('golf_picks').remove({ tournament_id: id }).write();
@@ -357,6 +367,14 @@ app.post('/api/soccer/weeks', auth, superAdminOnly, (req, res) => {
   });
 
   res.json({ id: week.id });
+});
+
+app.put('/api/soccer/weeks/:id', auth, superAdminOnly, (req, res) => {
+  const id = parseInt(req.params.id);
+  const { week_name, deadline } = req.body || {};
+  if (week_name !== undefined) db.get('soccer_weeks').find({ id }).assign({ week_name: week_name.trim() }).write();
+  if (deadline !== undefined) db.get('soccer_weeks').find({ id }).assign({ deadline: deadline || null }).write();
+  res.json({ success: true });
 });
 
 app.delete('/api/soccer/weeks/:id', auth, superAdminOnly, (req, res) => {
