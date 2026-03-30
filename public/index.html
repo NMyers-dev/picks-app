@@ -1861,22 +1861,27 @@ async function showEditGolf(id, name, course, eventType) {
   });
 }
 
-async function showEditGolfTop5(id, top5Csv, tournamentName) {
+function showEditGolfTop5(id, top5Csv, tournamentName) {
   const top5Array = top5Csv ? top5Csv.split(',') : ['','','','',''];
   const overlay = document.createElement('div');
+  overlay.id = 'edit-top5-overlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
   overlay.innerHTML = `
-    <div style="background:#fff;border:3px solid #000;box-shadow:8px 8px 0 #000;padding:1.5rem;max-width:450px;text-align:center;">
+    <div style="background:#fff;border:3px solid #000;box-shadow:8px 8px 0 #000;padding:1.5rem;max-width:450px;width:100%;text-align:center;">
       <div style="background:#9b59b6;border:2px solid #000;padding:0.75rem;font-size:1.1rem;font-weight:900;margin-bottom:1rem;color:#fff;">EDIT TOP 5 - ${tournamentName}</div>
       <div style="text-align:left;margin-bottom:1rem;">
-        <div style="margin-bottom:0.5rem;"><label style="display:block;font-size:0.75rem;font-weight:700;">Golfer #1</label><input type="text" id="edit-top5-1" list="golfer-list" value="${top5Array[0] || ''}" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
-        <div style="margin-bottom:0.5rem;"><label style="display:block;font-size:0.75rem;font-weight:700;">Golfer #2</label><input type="text" id="edit-top5-2" list="golfer-list" value="${top5Array[1] || ''}" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
-        <div style="margin-bottom:0.5rem;"><label style="display:block;font-size:0.75rem;font-weight:700;">Golfer #3</label><input type="text" id="edit-top5-3" list="golfer-list" value="${top5Array[2] || ''}" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
-        <div style="margin-bottom:0.5rem;"><label style="display:block;font-size:0.75rem;font-weight:700;">Golfer #4</label><input type="text" id="edit-top5-4" list="golfer-list" value="${top5Array[3] || ''}" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
-        <div style="margin-bottom:0.5rem;"><label style="display:block;font-size:0.75rem;font-weight:700;">Golfer #5</label><input type="text" id="edit-top5-5" list="golfer-list" value="${top5Array[4] || ''}" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/></div>
+        <div style="margin-bottom:0.5rem;"><label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">PREDICTED TOP 5</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+            <input type="text" id="edit-top5-1" placeholder="#1 favourite" list="golfer-list" value="${top5Array[0] || ''}" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+            <input type="text" id="edit-top5-2" placeholder="#2" list="golfer-list" value="${top5Array[1] || ''}" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+            <input type="text" id="edit-top5-3" placeholder="#3" list="golfer-list" value="${top5Array[2] || ''}" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+            <input type="text" id="edit-top5-4" placeholder="#4" list="golfer-list" value="${top5Array[3] || ''}" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+            <input type="text" id="edit-top5-5" placeholder="#5" list="golfer-list" value="${top5Array[4] || ''}" style="padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+          </div>
+        </div>
       </div>
       <div style="display:flex;gap:0.5rem;justify-content:center;">
-        <button onclick="this.closest('[style*=&quot;position:fixed&quot;]').remove()" style="background:#fff;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">CANCEL</button>
+        <button onclick="document.getElementById('edit-top5-overlay').remove()" style="background:#fff;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">CANCEL</button>
         <button onclick="saveEditGolfTop5(${id})" style="background:#9b59b6;color:#fff;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">SAVE</button>
       </div>
     </div>
@@ -1884,15 +1889,14 @@ async function showEditGolfTop5(id, top5Csv, tournamentName) {
   document.body.appendChild(overlay);
 }
 
-async function saveEditGolfTop5(id) {
+function saveEditGolfTop5(id) {
   const top5 = ['edit-top5-1','edit-top5-2','edit-top5-3','edit-top5-4','edit-top5-5'].map(i => document.getElementById(i).value.trim()).filter(g => g);
-  document.querySelector('[style*="position:fixed"]')?.remove();
-  try {
-    await api(`/golf/tournaments/${id}/top5`, { method: 'PUT', body: { predicted_top5: top5 } });
+  document.getElementById('edit-top5-overlay').remove();
+  api(`/golf/tournaments/${id}/top5`, { method: 'PUT', body: { predicted_top5: top5 } }).then(() => {
     toast('Top 5 updated!');
     loadAdminGolfResults();
     if (state.currentPage === 'golf') loadGolfTournaments();
-  } catch (e) { toast(e.message, 'error'); }
+  }).catch(e => { toast(e.message, 'error'); });
 }
 
 async function showEditSoccer(id, weekName, deadline) {
