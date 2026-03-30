@@ -178,8 +178,6 @@ app.get('/api/golf/tournaments', (req, res) => {
 app.post('/api/golf/tournaments', auth, adminOnly, (req, res) => {
   const { name, course, start_date, deadline, predicted_top5, event_type } = req.body || {};
   if (!name?.trim()) return res.status(400).json({ error: 'Tournament name required' });
-  if (!Array.isArray(predicted_top5) || predicted_top5.length !== 5 || predicted_top5.some(g => !g?.trim()))
-    return res.status(400).json({ error: 'Exactly 5 predicted top golfers required' });
   if (!['regular','signature','major'].includes(event_type))
     return res.status(400).json({ error: 'Event type must be regular, signature, or major' });
 
@@ -189,7 +187,7 @@ app.post('/api/golf/tournaments', auth, adminOnly, (req, res) => {
     course: course?.trim() || null,
     start_date: start_date || null,
     deadline: deadline || null,
-    predicted_top5: predicted_top5.map(g => g.trim()),
+    predicted_top5: (predicted_top5 || []).filter(g => g?.trim()),
     event_type: event_type || 'regular',
     results_entered: false,
     created_at: now()
@@ -246,7 +244,8 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
   if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
   if (tournament.results_entered) return res.status(400).json({ error: 'Results already entered — picks are locked' });
 
-  if (tournament.predicted_top5.some(g => g.toLowerCase() === picked_golfer.trim().toLowerCase()))
+  const top5 = tournament.predicted_top5 || [];
+  if (top5.length > 0 && top5.some(g => g.toLowerCase() === picked_golfer.trim().toLowerCase()))
     return res.status(400).json({ error: `${picked_golfer.trim()} is in the predicted Top 5 — you must pick someone else!` });
 
   const existing = db.get('golf_picks').find({ tournament_id: tournamentId, user_id: req.user.id }).value();
