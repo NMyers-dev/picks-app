@@ -944,9 +944,10 @@ function togglePast(btn, id) {
 
 function renderTournamentCard(t, isActive) {
   const top5Array = t.predicted_top5 || [];
+  const defaultImg = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0yMSAxNnY0Ii8+PC9zdmc+';
   const top5 = top5Array.length > 0 ? top5Array.map(g => {
     const img = getGolferImg(g);
-    return img ? `<span style="background:#fff;border:2px solid #000;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:700;"><img src="${img}" style="width:18px;height:18px;border-radius:50%;vertical-align:middle;margin-right:4px"/>${g}</span>` : `<span style="background:#fff;border:2px solid #000;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:700;">${g}</span>`;
+    return `<span style="background:#fff;border:2px solid #000;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><img src="${img || defaultImg}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;${img ? '' : 'opacity:0.5;'}"/>${g}</span>`;
   }).join('') : '<span style="font-size:0.8rem;color:#666;font-style:italic;">Top 5 to be added soon</span>';
   const deadline = t.deadline ? ` | Deadline: ${new Date(t.deadline).toLocaleDateString()}` : '';
   const eventType = t.event_type === 'major' ? ' | Major (x1.5)' : t.event_type === 'signature' ? ' | Signature (x1.25)' : '';
@@ -956,10 +957,13 @@ function renderTournamentCard(t, isActive) {
       pickHtml = `<div style="margin-top:0.75rem;padding:0.75rem;background:#f0f0f0;border:2px solid #000;font-size:0.85rem;font-weight:700;text-align:center;">Picks will open once Top 5 are added</div>`;
     } else {
       const top5Warning = 'Pick a golfer NOT in the predicted Top 5';
+      const defaultImg = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0yMSAxNnY0Ii8+PC9zdmc+';
+      const myImg = getGolferImg(t.my_pick.picked_golfer) || defaultImg;
+      const myImgStyle = getGolferImg(t.my_pick.picked_golfer) ? '' : 'opacity:0.5;';
       pickHtml = t.my_pick
-        ? `<div style="margin-top:0.75rem;padding:0.6rem;background:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;">
-             <span style="font-weight:700;">Your pick: </span><span style="font-weight:900;">${getGolferImg(t.my_pick.picked_golfer) ? '<img src="'+getGolferImg(t.my_pick.picked_golfer)+'" style="width:20px;height:20px;border-radius:50%;vertical-align:middle;margin-right:4px"/>' : ''} ${t.my_pick.picked_golfer}</span>
-             <span style="float:right;font-size:0.7rem;color:#000;">Change below</span>
+        ? `<div style="margin-top:0.75rem;padding:0.6rem;background:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;display:flex;align-items:center;gap:0.5rem;">
+             <span style="font-weight:700;">Your pick: </span><img src="${myImg}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;">${t.my_pick.picked_golfer}</span>
+             <span style="margin-left:auto;font-size:0.7rem;color:#000;">Change below</span>
            </div>
            <div style="display:flex;gap:0.5rem;margin-top:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" value="${t.my_pick.picked_golfer}" style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">UPDATE</button></div>`
         : `<div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;font-size:0.85rem;font-weight:700;">${top5Warning}</div>
@@ -991,14 +995,16 @@ async function submitGolfPick(tournamentId) {
 async function loadGolfPicks(tournamentId, btn) {
   const el = document.getElementById('golf-picks-' + tournamentId);
   if (el.innerHTML) { el.innerHTML = ''; return; }
+  const defaultImg = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0yMSAxNnY0Ii8+PC9zdmc+';
   try {
     const picks = await api(`/golf/tournaments/${tournamentId}/picks`);
     if (!picks.length) { el.innerHTML = '<p style="font-size:0.85rem;margin-top:0.5rem;">No picks yet.</p>'; return; }
     el.innerHTML = `<div style="margin-top:0.75rem;border:2px solid #000;">${picks.map(p => {
-      const img = getGolferImg(p.picked_golfer);
+      const img = getGolferImg(p.picked_golfer) || defaultImg;
+      const imgStyle = getGolferImg(p.picked_golfer) ? '' : 'opacity:0.5;';
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem;border-bottom:2px solid #000;${p.result_category?'background:#fff':''}">
         <span style="font-weight:700;">${uname(p.username)}</span>
-        <span style="font-weight:900;color:#000;">${img ? '<img src="'+img+'" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;margin-right:4px"/>' : ''} ${p.picked_golfer}</span>
+        <span style="font-weight:900;color:#000;display:flex;align-items:center;gap:6px;"><img src="${img}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;${imgStyle}"/> ${p.picked_golfer}</span>
         ${p.result_category ? `<span style="background:${p.result_category==='winner'?'#FFD700':p.result_category==='top5'?'#87CEEB':p.result_category==='top10'?'#90EE90':'#ccc'};border:2px solid #000;padding:2px 8px;font-size:0.75rem;font-weight:700;">${formatResult(p.result_category)} ${p.points_earned}pts</span>` : ''}
       </div>`;
     }).join('')}</div>`;
