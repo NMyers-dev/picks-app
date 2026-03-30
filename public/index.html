@@ -356,13 +356,11 @@
       <button class="nb-btn" id="nav-home" onclick="showPage('home')" style="background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">HOME</button>
       <button class="nb-btn" id="nav-golf" onclick="showPage('golf')" style="background: #FFD700; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">PGA</button>
       <button class="nb-btn" id="nav-soccer" onclick="showPage('soccer')" style="background: #1a1a1a; color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">EPL</button>
-      <button class="nb-btn" id="nav-account" onclick="showPage('account')" style="background: #87CEEB; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">ACCOUNT</button>
-      <button class="nb-btn" id="nav-admin" onclick="showPage('admin')" style="display:none; background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">ADMIN</button>
     </nav>
     <div style="display: flex; align-items: center; gap: 0.5rem;">
-      <span id="admin-badge" style="display:none; background: #e74c3c; color: #fff; padding: 2px 8px; border: 2px solid #000; font-weight: 700; font-size: 0.7rem;">ADMIN</span>
       <span id="username-display" style="background: #f0f0f0; padding: 4px 12px; border: 2px solid #000; font-weight: 600;"></span>
       <button class="nb-btn" onclick="showPage('account')" style="background: #87CEEB; border: 2px solid #000; box-shadow: 2px 2px 0 #000; font-size: 0.75rem; padding: 4px 8px;">ACCOUNT</button>
+      <button class="nb-btn" id="nav-admin" onclick="showPage('admin')" style="display:none; background: #e74c3c; color: #fff; border: 2px solid #000; box-shadow: 2px 2px 0 #000; font-size: 0.75rem; padding: 4px 8px;">ADMIN</button>
       <button class="nb-btn" onclick="doLogout()" style="background: #fff; border: 2px solid #000; box-shadow: 2px 2px 0 #000; font-size: 0.75rem; padding: 4px 8px;">LOGOUT</button>
     </div>
   </header>
@@ -803,7 +801,6 @@ function launchApp() {
   document.getElementById('app-screen').style.display  = 'flex';
   document.getElementById('username-display').innerHTML = uname(state.user.username);
   if (state.user.is_admin) {
-    document.getElementById('admin-badge').style.display = 'inline-block';
     document.getElementById('nav-admin').style.display   = 'inline-flex';
   }
   showPage('home');
