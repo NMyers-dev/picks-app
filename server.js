@@ -155,6 +155,34 @@ app.put('/api/users/:id/admin', auth, adminOnly, (req, res) => {
   res.json({ success: true });
 });
 
+app.put('/api/users/:id', auth, (req, res) => {
+  const targetId = parseInt(req.params.id);
+  if (targetId !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
+  const { username } = req.body || {};
+  if (!username?.trim()) return res.status(400).json({ error: 'Username required' });
+  db.get('users').find({ id: targetId }).assign({ username: username.trim() }).write();
+  res.json({ success: true });
+});
+
+app.put('/api/users/:id/password', auth, (req, res) => {
+  const targetId = parseInt(req.params.id);
+  if (targetId !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
+  const { password } = req.body || {};
+  if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  const hashed = bcrypt.hashSync(password, 10);
+  db.get('users').find({ id: targetId }).assign({ password: hashed }).write();
+  res.json({ success: true });
+});
+
+app.delete('/api/users/:id', auth, (req, res) => {
+  const targetId = parseInt(req.params.id);
+  if (targetId !== req.user.id) return res.status(403).json({ error: 'Not authorized' });
+  db.get('golf_picks').remove({ user_id: targetId }).write();
+  db.get('soccer_picks').remove({ user_id: targetId }).write();
+  db.get('users').remove({ id: targetId }).write();
+  res.json({ success: true });
+});
+
 // ─── Golf Tournaments ─────────────────────────────────────────────────────────
 app.get('/api/golf/tournaments', (req, res) => {
   try {

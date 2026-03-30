@@ -356,11 +356,13 @@
       <button class="nb-btn" id="nav-home" onclick="showPage('home')" style="background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">HOME</button>
       <button class="nb-btn" id="nav-golf" onclick="showPage('golf')" style="background: #FFD700; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">PGA</button>
       <button class="nb-btn" id="nav-soccer" onclick="showPage('soccer')" style="background: #1a1a1a; color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">EPL</button>
+      <button class="nb-btn" id="nav-account" onclick="showPage('account')" style="background: #87CEEB; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">ACCOUNT</button>
       <button class="nb-btn" id="nav-admin" onclick="showPage('admin')" style="display:none; background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">ADMIN</button>
     </nav>
-    <div style="display: flex; align-items: center; gap: 0.75rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
       <span id="admin-badge" style="display:none; background: #e74c3c; color: #fff; padding: 2px 8px; border: 2px solid #000; font-weight: 700; font-size: 0.7rem;">ADMIN</span>
       <span id="username-display" style="background: #f0f0f0; padding: 4px 12px; border: 2px solid #000; font-weight: 600;"></span>
+      <button class="nb-btn" onclick="showPage('account')" style="background: #87CEEB; border: 2px solid #000; box-shadow: 2px 2px 0 #000; font-size: 0.75rem; padding: 4px 8px;">ACCOUNT</button>
       <button class="nb-btn" onclick="doLogout()" style="background: #fff; border: 2px solid #000; box-shadow: 2px 2px 0 #000; font-size: 0.75rem; padding: 4px 8px;">LOGOUT</button>
     </div>
   </header>
@@ -551,6 +553,55 @@
             <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;background:#87CEEB;padding:0.5rem;border:2px solid #000;">USER MANAGEMENT</div>
             <div id="a-users-list"><div style="padding:1rem;">Loading...</div></div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!--  Account Page  -->
+    <div class="page" id="page-account" style="display:none">
+      <div style="max-width: 500px; margin: 0 auto;">
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #e74c3c; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+          <div style="font-size: 1.5rem; font-weight: 900; color: #fff;">MY ACCOUNT</div>
+        </div>
+        
+        <div style="padding: 1.5rem; background: #fff; border: 3px solid #000; box-shadow: 4px 4px 0 #000; margin-bottom: 1rem;">
+          <div style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem; background: #FFD700; padding: 0.5rem; border: 2px solid #000;">EDIT PROFILE</div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">USERNAME</label>
+            <input type="text" id="account-username" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">EMAIL</label>
+            <input type="email" id="account-email" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;" disabled/>
+          </div>
+          
+          <button onclick="updateProfile()" style="width:100%;background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.75rem;font-size:1rem;font-weight:900;cursor:pointer;margin-bottom:1rem;">SAVE CHANGES</button>
+        </div>
+        
+        <div style="padding: 1.5rem; background: #fff; border: 3px solid #000; box-shadow: 4px 4px 0 #000; margin-bottom: 1rem;">
+          <div style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem; background: #1a1a1a; color: #fff; padding: 0.5rem; border: 2px solid #000;">CHANGE PASSWORD</div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">NEW PASSWORD</label>
+            <input type="password" id="account-new-password" placeholder="Min. 6 characters" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display:block;font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">CONFIRM PASSWORD</label>
+            <input type="password" id="account-confirm-password" placeholder="Confirm new password" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+          </div>
+          
+          <button onclick="changePassword()" style="width:100%;background:#1a1a1a;color:#fff;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.75rem;font-size:1rem;font-weight:900;cursor:pointer;">CHANGE PASSWORD</button>
+        </div>
+        
+        <div style="padding: 1.5rem; background: #fff; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
+          <div style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem; background: #e74c3c; color: #fff; padding: 0.5rem; border: 2px solid #000;">DANGER ZONE</div>
+          
+          <p style="font-size: 0.85rem; margin-bottom: 1rem; color: #666;">Once you delete your account, there is no going back. Please be certain.</p>
+          
+          <button onclick="deleteMyAccount()" style="width:100%;background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.75rem;font-size:1rem;font-weight:900;cursor:pointer;">DELETE MY ACCOUNT</button>
         </div>
       </div>
     </div>
@@ -758,6 +809,89 @@ function launchApp() {
   showPage('home');
 }
 
+function showModal(title, message, buttons) {
+  const overlay = document.createElement('div');
+  overlay.id = 'custom-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  let buttonsHtml = '';
+  buttons.forEach((btn, i) => {
+    buttonsHtml += `<button onclick="document.getElementById('custom-modal-overlay').remove();btn.callback${i}()" style="background:${btn.color||'#000'};color:#fff;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">${btn.label}</button>`;
+  });
+  overlay.innerHTML = `
+    <div style="background:#fff;border:3px solid #000;box-shadow:8px 8px 0 #000;padding:1.5rem;max-width:400px;text-align:center;">
+      <div style="background:#FFD700;border:2px solid #000;padding:0.75rem;font-size:1.1rem;font-weight:900;margin-bottom:1rem;">${title}</div>
+      <div style="font-size:0.95rem;margin-bottom:1.5rem;line-height:1.5;">${message}</div>
+      <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">${buttonsHtml}</div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  buttons.forEach((btn, i) => overlay.querySelectorAll('button')[i].onclick = () => { overlay.remove(); btn.callback(); });
+}
+
+function showPromptModal(title, label, defaultValue, callback) {
+  const overlay = document.createElement('div');
+  overlay.id = 'custom-prompt-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+  overlay.innerHTML = `
+    <div style="background:#fff;border:3px solid #000;box-shadow:8px 8px 0 #000;padding:1.5rem;max-width:400px;text-align:center;">
+      <div style="background:#FFD700;border:2px solid #000;padding:0.75rem;font-size:1.1rem;font-weight:900;margin-bottom:1rem;">${title}</div>
+      <div style="text-align:left;margin-bottom:1rem;">
+        <label style="display:block;font-size:0.85rem;font-weight:700;margin-bottom:0.5rem;">${label}</label>
+        <input type="text" id="prompt-input" value="${defaultValue || ''}" style="width:100%;padding:0.5rem;border:2px solid #000;font-weight:600;"/>
+      </div>
+      <div style="display:flex;gap:0.5rem;justify-content:center;">
+        <button onclick="document.getElementById('custom-prompt-overlay').remove()" style="background:#fff;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">CANCEL</button>
+        <button onclick="const val=document.getElementById('prompt-input').value;document.getElementById('custom-prompt-overlay').remove();callback(val)" style="background:#000;color:#FFD700;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">OK</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('prompt-input')?.focus(), 100);
+}
+
+function loadAccountPage() {
+  document.getElementById('account-username').value = state.user.username;
+  document.getElementById('account-email').value = state.user.email;
+}
+
+async function updateProfile() {
+  const username = document.getElementById('account-username').value.trim();
+  if (!username) return toast('Username required', 'error');
+  try {
+    await api(`/users/${state.user.id}`, { method: 'PUT', body: { username } });
+    state.user.username = username;
+    localStorage.setItem('user', JSON.stringify(state.user));
+    document.getElementById('username-display').innerHTML = uname(username);
+    toast('Profile updated!');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+async function changePassword() {
+  const newPass = document.getElementById('account-new-password').value;
+  const confirmPass = document.getElementById('account-confirm-password').value;
+  if (!newPass || newPass.length < 6) return toast('Password must be at least 6 characters', 'error');
+  if (newPass !== confirmPass) return toast('Passwords do not match', 'error');
+  try {
+    await api(`/users/${state.user.id}/password`, { method: 'PUT', body: { password: newPass } });
+    toast('Password changed!');
+    document.getElementById('account-new-password').value = '';
+    document.getElementById('account-confirm-password').value = '';
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function deleteMyAccount() {
+  showModal('DELETE ACCOUNT', 'Are you sure you want to delete your account? This cannot be undone.', [
+    { label: 'CANCEL', callback: () => {}, color: '#000' },
+    { label: 'DELETE', callback: async () => {
+      try {
+        await api(`/users/${state.user.id}`, { method: 'DELETE' });
+        doLogout();
+        toast('Account deleted');
+      } catch (e) { toast(e.message, 'error'); }
+    }, color: '#e74c3c' }
+  ]);
+}
+
 // 
 // Navigation
 // 
@@ -767,13 +901,14 @@ function showPage(page) {
   const pageEl = document.getElementById('page-' + page);
   pageEl.classList.add('active');
   pageEl.style.display = 'block';
-  ['home','golf','soccer','admin'].forEach(p => {
+  ['home','golf','soccer','admin','account'].forEach(p => {
     const btn = document.getElementById('nav-' + p);
-    btn.className = 'nav-btn' + (p === page ? ' active-' + (p === 'home' ? 'golf' : p) : '');
+    if (btn) btn.className = 'nav-btn' + (p === page ? ' active-' + (p === 'home' ? 'golf' : p) : '');
   });
   if (page === 'home')  { loadHomePage(); }
   if (page === 'golf')   { loadGolfTournaments(); loadGolfLeaderboard(); }
   if (page === 'soccer') { loadSoccerWeeks(); loadSoccerLeaderboard(); }
+  if (page === 'account') { loadAccountPage(); }
   if (page === 'admin')  {
     loadAdminGolfResults();
     loadSettings();
@@ -1401,7 +1536,7 @@ async function loadAdminGolfResults() {
           <span>${t.name}${multLabel} <span style="background:${t.results_entered?'#999':'#2ecc71'};color:#fff;padding:1px 6px;font-size:0.65rem;border-radius:4px;">${t.results_entered?'COMPLETE':'ACTIVE'}</span></span>
           <div style="display:flex;gap:0.25rem">
             <button onclick="showEditGolf(${t.id},'${t.name}','${t.course || ''}','${t.event_type}')" style="background:#3498db;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">EDIT</button>
-            <button onclick="if(confirm('Are you sure you want to delete this tournament?')) adminDeleteTournament(${t.id})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE</button>
+            <button onclick="showModal('DELETE TOURNAMENT','Are you sure you want to delete this tournament?',[{label:'CANCEL',color:'#666',callback:()=>{}},{label:'DELETE',color:'#e74c3c',callback:()=>adminDeleteTournament(${t.id})}])" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE</button>
           </div>
         </div>
         <div style="font-size:0.75rem;color:#666;">${t.course || 'No course'} | ${t.start_date || 'No date'}</div>
@@ -1515,9 +1650,10 @@ async function adminAddTop5(tournamentId) {
 }
 
 async function adminDeleteTournament(id) {
-  if (!confirm('Delete this tournament and all its picks?')) return;
-  try { await api(`/golf/tournaments/${id}`, { method: 'DELETE' }); toast('Deleted'); loadAdminGolfResults(); if (state.currentPage === 'golf') loadGolfTournaments(); }
-  catch (e) { toast(e.message, 'error'); }
+  showModal('DELETE TOURNAMENT','Delete this tournament and all its picks?',[{label:'CANCEL',color:'#666',callback:()=>{}},{label:'DELETE',color:'#e74c3c',callback:async()=>{
+    try { await api(`/golf/tournaments/${id}`, { method: 'DELETE' }); toast('Deleted'); loadAdminGolfResults(); if (state.currentPage === 'golf') loadGolfTournaments(); }
+    catch (e) { toast(e.message, 'error'); }
+  }}]);
 }
 
 //  Soccer results with EPL auto-fetch 
@@ -1543,7 +1679,7 @@ async function loadAdminSoccerResults() {
           <span>${w.week_name} <span style="background:${w.results_entered?'#999':'#2ecc71'};color:#fff;padding:1px 6px;font-size:0.65rem;border-radius:4px;">${w.results_entered?'COMPLETE':'ACTIVE'}</span></span>
           <div style="display:flex;gap:0.25rem">
             <button onclick="showEditSoccer(${w.id},'${w.week_name}','${w.deadline || ''}')" style="background:#3498db;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">EDIT</button>
-            <button onclick="if(confirm('Are you sure you want to delete this week?')) adminDeleteSoccerWeek(${w.id})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE</button>
+            <button onclick="showModal('DELETE WEEK','Are you sure you want to delete this week?',[{label:'CANCEL',color:'#666',callback:()=>{}},{label:'DELETE',color:'#e74c3c',callback:()=>adminDeleteSoccerWeek(${w.id})}])" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE</button>
           </div>
         </div>
         ${gamesHtml}
@@ -1631,31 +1767,34 @@ async function adminSubmitSoccerResults(weekId, gameIds) {
 }
 
 async function adminDeleteSoccerWeek(id) {
-  if (!confirm('Delete this week and all picks?')) return;
-  try { await api(`/soccer/weeks/${id}`, { method: 'DELETE' }); toast('Deleted'); loadAdminSoccerResults(); if (state.currentPage === 'soccer') loadSoccerWeeks(); }
-  catch (e) { toast(e.message, 'error'); }
+  showModal('DELETE WEEK','Delete this week and all picks?',[{label:'CANCEL',color:'#666',callback:()=>{}},{label:'DELETE',color:'#e74c3c',callback:async()=>{
+    try { await api(`/soccer/weeks/${id}`, { method: 'DELETE' }); toast('Deleted'); loadAdminSoccerResults(); if (state.currentPage === 'soccer') loadSoccerWeeks(); }
+    catch (e) { toast(e.message, 'error'); }
+  }}]);
 }
 
 async function deleteAllGolfTournaments() {
-  if (!confirm('Delete ALL previous completed golf tournaments and all their picks?')) return;
-  try { 
-    const result = await api('/golf/tournaments', { method: 'DELETE' });
-    toast(`Deleted ${result.deleted} tournaments`);
-    loadAdminGolfResults();
-    if (state.currentPage === 'golf') loadGolfTournaments();
-  }
-  catch (e) { toast(e.message, 'error'); }
+  showModal('DELETE ALL GOLF','Delete ALL previous completed golf tournaments and all their picks?',[{label:'CANCEL',color:'#666',callback:()=>{}},{label:'DELETE ALL',color:'#e74c3c',callback:async()=>{
+    try { 
+      const result = await api('/golf/tournaments', { method: 'DELETE' });
+      toast(`Deleted ${result.deleted} tournaments`);
+      loadAdminGolfResults();
+      if (state.currentPage === 'golf') loadGolfTournaments();
+    }
+    catch (e) { toast(e.message, 'error'); }
+  }}]);
 }
 
 async function deleteAllSoccerWeeks() {
-  if (!confirm('Delete ALL previous completed EPL weeks and all their picks?')) return;
-  try { 
-    const result = await api('/soccer/weeks', { method: 'DELETE' });
-    toast(`Deleted ${result.deleted} weeks`);
-    loadAdminSoccerResults();
-    if (state.currentPage === 'soccer') loadSoccerWeeks();
-  }
-  catch (e) { toast(e.message, 'error'); }
+  showModal('DELETE ALL EPL','Delete ALL previous completed EPL weeks and all their picks?',[{label:'CANCEL',color:'#666',callback:()=>{}},{label:'DELETE ALL',color:'#e74c3c',callback:async()=>{
+    try { 
+      const result = await api('/soccer/weeks', { method: 'DELETE' });
+      toast(`Deleted ${result.deleted} weeks`);
+      loadAdminSoccerResults();
+      if (state.currentPage === 'soccer') loadSoccerWeeks();
+    }
+    catch (e) { toast(e.message, 'error'); }
+  }}]);
 }
 
 async function loadAdminUsers() {
