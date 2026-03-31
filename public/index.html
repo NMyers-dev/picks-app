@@ -356,7 +356,7 @@
     <nav style="display: flex; gap: 0.5rem;">
       <button class="nb-btn" id="nav-home" onclick="showPage('home')" style="background: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">HOME</button>
       <button class="nb-btn" id="nav-golf" onclick="showPage('golf')" style="background: #FFD700; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">PGA</button>
-      <button class="nb-btn" id="nav-soccer" onclick="showPage('soccer')" style="background: #1a1a1a; color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">EPL</button>
+      <button class="nb-btn" id="nav-soccer" onclick="showPage('soccer')" style="display:none; background: #1a1a1a; color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000;">EPL</button>
     </nav>
     <div style="display: flex; align-items: center; gap: 0.5rem;">
       <span id="username-display" style="background: #f0f0f0; padding: 4px 12px; border: 2px solid #000; font-weight: 600;"></span>
@@ -810,6 +810,7 @@ function launchApp() {
   document.getElementById('username-display').innerHTML = uname(state.user.username);
   if (state.user.is_admin) {
     document.getElementById('nav-admin').style.display   = 'inline-flex';
+    document.getElementById('nav-soccer').style.display = 'inline-flex';
   }
   showPage('home');
 }
@@ -944,12 +945,17 @@ async function loadGolfTournaments() {
     };
     
     const sorted = [...tournaments].sort(sortByDate);
-    const active = sorted.filter(t => !t.results_entered);
+    const open = sorted.filter(t => !t.results_entered && (t.predicted_top5 || []).length > 0);
+    const closed = sorted.filter(t => !t.results_entered && (!(t.predicted_top5) || (t.predicted_top5 || []).length === 0));
     const past   = sorted.filter(t =>  t.results_entered);
-    let html = active.map(t => renderTournamentCard(t, true)).join('');
+    let html = open.map(t => renderTournamentCard(t, 'active')).join('');
+    if (closed.length) {
+      html += `<div style="margin-bottom:1rem;padding:0.5rem;background:#e74c3c;color:#fff;border:2px solid #000;font-weight:700;text-align:center;">CLOSED FOR PICKS (Top 5 not yet posted)</div>`;
+      html += closed.map(t => renderTournamentCard(t, 'closed')).join('');
+    }
     if (past.length) {
       html += `<button class="collapse-toggle" onclick="togglePast(this,'past-golf-list')"> Past Tournaments (${past.length})</button>`;
-      html += `<div id="past-golf-list" style="display:none">${past.map(t => renderTournamentCard(t, false)).join('')}</div>`;
+      html += `<div id="past-golf-list" style="display:none">${past.map(t => renderTournamentCard(t, 'complete')).join('')}</div>`;
     }
     el.innerHTML = html;
   } catch (e) { el.innerHTML = `<div class="empty-state"><p style="color:var(--red)">${e.message}</p></div>`; }
@@ -976,27 +982,25 @@ function renderTournamentCard(t, isActive) {
   const deadline = t.deadline ? ` | Deadline: ${new Date(t.deadline).toLocaleDateString()}` : '';
   const eventType = t.event_type === 'major' ? ' | Major (x1.5)' : t.event_type === 'signature' ? ' | Signature (x1.25)' : '';
   let pickHtml = '';
-  if (isActive) {
-    if (top5Array.length === 0) {
-      pickHtml = `<div style="margin-top:0.75rem;padding:0.75rem;background:#f0f0f0;border:2px solid #000;font-size:0.85rem;font-weight:700;text-align:center;">Picks will open once Top 5 are added</div>`;
+  if (isActive === 'active') {
+    const defaultImg = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0yMSAxNnY0Ii8+PC9zdmc+';
+    if (t.my_pick) {
+      const myImg = getGolferImg(t.my_pick.picked_golfer) || defaultImg;
+      const myImgStyle = getGolferImg(t.my_pick.picked_golfer) ? '' : 'opacity:0.5;';
+      const pickedDate = t.my_pick.created_at ? new Date(t.my_pick.created_at).toLocaleString() : '';
+      pickHtml = `<div style="margin-top:0.75rem;padding:0.75rem;background:#2ecc71;border:2px solid #000;box-shadow:3px 3px 0 #000;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem;">
+          <span style="font-weight:700;font-size:0.9rem;">PICK SUBMITTED:</span><img src="${myImg}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;font-size:1.1rem;">${t.my_pick.picked_golfer}</span>
+        </div>
+        <div style="font-size:0.7rem;color:#000;">Picked on ${pickedDate}</div>
+      </div>`;
     } else {
       const top5Warning = 'Pick a golfer NOT in the predicted Top 5';
-      const defaultImg = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0yMSAxNnY0Ii8+PC9zdmc+';
-      pickHtml = t.my_pick
-        ? (() => {
-            const myImg = getGolferImg(t.my_pick.picked_golfer) || defaultImg;
-            const myImgStyle = getGolferImg(t.my_pick.picked_golfer) ? '' : 'opacity:0.5;';
-            const pickedDate = t.my_pick.created_at ? new Date(t.my_pick.created_at).toLocaleString() : '';
-            return `<div style="margin-top:0.75rem;padding:0.75rem;background:#2ecc71;border:2px solid #000;box-shadow:3px 3px 0 #000;">
-             <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.25rem;">
-               <span style="font-weight:700;font-size:0.9rem;">LOCKED IN:</span><img src="${myImg}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;${myImgStyle}"/><span style="font-weight:900;font-size:1.1rem;">${t.my_pick.picked_golfer}</span>
-             </div>
-             <div style="font-size:0.7rem;color:#000;">Picked on ${pickedDate}</div>
-           </div>`;
-          })()
-        : `<div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;font-size:0.85rem;font-weight:700;">${top5Warning}</div>
+      pickHtml = `<div style="margin-bottom:0.75rem;padding:0.5rem;background:#FFE4E1;border:2px solid #000;font-size:0.85rem;font-weight:700;">${top5Warning}</div>
            <div style="display:flex;gap:0.5rem"><input type="text" list="golfer-list" id="pick-input-${t.id}" placeholder="Search golfer..." style="flex:1;padding:0.5rem;border:2px solid #000;background:#fff;font-weight:600;"/><button onclick="submitGolfPick(${t.id})" style="background:#FFD700;color:#000;border:2px solid #000;box-shadow:3px 3px 0 #000;padding:0.5rem 1rem;font-weight:700;cursor:pointer;">LOCK IN</button></div>`;
     }
+  } else if (isActive === 'closed') {
+    pickHtml = `<div style="margin-top:0.75rem;padding:0.75rem;background:#e74c3c;color:#fff;border:2px solid #000;font-size:0.85rem;font-weight:700;text-align:center;">CLOSED - Top 5 not yet posted</div>`;
   } else {
     const defaultImg = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iNCIvPjxwYXRoIGQ9Ik0yMSAxNnY0Ii8+PC9zdmc+';
     pickHtml = t.my_pick
@@ -1011,11 +1015,13 @@ function renderTournamentCard(t, isActive) {
         })()
       : `<button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.75rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
   }
+  const statusLabel = isActive === 'active' ? 'ACTIVE' : isActive === 'closed' ? 'CLOSED' : 'COMPLETE';
+  const statusBg = isActive === 'active' ? '#2ecc71' : isActive === 'closed' ? '#e74c3c' : '#999';
   return `<div style="background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:1rem;margin-bottom:1rem;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;">
       <div><div style="font-size:1.1rem;font-weight:900;color:#000;">${t.name}</div>
         <div style="font-size:0.75rem;color:#666;font-weight:600;">${t.course ? t.course + ' | ' : ''}${t.start_date ? new Date(t.start_date).toLocaleDateString() : ''}${deadline}${eventType}</div></div>
-      <span style="background:${isActive?'#2ecc71':'#999'};color:#fff;border:2px solid #000;padding:2px 8px;font-size:0.7rem;font-weight:700;border-radius:4px;">${isActive ? 'ACTIVE' : 'COMPLETE'}</span>
+      <span style="background:${statusBg};color:#fff;border:2px solid #000;padding:2px 8px;font-size:0.7rem;font-weight:700;border-radius:4px;">${statusLabel}</span>
     </div>
     <div style="font-size:0.75rem;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;background:#FFD700;padding:0.25rem 0.5rem;border:2px solid #000;display:inline-block;">PREDICTED TOP 5</div>
     <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">${top5}</div>

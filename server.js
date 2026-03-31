@@ -519,7 +519,7 @@ app.put('/api/soccer/weeks/:id/results', auth, superAdminOnly, (req, res) => {
 
 app.get('/api/soccer/leaderboard', (req, res) => {
   try {
-    const users = db.get('users').value();
+    const users = db.get('users').filter(u => u.is_admin).value();
     const allPicks = db.get('soccer_picks').value();
 
     const leaderboard = users.map(u => {
