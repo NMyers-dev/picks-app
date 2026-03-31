@@ -287,10 +287,6 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
   if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
   if (tournament.results_entered) return res.status(400).json({ error: 'Results already entered — picks are locked' });
 
-  const field = tournament.field || [];
-  if (field.length > 0 && !field.some(g => g.toLowerCase() === picked_golfer.trim().toLowerCase()))
-    return res.status(400).json({ error: `${picked_golfer.trim()} is not in this tournament's field. Please pick a player who is playing.` });
-
   const top5 = tournament.predicted_top5 || [];
   if (top5.length > 0 && top5.some(g => g.toLowerCase() === picked_golfer.trim().toLowerCase()))
     return res.status(400).json({ error: `${picked_golfer.trim()} is in the predicted Top 5 — you must pick someone else!` });
