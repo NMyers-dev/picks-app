@@ -307,6 +307,20 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
   res.json({ success: true });
 });
 
+app.delete('/api/golf/picks/:pickId', auth, adminOnly, (req, res) => {
+  const pickId = parseInt(req.params.pickId);
+  db.get('golf_picks').remove({ id: pickId }).write();
+  res.json({ success: true });
+});
+
+app.get('/api/golf/tournaments/:id/picks', auth, adminOnly, (req, res) => {
+  const tournamentId = parseInt(req.params.id);
+  const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
+  const users = db.get('users').value();
+  const userMap = Object.fromEntries(users.map(u => [u.id, u.username]));
+  res.json(picks.map(p => ({ ...p, username: userMap[p.user_id] || 'Unknown' })));
+});
+
 app.put('/api/golf/tournaments/:id/results', auth, adminOnly, (req, res) => {
   const { results } = req.body || {};
   const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
