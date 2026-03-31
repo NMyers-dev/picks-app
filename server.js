@@ -287,15 +287,14 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
   if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
   if (tournament.results_entered) return res.status(400).json({ error: 'Results already entered — picks are locked' });
 
+  const existing = db.get('golf_picks').find({ tournament_id: tournamentId, user_id: req.user.id }).value();
+  if (existing) return res.status(400).json({ error: 'You already have a pick locked in for this tournament' });
+
   const top5 = tournament.predicted_top5 || [];
   if (top5.length > 0 && top5.some(g => g.toLowerCase() === picked_golfer.trim().toLowerCase()))
     return res.status(400).json({ error: `${picked_golfer.trim()} is in the predicted Top 5 — you must pick someone else!` });
 
-  const existing = db.get('golf_picks').find({ tournament_id: tournamentId, user_id: req.user.id }).value();
-  if (existing) {
-    db.get('golf_picks').find({ id: existing.id }).assign({ picked_golfer: picked_golfer.trim(), result_category: null, points_earned: 0 }).write();
-  } else {
-    db.get('golf_picks').push({
+  db.get('golf_picks').push({
       id: nextId('golf_picks'),
       tournament_id: tournamentId,
       user_id: req.user.id,
@@ -304,7 +303,6 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
       points_earned: 0,
       created_at: now()
     }).write();
-  }
 
   res.json({ success: true });
 });
