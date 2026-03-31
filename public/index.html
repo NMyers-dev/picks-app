@@ -934,7 +934,7 @@ function showPage(page) {
 async function loadGolfTournaments() {
   const el = document.getElementById('golf-tournaments-list');
   try {
-    const tournaments = await api('/golf/tournaments');
+    const tournaments = await api('/golf/tournaments?_=' + Date.now());
     if (!tournaments.length) { el.innerHTML = `<div class="empty-state"><div class="icon"></div><p>No tournaments yet.</p></div>`; return; }
     
     const sortByDate = (a, b) => {
