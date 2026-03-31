@@ -1089,7 +1089,7 @@ async function loadGolfLeaderboard() {
       </tr></thead><tbody>
       ${rows.map((r,i) => `<tr style="background:${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'#fff'};border:2px solid #000;">
         <td style="padding:0.5rem;border:2px solid #000;font-weight:900;">${i+1}</td>
-        <td style="padding:0.5rem;border:2px solid #000;font-weight:700;">${uname(r.username)}</td>
+        <td style="padding:0.5rem;border:2px solid #000;font-weight:700;">${r.is_kennure ? `<span class="rainbow-name">${r.username}</span>` : r.username}</td>
         <td style="padding:0.5rem;border:2px solid #000;font-weight:900;text-align:center;">${r.total_points}</td>
         <td style="padding:0.5rem;border:2px solid #000;text-align:center;font-weight:700;">${r.wins}</td>
         <td style="padding:0.5rem;border:2px solid #000;text-align:center;">${r.top5s}</td>
@@ -1962,11 +1962,12 @@ async function loadAdminUsers() {
   const el = document.getElementById('a-users-list');
   try {
     const users = await api('/users');
-    el.innerHTML = `<table class="lb-table"><thead><tr><th>Username</th><th>Email</th><th>Joined</th><th>Admin</th></tr></thead><tbody>
+    el.innerHTML = `<table class="lb-table"><thead><tr><th>Username</th><th>Email</th><th>Joined</th><th>Kennure</th><th>Admin</th></tr></thead><tbody>
       ${users.map(u => `<tr>
-        <td><b>${uname(u.username)}</b></td>
+        <td><b>${u.is_kennure ? `<span class="rainbow-name">${u.username}</span>` : u.username}</b></td>
         <td style="color:var(--muted);font-size:0.8rem">${u.email}</td>
         <td style="color:var(--muted);font-size:0.8rem">${new Date(u.created_at).toLocaleDateString()}</td>
+        <td><button class="btn btn-sm ${u.is_kennure?'btn-danger':'btn-ghost'}" onclick="toggleKennure(${u.id},${!u.is_kennure})">${u.is_kennure?'Remove':'Make'}</button></td>
         <td>${u.id===state.user.id ? `<span class="pill pill-gold">You</span>` :
           `<button class="btn btn-sm ${u.is_admin?'btn-danger':'btn-ghost'}" onclick="toggleAdmin(${u.id},${!u.is_admin})">${u.is_admin?'Remove Admin':'Make Admin'}</button>`}
         </td>
@@ -1977,6 +1978,11 @@ async function loadAdminUsers() {
 
 async function toggleAdmin(userId, makeAdmin) {
   try { await api(`/users/${userId}/admin`, { method: 'PUT', body: { is_admin: makeAdmin } }); toast(makeAdmin ? 'User is now admin' : 'Admin removed'); loadAdminUsers(); }
+  catch (e) { toast(e.message, 'error'); }
+}
+
+async function toggleKennure(userId, makeKennure) {
+  try { await api(`/users/${userId}/kennure`, { method: 'PUT', body: { is_kennure: makeKennure } }); toast(makeKennure ? 'Rainbow enabled' : 'Rainbow removed'); loadAdminUsers(); if (state.currentPage === 'golf') loadGolfLeaderboard(); }
   catch (e) { toast(e.message, 'error'); }
 }
 

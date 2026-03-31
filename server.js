@@ -141,7 +141,7 @@ app.post('/api/auth/login', async (req, res) => {
 // ─── User Management ──────────────────────────────────────────────────────────
 app.get('/api/users', auth, adminOnly, (req, res) => {
   const users = db.get('users').map(u => ({
-    id: u.id, username: u.username, email: u.email, is_admin: u.is_admin, created_at: u.created_at
+    id: u.id, username: u.username, email: u.email, is_admin: u.is_admin, is_kennure: u.is_kennure || false, created_at: u.created_at
   })).sortBy('username').value();
   res.json(users);
 });
@@ -152,6 +152,14 @@ app.put('/api/users/:id/admin', auth, adminOnly, (req, res) => {
   const user = db.get('users').find({ id: targetId }).value();
   if (!user) return res.status(404).json({ error: 'User not found' });
   db.get('users').find({ id: targetId }).assign({ is_admin: Boolean(req.body.is_admin) }).write();
+  res.json({ success: true });
+});
+
+app.put('/api/users/:id/kennure', auth, adminOnly, (req, res) => {
+  const targetId = parseInt(req.params.id);
+  const user = db.get('users').find({ id: targetId }).value();
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  db.get('users').find({ id: targetId }).assign({ is_kennure: Boolean(req.body.is_kennure) }).write();
   res.json({ success: true });
 });
 
@@ -354,6 +362,7 @@ app.get('/api/golf/leaderboard', (req, res) => {
       return {
         id: u.id,
         username: u.username,
+        is_kennure: u.is_kennure || false,
         total_points: picks.reduce((s, p) => s + (p.points_earned || 0), 0),
         total_picks: picks.length,
         wins:   picks.filter(p => p.result_category === 'winner').length,
