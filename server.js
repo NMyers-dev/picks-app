@@ -272,8 +272,8 @@ app.get('/api/golf/tournaments/:id/picks', auth, (req, res) => {
 
   // Admins can always see all picks
   if (req.user.is_admin) {
-    const userMap = Object.fromEntries(users.map(u => [u.id, u.username]));
-    return res.json(picks.map(p => ({ ...p, username: userMap[p.user_id] || 'Unknown' })));
+    const userMap = Object.fromEntries(users.map(u => [u.id, { username: u.username, is_kennure: u.is_kennure }]));
+    return res.json(picks.map(p => ({ ...p, username: userMap[p.user_id]?.username || 'Unknown', is_kennure: userMap[p.user_id]?.is_kennure || false })));
   }
 
   // Hide other users' picks until deadline or results entered
