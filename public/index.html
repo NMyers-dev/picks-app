@@ -402,7 +402,6 @@
     </div>
 
     <!--  PGA Page  -->
-    <datalist id="golfer-list"></datalist>
     <div class="page" id="page-golf">
       <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
         <div>
@@ -1688,7 +1687,7 @@ async function loadAdminGolfPicks(tournamentId) {
       const imgStyle = getGolferImg(p.picked_golfer) ? '' : 'opacity:0.5;';
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem;border-bottom:2px solid #000;">
         <span style="font-weight:700;">${uname(p.username)}</span>
-        <span style="display:flex;align-items:center;gap:8px;"><img src="${img}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;${imgStyle}"/>${p.picked_golfer}</span>
+        <span style="display:flex;align-items:center;gap:8px;"><img src="${img}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;${imgStyle}"/> ${p.picked_golfer}</span>
         <button onclick="deleteGolfPick(${p.id},${tournamentId})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">DELETE</button>
       </div>`;
     }).join('');
@@ -2116,9 +2115,6 @@ document.getElementById('reg-password').addEventListener('keydown',  e => { if (
 
 const plDatalist = document.getElementById('pl-teams');
 PREMIER_LEAGUE_TEAMS.forEach(t => { const o = document.createElement('option'); o.value = t; plDatalist.appendChild(o); });
-
-const golferDatalist = document.getElementById('golfer-list');
-GOLFERS.forEach(g => { const o = document.createElement('option'); o.value = g.name; golferDatalist.appendChild(o); });
 
 init();
 </script>
