@@ -21,7 +21,7 @@ function getDb() {
 
 function initDb() {
   try {
-    const dbPath = process.env.DB_PATH || '/app/data/picks.json';
+    const dbPath = process.env.DB_PATH || path.join(__dirname, 'data', 'picks.json');
     const adapter = new FileSync(dbPath);
     db = low(adapter);
     
@@ -34,15 +34,6 @@ function initDb() {
       soccer_picks: [],
       settings: {}
     }).write();
-    
-    try {
-      const users = db.get('users').value();
-      users.forEach((u, i => {
-        if (u.is_super_admin === undefined) {
-          db.get('users').find({ id: u.id }).assign({ is_super_admin: i === 0 }).write();
-        }
-      }));
-    } catch (e) { console.log('Migration:', e.message); }
     
     dbReady = true;
     console.log('Database ready');
