@@ -270,6 +270,12 @@ app.get('/api/golf/tournaments/:id/picks', auth, (req, res) => {
   const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
   const users = db.get('users').value();
 
+  // Admins can always see all picks
+  if (req.user.is_admin) {
+    const userMap = Object.fromEntries(users.map(u => [u.id, u.username]));
+    return res.json(picks.map(p => ({ ...p, username: userMap[p.user_id] || 'Unknown' })));
+  }
+
   // Hide other users' picks until deadline or results entered
   const deadlinePassed = tournament && (tournament.results_entered || (tournament.deadline && new Date() >= new Date(tournament.deadline)));
   if (!deadlinePassed) {
@@ -319,14 +325,6 @@ app.delete('/api/golf/picks/:pickId', auth, adminOnly, (req, res) => {
   const pickId = parseInt(req.params.pickId);
   db.get('golf_picks').remove({ id: pickId }).write();
   res.json({ success: true });
-});
-
-app.get('/api/golf/tournaments/:id/picks', auth, adminOnly, (req, res) => {
-  const tournamentId = parseInt(req.params.id);
-  const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
-  const users = db.get('users').value();
-  const userMap = Object.fromEntries(users.map(u => [u.id, u.username]));
-  res.json(picks.map(p => ({ ...p, username: userMap[p.user_id] || 'Unknown' })));
 });
 
 app.put('/api/golf/tournaments/:id/results', auth, adminOnly, (req, res) => {
