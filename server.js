@@ -295,14 +295,15 @@ app.get('/api/golf/tournaments/:id/picks', auth, (req, res) => {
 app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
   const { picked_golfer } = req.body || {};
   if (!picked_golfer?.trim()) return res.status(400).json({ error: 'Golfer name required' });
+  if (!req.user || !req.user.id) return res.status(401).json({ error: 'Not authenticated' });
 
   const tournamentId = parseInt(req.params.id);
   const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
   if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
   if (tournament.results_entered) return res.status(400).json({ error: 'Results already entered — picks are locked' });
 
-  const existing = db.get('golf_picks').find({ tournament_id: tournamentId, user_id: req.user.id }).value();
-  if (existing) return res.status(400).json({ error: 'You already have a pick locked in for this tournament' });
+  const existingPicks = db.get('golf_picks').filter({ tournament_id: tournamentId, user_id: req.user.id }).value();
+  if (existingPicks && existingPicks.length > 0) return res.status(400).json({ error: 'You already have a pick locked in for this tournament' });
 
   const top5 = tournament.predicted_top5 || [];
   if (top5.length > 0 && top5.some(g => g.toLowerCase() === picked_golfer.trim().toLowerCase()))
