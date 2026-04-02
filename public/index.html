@@ -888,6 +888,7 @@ async function loadGolfTournaments() {
     const tournaments = await api('/golf/tournaments?_=' + Date.now());
     if (!tournaments.length) { el.innerHTML = `<div class="empty-state"><div class="icon"></div><p>No tournaments yet.</p></div>`; return; }
     
+    const now = new Date();
     const sortByDate = (a, b) => {
       if (!a.start_date && !b.start_date) return 0;
       if (!a.start_date) return 1;
@@ -896,13 +897,18 @@ async function loadGolfTournaments() {
     };
     
     const sorted = [...tournaments].sort(sortByDate);
-    const open = sorted.filter(t => !t.results_entered && (t.predicted_top5 || []).length > 0);
-    const closed = sorted.filter(t => !t.results_entered && (!(t.predicted_top5) || (t.predicted_top5 || []).length === 0));
+    const open = sorted.filter(t => !t.results_entered && (t.predicted_top5 || []).length > 0 && (!t.deadline || now < new Date(t.deadline)));
+    const closed = sorted.filter(t => !t.results_entered && ((t.predicted_top5 || []).length > 0 && t.deadline && now >= new Date(t.deadline)));
+    const pending = sorted.filter(t => !t.results_entered && (!(t.predicted_top5) || (t.predicted_top5 || []).length === 0));
     const past   = sorted.filter(t =>  t.results_entered);
     let html = open.map(t => renderTournamentCard(t, 'active')).join('');
     if (closed.length) {
-      html += `<div style="margin-bottom:1rem;padding:0.5rem;background:#e74c3c;color:#fff;border:2px solid #000;font-weight:700;text-align:center;">CLOSED FOR PICKS (Top 5 not yet posted)</div>`;
+      html += `<div style="margin-bottom:1rem;padding:0.5rem;background:#e74c3c;color:#fff;border:2px solid #000;font-weight:700;text-align:center;">PICKS CLOSED</div>`;
       html += closed.map(t => renderTournamentCard(t, 'closed')).join('');
+    }
+    if (pending.length) {
+      html += `<div style="margin-bottom:1rem;padding:0.5rem;background:#e74c3c;color:#fff;border:2px solid #000;font-weight:700;text-align:center;">CLOSED FOR PICKS (Top 5 not yet posted)</div>`;
+      html += pending.map(t => renderTournamentCard(t, 'closed')).join('');
     }
     if (past.length) {
       html += `<button class="collapse-toggle" onclick="togglePast(this,'past-golf-list')"> Past Tournaments (${past.length})</button>`;
@@ -952,9 +958,10 @@ function renderTournamentCard(t, isActive) {
           <span style="font-weight:700;font-size:0.9rem;">You picked</span><span style="font-weight:900;font-size:1.1rem;">${t.my_pick.picked_golfer}</span>
         </div>
         <div style="font-size:0.7rem;color:#000;margin-top:0.25rem;">as your golfer - Locked in on ${pickedDate}</div>
-      </div>`;
+      </div><button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.5rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>`;
     } else {
-      pickHtml = `<div style="margin-top:0.75rem;padding:0.75rem;background:#e74c3c;color:#fff;border:2px solid #000;font-size:0.85rem;font-weight:700;text-align:center;">CLOSED - Top 5 not yet posted</div>`;
+      const hasTop5 = (t.predicted_top5 || []).length > 0;
+      pickHtml = `<div style="margin-top:0.75rem;padding:0.75rem;background:#e74c3c;color:#fff;border:2px solid #000;font-size:0.85rem;font-weight:700;text-align:center;">${hasTop5 ? 'PICKS HAVE BEEN CLOSED' : 'CLOSED - Top 5 not yet posted'}</div>${hasTop5 ? `<button onclick="loadGolfPicks(${t.id},this)" style="margin-top:0.5rem;background:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.4rem 0.8rem;font-size:0.8rem;font-weight:700;cursor:pointer;">VIEW ALL PICKS</button><div id="golf-picks-${t.id}"></div>` : ''}`;
     }
   } else {
     pickHtml = t.my_pick

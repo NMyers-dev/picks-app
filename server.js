@@ -292,6 +292,7 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
   const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
   if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
   if (tournament.results_entered) return res.status(400).json({ error: 'Results already entered — picks are locked' });
+  if (tournament.deadline && new Date() >= new Date(tournament.deadline)) return res.status(400).json({ error: 'Picks have been closed for this tournament' });
 
   const existingPicks = db.get('golf_picks').filter({ tournament_id: tournamentId, user_id: req.user.id }).value();
   if (existingPicks && existingPicks.length > 0) return res.status(400).json({ error: 'You already have a pick locked in for this tournament' });
