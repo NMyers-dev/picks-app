@@ -369,6 +369,7 @@
   <main style="padding: 1.5rem;">
     <!--  Home / News Page  -->
     <div class="page" id="page-home" style="display:none">
+      <div id="home-current-tournament"></div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
         <div class="nb-card" style="padding: 1rem; background: #FFD700; border: 3px solid #000; box-shadow: 4px 4px 0 #000;">
           <h3 class="nb-title" style="font-size: 1.25rem; margin-bottom: 1rem;">PGA LEADERBOARD</h3>
@@ -1049,10 +1050,12 @@ async function loadHomePage() {
   const golfEl = document.getElementById('home-golf-lb');
   const soccerEl = document.getElementById('home-soccer-lb');
   const recentEl = document.getElementById('recent-results-list');
+  const currentEl = document.getElementById('home-current-tournament');
 
   golfEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #000; background: #FFD700;">Loading PGA...</div>';
   soccerEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #000; background: #1a1a1a; color: #fff;">Loading EPL...</div>';
   recentEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #000; background: #f0f0f0;">Loading...</div>';
+  currentEl.innerHTML = '<div style="padding: 0.75rem; border: 2px solid #000; background: #f0f0f0;">Loading...</div>';
 
   try {
     const [golfRows, soccerRows] = await Promise.all([
@@ -1086,6 +1089,30 @@ async function loadHomePage() {
       fetch('/api/golf/tournaments').then(r => r.json()).catch(() => []),
       fetch('/api/soccer/weeks').then(r => r.ok ? r.json() : []).catch(() => [])
     ]);
+
+    const now = new Date();
+    const activeGolf = (golfTours || []).find(t => !t.results_entered && (t.predicted_top5 || []).length > 0 && (!t.deadline || now < new Date(t.deadline)));
+    const closedGolf = (golfTours || []).find(t => !t.results_entered && (t.predicted_top5 || []).length > 0 && t.deadline && now >= new Date(t.deadline));
+
+    if (activeGolf) {
+      currentEl.innerHTML = `<div style="background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:1rem;margin-bottom:1.5rem;">
+        <div style="font-size:1rem;font-weight:900;color:#000;">${activeGolf.name}</div>
+        <div style="font-size:0.75rem;color:#666;font-weight:600;margin-bottom:0.5rem;">${activeGolf.course ? activeGolf.course + ' | ' : ''}${activeGolf.start_date ? new Date(activeGolf.start_date).toLocaleDateString() : ''}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.5rem;">${(activeGolf.predicted_top5 || []).map((g, i) => `<span style="background:#fff;border:2px solid #000;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:700;">${i+1}. ${g}</span>`).join('')}</div>
+        <div style="font-size:0.8rem;font-weight:700;color:#2ecc71;">Pick deadline: ${activeGolf.deadline ? new Date(activeGolf.deadline).toLocaleString() : 'Not set'}</div>
+      </div>`;
+    } else if (closedGolf) {
+      const picksRes = await fetch(`/api/golf/tournaments/${closedGolf.id}/picks`).then(r => r.ok ? r.json() : []);
+      currentEl.innerHTML = `<div style="background:#fff;border:3px solid #000;box-shadow:4px 4px 0 #000;padding:1rem;margin-bottom:1.5rem;">
+        <div style="font-size:1rem;font-weight:900;color:#000;">${closedGolf.name}</div>
+        <div style="font-size:0.75rem;color:#666;font-weight:600;margin-bottom:0.5rem;">${closedGolf.course ? closedGolf.course + ' | ' : ''}${closedGolf.start_date ? new Date(closedGolf.start_date).toLocaleDateString() : ''}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.5rem;">${(closedGolf.predicted_top5 || []).map((g, i) => `<span style="background:#fff;border:2px solid #000;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:700;">${i+1}. ${g}</span>`).join('')}</div>
+        <div style="font-size:0.8rem;font-weight:700;color:#e74c3c;margin-bottom:0.5rem;">PICKS CLOSED</div>
+        ${picksRes.length ? `<div style="font-size:0.75rem;font-weight:700;margin-bottom:0.25rem;">Total Picks: ${picksRes.length}</div>` : ''}
+      </div>`;
+    } else {
+      currentEl.innerHTML = '';
+    }
 
     const completedGolf = (golfTours || []).filter(t => t.results_entered).slice(-2);
     const completedSoccer = (soccerWeeks || []).filter(w => w.results_entered).slice(-2);
