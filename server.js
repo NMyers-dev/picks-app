@@ -255,32 +255,47 @@ app.delete('/api/golf/tournaments', auth, superAdminOnly, (req, res) => {
   res.json({ success: true, deleted: completed.length });
 });
 
-app.get('/api/golf/tournaments/:id/picks', auth, (req, res) => {
+app.get('/api/golf/tournaments/:id/picks', (req, res) => {
   const tournamentId = parseInt(req.params.id);
   const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
   const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
   const users = db.get('users').value();
 
+  const deadlinePassed = tournament && (tournament.results_entered || (tournament.deadline && new Date() >= new Date(tournament.deadline)));
+
+  // If deadline hasn't passed and user not authenticated, hide picks
+  const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
+  if (!deadlinePassed && !token) {
+    return res.json([]);
+  }
+
+  // Verify user if token provided
+  if (token) {
+    try {
+      req.user = jwt.verify(token, JWT_SECRET);
+    } catch {}
+  }
+
   // Admins can always see all picks
-  if (req.user.is_admin) {
+  if (req.user?.is_admin) {
     const userMap = Object.fromEntries(users.map(u => [u.id, { username: u.username, is_kennure: u.is_kennure }]));
     return res.json(picks.map(p => ({ ...p, username: userMap[p.user_id]?.username || 'Unknown', is_kennure: userMap[p.user_id]?.is_kennure || false })));
   }
 
-  // Hide other users' picks until deadline or results entered
-  const deadlinePassed = tournament && (tournament.results_entered || (tournament.deadline && new Date() >= new Date(tournament.deadline)));
-  if (!deadlinePassed) {
+  // If deadline passed, show all picks
+  if (deadlinePassed) {
+    const userMap = Object.fromEntries(users.map(u => [u.id, { username: u.username }]));
+    return res.json(picks.map(p => ({ ...p, username: userMap[p.user_id]?.username || 'Unknown' })));
+  }
+
+  // Otherwise just show own picks
+  if (req.user) {
     const myPicks = picks.filter(p => p.user_id === req.user.id);
     const user = users.find(u => u.id === req.user.id);
     return res.json(myPicks.map(p => ({ id: p.id, picked_golfer: p.picked_golfer, result_category: p.result_category, points_earned: p.points_earned, username: user?.username })));
   }
 
-  const result = picks.map(p => {
-    const user = users.find(u => u.id === p.user_id);
-    return { id: p.id, picked_golfer: p.picked_golfer, result_category: p.result_category, points_earned: p.points_earned, username: user?.username };
-  }).sort((a, b) => (b.points_earned || 0) - (a.points_earned || 0));
-
-  res.json(result);
+  res.json([]);
 });
 
 app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
