@@ -654,33 +654,28 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
                      : tournament.event_type === 'signature' ? 1.25 : 1;
     const updated = [], notFound = [], results = [];
 
-    // Second pass: assign categories based on final position
-    // Note: roundsCompleted from ESPN may include future rounds - we use position in sorted list
+    // Second pass: assign categories based on rounds completed and position
+    // Players with 4 rounds made the cut
+    // Players with < 4 rounds missed the cut or withdrew
     for (let i = 0; i < pickData.length; i++) {
       const { pick, totalToPar, roundsCompleted } = pickData[i];
       
-      // Determine category based on position in sorted list
-      // Note: We're ranking among our picks only, not all 132 competitors
-      const pos = i + 1;
       let category;
-      
-      // If toPar is very high (> 5 over), likely missed cut
-      if (totalToPar > 5) {
-        category = 'other'; // Missed cut - 0 points
-      } else if (pos === 1) {
-        category = 'winner';
-      } else if (pos <= 5) {
-        category = 'top5';
-      } else if (pos <= 10) {
-        category = 'top10';
-      } else if (pos <= 20) {
-        category = 'top20';
+      if (roundsCompleted < 4) {
+        // Missed cut or withdrew - 0 points
+        category = 'other';
       } else {
-        category = 'made_cut';
+        // Made the cut - rank among all players who made cut
+        const pos = i + 1;
+        if (pos === 1) category = 'winner';
+        else if (pos <= 5) category = 'top5';
+        else if (pos <= 10) category = 'top10';
+        else if (pos <= 20) category = 'top20';
+        else category = 'made_cut';
       }
 
       const points = Math.round((pointsMap[category] ?? 0) * multiplier * 10) / 10;
-      console.log(`[SYNC] ${pick.picked_golfer}: position=${pos}, toPar=${totalToPar}, category=${category}, multiplier=${multiplier}, points=${points}`);
+      console.log(`[SYNC] ${pick.picked_golfer}: position=${i+1}, toPar=${totalToPar}, rounds=${roundsCompleted}, category=${category}, points=${points}`);
       
       db.get('golf_picks').find({ id: pick.id })
         .assign({ result_category: category, points_earned: points }).write();
