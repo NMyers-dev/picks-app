@@ -621,15 +621,18 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
       });
 
       if (match) {
-        // ESPN API structure may vary - try multiple paths
-        let posId = match.status?.position?.id ?? match.position?.rank ?? match.rank?.position ?? match.status?.rank;
-        let posLabel = match.status?.position?.displayName ?? match.position?.displayName ?? match.rank?.displayName ?? posId ?? '?';
+        // ESPN API - position is in linescores or score object
+        const linescores = match.linescores || [];
+        const position = linescores.find(ls => ls.position)?.position;
+        const displayPosition = linescores.find(ls => ls.position)?.displayPosition;
+        
+        let posId = position ?? match.status?.position?.id ?? match.position?.rank ?? match.rank?.position ?? match.status?.rank;
+        let posLabel = displayPosition ?? match.status?.position?.displayName ?? match.position?.displayName ?? posId ?? '?';
         const desc = (match.status?.type?.description || match.status?.description || '').toLowerCase();
         const score = match.score?.displayValue ?? match.displayScore ?? 'E';
 
-        // Log full match object structure for debugging
-        console.log(`[SYNC] ${pick.picked_golfer}: match object keys:`, Object.keys(match));
-        console.log(`[SYNC] ${pick.picked_golfer}: match.status:`, JSON.stringify(match.status));
+        // Log linescores for debugging
+        console.log(`[SYNC] ${pick.picked_golfer}: linescores:`, JSON.stringify(linescores));
         console.log(`[SYNC] ${pick.picked_golfer}: posId=${posId}, posLabel=${posLabel}, desc=${desc}, score=${score}`);
 
         let category = 'other';
