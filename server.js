@@ -602,13 +602,46 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
     const competitors = event.competitions?.[0]?.competitors || [];
     console.log(`[SYNC] Event: ${event.name}, Competitors: ${competitors.length}, tournament.event_type: ${tournament.event_type}`);
     
-    // Debug: log all competitor names
-    const competitorNames = competitors.map(c => c.athlete?.displayName || 'unknown');
-    console.log(`[SYNC] All competitors:`, competitorNames.slice(0, 20).join(', '), '...');
-    
     const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
 
-    // First pass: collect all scores
+    // First pass: Calculate toPar for ALL competitors to determine actual positions
+    const allCompetitors = [];
+    for (const c of competitors) {
+      const linescores = c.linescores || [];
+      let totalToPar = 0;
+      let roundsCompleted = 0;
+      
+      for (const round of linescores) {
+        const toPar = parseInt(round.displayValue);
+        if (!isNaN(toPar)) {
+          totalToPar += toPar;
+          roundsCompleted++;
+        }
+      }
+      
+      allCompetitors.push({
+        name: c.athlete?.displayName || 'Unknown',
+        totalToPar,
+        roundsCompleted
+      });
+    }
+    
+    // Sort all competitors by toPar (lowest = best) to get actual positions
+    // For ties, more rounds completed = better
+    allCompetitors.sort((a, b) => {
+      if (a.totalToPar !== b.totalToPar) return a.totalToPar - b.totalToPar;
+      return b.roundsCompleted - a.roundsCompleted;
+    });
+    
+    // Create a map for quick lookup of actual position
+    const positionMap = {};
+    for (let i = 0; i < allCompetitors.length; i++) {
+      positionMap[allCompetitors[i].name.toLowerCase()] = i + 1;
+    }
+    
+    console.log(`[SYNC] Top 10 actual positions:`, allCompetitors.slice(0, 10).map(c => `${c.name}:${c.totalToPar}`).join(', '));
+
+    // Second pass: match picks to actual positions
     const pickData = [];
     for (const pick of picks) {
       const search = pick.picked_golfer.toLowerCase();
@@ -621,18 +654,13 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
         const searchParts = searchNorm.split(' ');
         
         // If search is initials like "S w kim", try to match first name initial + middle name initial + last name
-        // "S w kim" -> "si woo kim" -> starts with 's', ends with 'kim', has middle initial
         if (searchParts.length >= 2 && searchParts[0].length <= 2 && searchParts[1].length <= 2) {
           const lastName = searchParts[searchParts.length - 1];
           const firstInitial = searchParts[0].charAt(0);
           const middleInitial = searchParts.length >= 3 ? searchParts[1].charAt(0) : '';
           
-          // For "Si Woo Kim" - match: starts with 's', middle 'w', ends with 'kim'
-          // For "Michael Kim" - only starts with 'm', so won't match first 's'
           if (dn.endsWith(lastName) && dn.startsWith(firstInitial)) {
-            // If there's a middle initial in search, the actual name should have it too
             if (middleInitial) {
-              // Check if actual name has something in the middle position
               const nameParts = dn.split(' ');
               if (nameParts.length >= 3) {
                 const actualMiddle = nameParts[1].charAt(0);
@@ -646,7 +674,6 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
         
         const searchLast = searchNorm.split(' ').pop();
         
-        // Try various matching strategies
         return dn === searchNorm 
             || dn.includes(searchNorm) 
             || searchNorm.includes(dn)
@@ -655,10 +682,8 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
       });
 
       if (match) {
-        const linescores = match.linescores || [];
         const athleteName = match.athlete?.displayName || 'Unknown';
-        
-        console.log(`[SYNC] MATCH: "${pick.picked_golfer}" matched to "${athleteName}"`);
+        const linescores = match.linescores || [];
         
         let totalToPar = 0;
         let roundsCompleted = 0;
@@ -671,39 +696,35 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
           }
         }
         
-        pickData.push({ pick, totalToPar, roundsCompleted });
-        console.log(`[SYNC] ${pick.picked_golfer}: toPar=${totalToPar}, rounds=${roundsCompleted}`);
+        // Get actual position from positionMap
+        const actualPosition = positionMap[athleteName.toLowerCase()] || 0;
+        
+        console.log(`[SYNC] MATCH: "${pick.picked_golfer}" -> "${athleteName}" toPar=${totalToPar}, rounds=${roundsCompleted}, actualPos=${actualPosition}`);
+        
+        pickData.push({ pick, totalToPar, roundsCompleted, actualPosition, athleteName });
       } else {
         console.log(`[SYNC] NOT FOUND: ${pick.picked_golfer}`);
         notFound.push(pick.picked_golfer);
       }
     }
-    
-    // Sort by totalToPar (lowest = best) to determine positions
-    // For ties, use more rounds completed as tiebreaker
-    pickData.sort((a, b) => {
-      if (a.totalToPar !== b.totalToPar) return a.totalToPar - b.totalToPar;
-      return b.roundsCompleted - a.roundsCompleted;
-    });
 
     const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
     const multiplier = tournament.event_type === 'major' ? 1.5
                      : tournament.event_type === 'signature' ? 1.25 : 1;
     const updated = [], notFound = [], results = [];
 
-    // Second pass: assign categories based on rounds completed and position
-    // Players with 4 rounds made the cut
-    // Players with < 4 rounds missed the cut or withdrew
-    for (let i = 0; i < pickData.length; i++) {
-      const { pick, totalToPar, roundsCompleted } = pickData[i];
+    // Third pass: assign categories based on actual position in tournament
+    // Use roundsCompleted to detect missed cut (< 4 rounds)
+    for (const data of pickData) {
+      const { pick, totalToPar, roundsCompleted, actualPosition } = data;
       
       let category;
       if (roundsCompleted < 4) {
         // Missed cut or withdrew - 0 points
         category = 'other';
       } else {
-        // Made the cut - rank among all players who made cut
-        const pos = i + 1;
+        // Made the cut - use actual position from full leaderboard
+        const pos = actualPosition;
         if (pos === 1) category = 'winner';
         else if (pos <= 5) category = 'top5';
         else if (pos <= 10) category = 'top10';
@@ -712,7 +733,7 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
       }
 
       const points = Math.round((pointsMap[category] ?? 0) * multiplier * 10) / 10;
-      console.log(`[SYNC] ${pick.picked_golfer}: position=${i+1}, toPar=${totalToPar}, rounds=${roundsCompleted}, category=${category}, points=${points}`);
+      console.log(`[SYNC] ${pick.picked_golfer}: actualPos=${actualPosition}, toPar=${totalToPar}, rounds=${roundsCompleted}, category=${category}, points=${points}`);
       
       db.get('golf_picks').find({ id: pick.id })
         .assign({ result_category: category, points_earned: points }).write();
