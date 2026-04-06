@@ -603,12 +603,8 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
     console.log(`[SYNC] Event: ${event.name}, Competitors: ${competitors.length}, tournament.event_type: ${tournament.event_type}`);
     const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
 
-    const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
-    const multiplier = tournament.event_type === 'major' ? 1.5
-                     : tournament.event_type === 'signature' ? 1.25 : 1;
-
-    const updated = [], notFound = [], results = [];
-
+    // First pass: collect all scores
+    const pickData = [];
     for (const pick of picks) {
       const search = pick.picked_golfer.toLowerCase();
       const lastName = search.split(' ').pop();
@@ -621,8 +617,6 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
       });
 
       if (match) {
-        // ESPN API doesn't include position in scoreboard - we need to fetch standings
-        // For now, calculate position based on total score (toPar)
         const linescores = match.linescores || [];
         let totalToPar = 0;
         let roundsCompleted = 0;
@@ -635,27 +629,55 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
           }
         }
         
-        // Store the calculated data for later use
+        pickData.push({ pick, totalToPar, roundsCompleted });
         console.log(`[SYNC] ${pick.picked_golfer}: toPar=${totalToPar}, rounds=${roundsCompleted}`);
-        
-        // We'll use a different approach - compute all positions from ESPN standings API
-        // For now, default to made_cut (1 point) - admin can adjust manually
-        let category = 'made_cut';
-        if (roundsCompleted === 0) {
-          category = 'other'; // Didn't complete any rounds (withdrawn, etc)
-        }
-        
-        const points = Math.round((pointsMap[category] ?? 0) * multiplier * 10) / 10;
-        console.log(`[SYNC] ${pick.picked_golfer}: category=${category}, multiplier=${multiplier}, points=${points}`);
-        db.get('golf_picks').find({ id: pick.id })
-          .assign({ result_category: category, points_earned: points }).write();
-
-        updated.push(pick.picked_golfer);
-        results.push({ golfer: pick.picked_golfer, toPar: totalToPar, rounds: roundsCompleted, category, points });
       } else {
         console.log(`[SYNC] NOT FOUND: ${pick.picked_golfer}`);
         notFound.push(pick.picked_golfer);
       }
+    }
+    
+    // Sort by totalToPar (lowest = best) to determine positions
+    // For ties, use more rounds completed as tiebreaker
+    pickData.sort((a, b) => {
+      if (a.totalToPar !== b.totalToPar) return a.totalToPar - b.totalToPar;
+      return b.roundsCompleted - a.roundsCompleted;
+    });
+
+    const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
+    const multiplier = tournament.event_type === 'major' ? 1.5
+                     : tournament.event_type === 'signature' ? 1.25 : 1;
+    const updated = [], notFound = [], results = [];
+
+    // Second pass: assign categories based on final position
+    for (let i = 0; i < pickData.length; i++) {
+      const { pick, totalToPar, roundsCompleted } = pickData[i];
+      
+      // If rounds < 2, they missed cut (or withdrew)
+      let category;
+      if (roundsCompleted < 2) {
+        category = 'other';
+      } else if (roundsCompleted < 4) {
+        // Made cut but tournament not finished - use made_cut
+        category = 'made_cut';
+      } else {
+        // Full tournament - determine position from sorted list
+        const pos = i + 1;
+        if (pos === 1) category = 'winner';
+        else if (pos <= 5) category = 'top5';
+        else if (pos <= 10) category = 'top10';
+        else if (pos <= 20) category = 'top20';
+        else category = 'made_cut';
+      }
+
+      const points = Math.round((pointsMap[category] ?? 0) * multiplier * 10) / 10;
+      console.log(`[SYNC] ${pick.picked_golfer}: position=${i+1}, category=${category}, multiplier=${multiplier}, points=${points}`);
+      
+      db.get('golf_picks').find({ id: pick.id })
+        .assign({ result_category: category, points_earned: points }).write();
+
+      updated.push(pick.picked_golfer);
+      results.push({ golfer: pick.picked_golfer, position: i+1, toPar: totalToPar, rounds: roundsCompleted, category, points });
     }
 
     // Stamp tournament with sync metadata (does NOT lock it)
