@@ -600,6 +600,7 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
     if (!event) return res.status(404).json({ error: 'No active PGA tournament found on ESPN right now' });
 
     const competitors = event.competitions?.[0]?.competitors || [];
+    console.log(`[SYNC] Event: ${event.name}, Competitors: ${competitors.length}, tournament.event_type: ${tournament.event_type}`);
     const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
 
     const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
@@ -625,6 +626,8 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
         const desc     = (match.status?.type?.description || '').toLowerCase();
         const score    = match.score?.displayValue || 'E';
 
+        console.log(`[SYNC] ${pick.picked_golfer}: posId=${posId}, posLabel=${posLabel}, desc=${desc}, score=${score}`);
+
         let category = 'other';
         if (['cut', 'wd', 'dq', 'mdf'].some(s => desc.includes(s))) {
           category = 'other';
@@ -638,12 +641,14 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
         }
 
         const points = Math.round((pointsMap[category] ?? 0) * multiplier * 10) / 10;
+        console.log(`[SYNC] ${pick.picked_golfer}: category=${category}, multiplier=${multiplier}, points=${points}`);
         db.get('golf_picks').find({ id: pick.id })
           .assign({ result_category: category, points_earned: points }).write();
 
         updated.push(pick.picked_golfer);
         results.push({ golfer: pick.picked_golfer, position: posLabel, score, category, points });
       } else {
+        console.log(`[SYNC] NOT FOUND: ${pick.picked_golfer}`);
         notFound.push(pick.picked_golfer);
       }
     }
