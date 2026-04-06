@@ -610,10 +610,15 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
       const lastName = search.split(' ').pop();
 
       const match = competitors.find(c => {
-        const dn = (c.athlete?.displayName || '').toLowerCase();
-        const sn = (c.athlete?.shortName || '').toLowerCase();
-        return dn === search || dn.includes(search) || search.includes(dn)
-            || dn.endsWith(lastName) || sn.endsWith(lastName);
+        const dn = (c.athlete?.displayName || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        const sn = (c.athlete?.shortName || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        const searchNorm = search.replace(/\s+/g, ' ').trim();
+        const lastName = searchNorm.split(' ').pop();
+        
+        // Try various matching strategies
+        return dn === searchNorm || dn.includes(searchNorm) || searchNorm.includes(dn)
+            || dn.endsWith(lastName) || sn.endsWith(lastName)
+            || (searchNorm.includes(' ') && dn.includes(searchNorm.split(' ').pop()));
       });
 
       if (match) {
@@ -650,28 +655,32 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
     const updated = [], notFound = [], results = [];
 
     // Second pass: assign categories based on final position
+    // Note: roundsCompleted from ESPN may include future rounds - we use position in sorted list
     for (let i = 0; i < pickData.length; i++) {
       const { pick, totalToPar, roundsCompleted } = pickData[i];
       
-      // If rounds < 2, they missed cut (or withdrew)
+      // Determine category based on position in sorted list
+      // Note: We're ranking among our picks only, not all 132 competitors
+      const pos = i + 1;
       let category;
-      if (roundsCompleted < 2) {
-        category = 'other';
-      } else if (roundsCompleted < 4) {
-        // Made cut but tournament not finished - use made_cut
-        category = 'made_cut';
+      
+      // If toPar is very high (> 5 over), likely missed cut
+      if (totalToPar > 5) {
+        category = 'other'; // Missed cut - 0 points
+      } else if (pos === 1) {
+        category = 'winner';
+      } else if (pos <= 5) {
+        category = 'top5';
+      } else if (pos <= 10) {
+        category = 'top10';
+      } else if (pos <= 20) {
+        category = 'top20';
       } else {
-        // Full tournament - determine position from sorted list
-        const pos = i + 1;
-        if (pos === 1) category = 'winner';
-        else if (pos <= 5) category = 'top5';
-        else if (pos <= 10) category = 'top10';
-        else if (pos <= 20) category = 'top20';
-        else category = 'made_cut';
+        category = 'made_cut';
       }
 
       const points = Math.round((pointsMap[category] ?? 0) * multiplier * 10) / 10;
-      console.log(`[SYNC] ${pick.picked_golfer}: position=${i+1}, category=${category}, multiplier=${multiplier}, points=${points}`);
+      console.log(`[SYNC] ${pick.picked_golfer}: position=${pos}, toPar=${totalToPar}, category=${category}, multiplier=${multiplier}, points=${points}`);
       
       db.get('golf_picks').find({ id: pick.id })
         .assign({ result_category: category, points_earned: points }).write();
