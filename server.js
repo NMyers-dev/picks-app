@@ -601,6 +601,11 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
 
     const competitors = event.competitions?.[0]?.competitors || [];
     console.log(`[SYNC] Event: ${event.name}, Competitors: ${competitors.length}, tournament.event_type: ${tournament.event_type}`);
+    
+    // Debug: log all competitor names
+    const competitorNames = competitors.map(c => c.athlete?.displayName || 'unknown');
+    console.log(`[SYNC] All competitors:`, competitorNames.slice(0, 20).join(', '), '...');
+    
     const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
 
     // First pass: collect all scores
@@ -613,6 +618,18 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
         const dn = (c.athlete?.displayName || '').toLowerCase().replace(/\s+/g, ' ').trim();
         const sn = (c.athlete?.shortName || '').toLowerCase().replace(/\s+/g, ' ').trim();
         const searchNorm = search.replace(/\s+/g, ' ').trim();
+        const searchParts = searchNorm.split(' ');
+        
+        // If search is initials like "S w kim", try to match first name initial + last name
+        if (searchParts.length >= 2 && searchParts[0].length <= 2 && searchParts[1].length <= 2) {
+          const lastName = searchParts[searchParts.length - 1];
+          const firstInitial = searchParts[0].charAt(0);
+          // Match if last name matches AND first name starts with that initial
+          if (dn.endsWith(lastName) && dn.startsWith(firstInitial)) {
+            return true;
+          }
+        }
+        
         const searchLast = searchNorm.split(' ').pop();
         
         // Try various matching strategies
@@ -620,9 +637,7 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
             || dn.includes(searchNorm) 
             || searchNorm.includes(dn)
             || (searchNorm.split(' ').length > 1 && dn.endsWith(searchLast))
-            || (sn && sn.endsWith(searchLast))
-            // Handle "S w kim" to "Si Woo Kim" - match last names when first initial matches
-            || (searchNorm.length >= 2 && dn.includes(searchLast) && (dn.startsWith(searchNorm.charAt(0)) || dn.startsWith(searchNorm.split(' ')[0].charAt(0))));
+            || (sn && sn.endsWith(searchLast));
       });
 
       if (match) {
