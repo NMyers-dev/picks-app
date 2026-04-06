@@ -613,16 +613,24 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
         const dn = (c.athlete?.displayName || '').toLowerCase().replace(/\s+/g, ' ').trim();
         const sn = (c.athlete?.shortName || '').toLowerCase().replace(/\s+/g, ' ').trim();
         const searchNorm = search.replace(/\s+/g, ' ').trim();
-        const lastName = searchNorm.split(' ').pop();
+        const searchLast = searchNorm.split(' ').pop();
         
         // Try various matching strategies
-        return dn === searchNorm || dn.includes(searchNorm) || searchNorm.includes(dn)
-            || dn.endsWith(lastName) || sn.endsWith(lastName)
-            || (searchNorm.includes(' ') && dn.includes(searchNorm.split(' ').pop()));
+        return dn === searchNorm 
+            || dn.includes(searchNorm) 
+            || searchNorm.includes(dn)
+            || (searchNorm.split(' ').length > 1 && dn.endsWith(searchLast))
+            || (sn && sn.endsWith(searchLast))
+            // Handle "S w kim" to "Si Woo Kim" - match last names when first initial matches
+            || (searchNorm.length >= 2 && dn.includes(searchLast) && (dn.startsWith(searchNorm.charAt(0)) || dn.startsWith(searchNorm.split(' ')[0].charAt(0))));
       });
 
       if (match) {
         const linescores = match.linescores || [];
+        const athleteName = match.athlete?.displayName || 'Unknown';
+        
+        console.log(`[SYNC] MATCH: "${pick.picked_golfer}" matched to "${athleteName}"`);
+        
         let totalToPar = 0;
         let roundsCompleted = 0;
         
