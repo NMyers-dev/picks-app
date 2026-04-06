@@ -620,12 +620,26 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
         const searchNorm = search.replace(/\s+/g, ' ').trim();
         const searchParts = searchNorm.split(' ');
         
-        // If search is initials like "S w kim", try to match first name initial + last name
+        // If search is initials like "S w kim", try to match first name initial + middle name initial + last name
+        // "S w kim" -> "si woo kim" -> starts with 's', ends with 'kim', has middle initial
         if (searchParts.length >= 2 && searchParts[0].length <= 2 && searchParts[1].length <= 2) {
           const lastName = searchParts[searchParts.length - 1];
           const firstInitial = searchParts[0].charAt(0);
-          // Match if last name matches AND first name starts with that initial
+          const middleInitial = searchParts.length >= 3 ? searchParts[1].charAt(0) : '';
+          
+          // For "Si Woo Kim" - match: starts with 's', middle 'w', ends with 'kim'
+          // For "Michael Kim" - only starts with 'm', so won't match first 's'
           if (dn.endsWith(lastName) && dn.startsWith(firstInitial)) {
+            // If there's a middle initial in search, the actual name should have it too
+            if (middleInitial) {
+              // Check if actual name has something in the middle position
+              const nameParts = dn.split(' ');
+              if (nameParts.length >= 3) {
+                const actualMiddle = nameParts[1].charAt(0);
+                return actualMiddle === middleInitial || nameParts[1].startsWith(middleInitial);
+              }
+              return false;
+            }
             return true;
           }
         }
