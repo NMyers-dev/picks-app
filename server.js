@@ -621,15 +621,19 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
       });
 
       if (match) {
-        const posId    = match.status?.position?.id;
-        const posLabel = match.status?.position?.displayName || posId || '?';
-        const desc     = (match.status?.type?.description || '').toLowerCase();
-        const score    = match.score?.displayValue || 'E';
+        // ESPN API structure may vary - try multiple paths
+        let posId = match.status?.position?.id ?? match.position?.rank ?? match.rank?.position ?? match.status?.rank;
+        let posLabel = match.status?.position?.displayName ?? match.position?.displayName ?? match.rank?.displayName ?? posId ?? '?';
+        const desc = (match.status?.type?.description || match.status?.description || '').toLowerCase();
+        const score = match.score?.displayValue ?? match.displayScore ?? 'E';
 
+        // Log full match object structure for debugging
+        console.log(`[SYNC] ${pick.picked_golfer}: match object keys:`, Object.keys(match));
+        console.log(`[SYNC] ${pick.picked_golfer}: match.status:`, JSON.stringify(match.status));
         console.log(`[SYNC] ${pick.picked_golfer}: posId=${posId}, posLabel=${posLabel}, desc=${desc}, score=${score}`);
 
         let category = 'other';
-        if (['cut', 'wd', 'dq', 'mdf'].some(s => desc.includes(s))) {
+        if (['cut', 'wd', 'dq', 'mdf', 'withdrawn'].some(s => desc.includes(s))) {
           category = 'other';
         } else {
           const pos = parseInt(posId);
