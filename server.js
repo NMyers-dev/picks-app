@@ -653,23 +653,32 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
         const searchNorm = search.replace(/\s+/g, ' ').trim();
         const searchParts = searchNorm.split(' ');
         
-        // If search is initials like "S w kim", try to match first name initial + middle name initial + last name
+        // If search is initials like "S w kim", match using first initial + middle initial + last name
+        // "S w kim" -> "Si Woo Kim" (not "Michael Kim")
         if (searchParts.length >= 2 && searchParts[0].length <= 2 && searchParts[1].length <= 2) {
           const lastName = searchParts[searchParts.length - 1];
           const firstInitial = searchParts[0].charAt(0);
-          const middleInitial = searchParts.length >= 3 ? searchParts[1].charAt(0) : '';
+          const middleInitial = searchParts.length >= 2 ? searchParts[1].charAt(0) : '';
           
+          // Must match last name AND first letter matches
           if (dn.endsWith(lastName) && dn.startsWith(firstInitial)) {
+            // If there's a middle initial in search, check the middle of actual name
             if (middleInitial) {
               const nameParts = dn.split(' ');
               if (nameParts.length >= 3) {
+                // Si Woo Kim: parts[0]="si", parts[1]="woo", parts[2]="kim"
+                // First letter of middle part should match
                 const actualMiddle = nameParts[1].charAt(0);
-                return actualMiddle === middleInitial || nameParts[1].startsWith(middleInitial);
+                if (actualMiddle !== middleInitial && !nameParts[1].startsWith(middleInitial)) {
+                  return false; // Middle initial doesn't match
+                }
+              } else {
+                return false; // No middle name but search has middle initial
               }
-              return false;
             }
             return true;
           }
+          return false;
         }
         
         const searchLast = searchNorm.split(' ').pop();
@@ -739,7 +748,7 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
         .assign({ result_category: category, points_earned: points }).write();
 
       updated.push(pick.picked_golfer);
-      results.push({ golfer: pick.picked_golfer, position: i+1, toPar: totalToPar, rounds: roundsCompleted, category, points });
+      results.push({ golfer: pick.picked_golfer, position: actualPosition, toPar: totalToPar, rounds: roundsCompleted, category, points });
     }
 
     // Stamp tournament with sync metadata (does NOT lock it)
