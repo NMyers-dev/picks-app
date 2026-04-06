@@ -621,39 +621,37 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
       });
 
       if (match) {
-        // ESPN API - position is in linescores or score object
+        // ESPN API doesn't include position in scoreboard - we need to fetch standings
+        // For now, calculate position based on total score (toPar)
         const linescores = match.linescores || [];
-        const position = linescores.find(ls => ls.position)?.position;
-        const displayPosition = linescores.find(ls => ls.position)?.displayPosition;
+        let totalToPar = 0;
+        let roundsCompleted = 0;
         
-        let posId = position ?? match.status?.position?.id ?? match.position?.rank ?? match.rank?.position ?? match.status?.rank;
-        let posLabel = displayPosition ?? match.status?.position?.displayName ?? match.position?.displayName ?? posId ?? '?';
-        const desc = (match.status?.type?.description || match.status?.description || '').toLowerCase();
-        const score = match.score?.displayValue ?? match.displayScore ?? 'E';
-
-        // Log linescores for debugging
-        console.log(`[SYNC] ${pick.picked_golfer}: linescores:`, JSON.stringify(linescores));
-        console.log(`[SYNC] ${pick.picked_golfer}: posId=${posId}, posLabel=${posLabel}, desc=${desc}, score=${score}`);
-
-        let category = 'other';
-        if (['cut', 'wd', 'dq', 'mdf', 'withdrawn'].some(s => desc.includes(s))) {
-          category = 'other';
-        } else {
-          const pos = parseInt(posId);
-          if (pos === 1)       category = 'winner';
-          else if (pos <= 5)   category = 'top5';
-          else if (pos <= 10)  category = 'top10';
-          else if (pos <= 20)  category = 'top20';
-          else                 category = 'made_cut';
+        for (const round of linescores) {
+          const toPar = parseInt(round.displayValue);
+          if (!isNaN(toPar)) {
+            totalToPar += toPar;
+            roundsCompleted++;
+          }
         }
-
+        
+        // Store the calculated data for later use
+        console.log(`[SYNC] ${pick.picked_golfer}: toPar=${totalToPar}, rounds=${roundsCompleted}`);
+        
+        // We'll use a different approach - compute all positions from ESPN standings API
+        // For now, default to made_cut (1 point) - admin can adjust manually
+        let category = 'made_cut';
+        if (roundsCompleted === 0) {
+          category = 'other'; // Didn't complete any rounds (withdrawn, etc)
+        }
+        
         const points = Math.round((pointsMap[category] ?? 0) * multiplier * 10) / 10;
         console.log(`[SYNC] ${pick.picked_golfer}: category=${category}, multiplier=${multiplier}, points=${points}`);
         db.get('golf_picks').find({ id: pick.id })
           .assign({ result_category: category, points_earned: points }).write();
 
         updated.push(pick.picked_golfer);
-        results.push({ golfer: pick.picked_golfer, position: posLabel, score, category, points });
+        results.push({ golfer: pick.picked_golfer, toPar: totalToPar, rounds: roundsCompleted, category, points });
       } else {
         console.log(`[SYNC] NOT FOUND: ${pick.picked_golfer}`);
         notFound.push(pick.picked_golfer);
