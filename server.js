@@ -585,6 +585,88 @@ app.put('/api/soccer/leaderboard/:userId', auth, superAdminOnly, (req, res) => {
   res.json({ success: true });
 });
 
+// ─── ESPN Live Sync ───────────────────────────────────────────────────────────
+app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res) => {
+  const tournamentId = parseInt(req.params.id);
+  const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
+  if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
+
+  try {
+    const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard');
+    if (!response.ok) throw new Error('ESPN API returned ' + response.status);
+    const data = await response.json();
+
+    const event = data.events?.[0];
+    if (!event) return res.status(404).json({ error: 'No active PGA tournament found on ESPN right now' });
+
+    const competitors = event.competitions?.[0]?.competitors || [];
+    const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
+
+    const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
+    const multiplier = tournament.event_type === 'major' ? 1.5
+                     : tournament.event_type === 'signature' ? 1.25 : 1;
+
+    const updated = [], notFound = [], results = [];
+
+    for (const pick of picks) {
+      const search = pick.picked_golfer.toLowerCase();
+      const lastName = search.split(' ').pop();
+
+      const match = competitors.find(c => {
+        const dn = (c.athlete?.displayName || '').toLowerCase();
+        const sn = (c.athlete?.shortName || '').toLowerCase();
+        return dn === search || dn.includes(search) || search.includes(dn)
+            || dn.endsWith(lastName) || sn.endsWith(lastName);
+      });
+
+      if (match) {
+        const posId    = match.status?.position?.id;
+        const posLabel = match.status?.position?.displayName || posId || '?';
+        const desc     = (match.status?.type?.description || '').toLowerCase();
+        const score    = match.score?.displayValue || 'E';
+
+        let category = 'other';
+        if (['cut', 'wd', 'dq', 'mdf'].some(s => desc.includes(s))) {
+          category = 'other';
+        } else {
+          const pos = parseInt(posId);
+          if (pos === 1)       category = 'winner';
+          else if (pos <= 5)   category = 'top5';
+          else if (pos <= 10)  category = 'top10';
+          else if (pos <= 20)  category = 'top20';
+          else                 category = 'made_cut';
+        }
+
+        const points = Math.round((pointsMap[category] ?? 0) * multiplier * 10) / 10;
+        db.get('golf_picks').find({ id: pick.id })
+          .assign({ result_category: category, points_earned: points }).write();
+
+        updated.push(pick.picked_golfer);
+        results.push({ golfer: pick.picked_golfer, position: posLabel, score, category, points });
+      } else {
+        notFound.push(pick.picked_golfer);
+      }
+    }
+
+    // Stamp tournament with sync metadata (does NOT lock it)
+    db.get('golf_tournaments').find({ id: tournamentId }).assign({
+      last_espn_sync: now(),
+      espn_event_name: event.name,
+      espn_round: event.competitions?.[0]?.status?.type?.shortDetail || null
+    }).write();
+
+    // If finalize flag is set, lock the tournament too
+    if (req.body?.finalize) {
+      db.get('golf_tournaments').find({ id: tournamentId }).assign({ results_entered: true }).write();
+    }
+
+    res.json({ success: true, eventName: event.name, updated: updated.length, notFound, results, syncTime: now(), finalized: Boolean(req.body?.finalize) });
+  } catch (err) {
+    console.error('ESPN sync error:', err);
+    res.status(500).json({ error: 'ESPN sync failed: ' + err.message });
+  }
+});
+
 // ─── Settings ─────────────────────────────────────────────────────────────────
 app.get('/api/settings', auth, adminOnly, (req, res) => {
   const s = db.get('settings').value();
