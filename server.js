@@ -329,6 +329,30 @@ app.post('/api/golf/tournaments/:id/pick', auth, (req, res) => {
   res.json({ success: true });
 });
 
+// Admin: manually create or overwrite a pick for any user (bypasses deadline/lock)
+app.post('/api/golf/tournaments/:id/admin-pick', auth, adminOnly, (req, res) => {
+  const tournamentId = parseInt(req.params.id);
+  const { user_id, picked_golfer } = req.body || {};
+  if (!user_id || !picked_golfer?.trim()) return res.status(400).json({ error: 'user_id and picked_golfer required' });
+  const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
+  if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
+  const user = db.get('users').find({ id: parseInt(user_id) }).value();
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  // Remove any existing pick for this user in this tournament first
+  db.get('golf_picks').remove({ tournament_id: tournamentId, user_id: parseInt(user_id) }).write();
+  db.get('golf_picks').push({
+    id: nextId('golf_picks'),
+    tournament_id: tournamentId,
+    user_id: parseInt(user_id),
+    picked_golfer: picked_golfer.trim(),
+    result_category: null,
+    points_earned: 0,
+    created_at: now(),
+    admin_entered: true
+  }).write();
+  res.json({ success: true });
+});
+
 app.delete('/api/golf/picks/:pickId', auth, adminOnly, (req, res) => {
   const pickId = parseInt(req.params.pickId);
   db.get('golf_picks').remove({ id: pickId }).write();
@@ -795,111 +819,4 @@ app.get('/api/external/golf-events', auth, adminOnly, async (req, res) => {
     const params = new URLSearchParams({ api_key: apiKey });
     if (req.query.start_date) params.set('start_date', req.query.start_date);
     if (req.query.end_date) params.set('end_date', req.query.end_date);
-    if (req.query.tour) params.set('tour', req.query.tour);
-    const response = await fetch('https://use.livegolfapi.com/v1/events?' + params);
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      return res.status(response.status).json({ error: err.message || 'Live Golf API error' });
-    }
-    const data = await response.json();
-    res.json(data || []);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch golf events: ' + err.message });
-  }
-});
-
-app.get('/api/external/epl-results', auth, adminOnly, async (req, res) => {
-  res.status(410).json({ error: 'This endpoint is deprecated. EPL data now comes from ESPN on the frontend.' });
-});
-
-app.get('/api/external/epl-fixtures', auth, adminOnly, async (req, res) => {
-  res.status(410).json({ error: 'This endpoint is deprecated. EPL data now comes from ESPN on the frontend.' });
-});
-
-// Email settings & reminder system
-let emailTransporter = null;
-
-function initEmail() {
-  const s = db.get('settings').value();
-  if (s.smtp_host && s.smtp_user && s.smtp_password) {
-    emailTransporter = require('nodemailer').createTransport({
-      host: s.smtp_host,
-      port: s.smtp_port || 587,
-      secure: false,
-      auth: { user: s.smtp_user, pass: s.smtp_password }
-    });
-  }
-}
-
-// Check for pending picks and send reminders every minute
-setInterval(async () => {
-  if (!emailTransporter || !dbReady) return;
-  try {
-    const now = new Date();
-    const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
-
-    // Check golf tournaments
-    const golfTournaments = db.get('golf_tournaments').value();
-  for (const t of golfTournaments) {
-    if (t.results_entered || !t.deadline) continue;
-    const dl = new Date(t.deadline);
-    if (dl > now && dl <= oneHourFromNow) {
-      const picks = db.get('golf_picks').filter({ tournament_id: t.id }).value();
-      const users = db.get('users').value();
-      const pickedUserIds = new Set(picks.map(p => p.user_id));
-
-      const usersWithoutPicks = users.filter(u => u.email && !pickedUserIds.has(u.id));
-      for (const u of usersWithoutPicks) {
-        try {
-          await emailTransporter.sendMail({
-            from: '"The Boys Picks" <noreply@theboyspicks.com>',
-            to: u.email,
-            subject: `⛳ Reminder: ${t.name} - 1 hour to pick!`,
-            text: `Hi ${u.username},\n\nOnly 1 hour left to make your pick for ${t.name}!\n\nPick a golfer NOT in the predicted Top 5.\n\nGo to https://theboyspicks.com to make your pick.\n\nGood luck!`
-          });
-          console.log(`Reminder sent to ${u.email} for ${t.name}`);
-        } catch (e) { console.error('Email failed:', e.message); }
-      }
-    }
-  }
-
-  // Check soccer weeks
-  const soccerWeeks = db.get('soccer_weeks').value();
-  for (const w of soccerWeeks) {
-    if (w.results_entered || !w.deadline) continue;
-    const dl = new Date(w.deadline);
-    if (dl > now && dl <= oneHourFromNow) {
-      const games = db.get('soccer_games').filter({ week_id: w.id }).value();
-      const gameIds = games.map(g => g.id);
-      const picks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
-      const users = db.get('users').value();
-      const pickedUserIds = new Set(picks.map(p => p.user_id));
-
-      const usersWithoutPicks = users.filter(u => u.email && !pickedUserIds.has(u.id));
-      for (const u of usersWithoutPicks) {
-        try {
-          await emailTransporter.sendMail({
-            from: '"The Boys Picks" <noreply@theboyspicks.com>',
-            to: u.email,
-            subject: `⚽ Reminder: ${w.week_name} - 1 hour to pick!`,
-            text: `Hi ${u.username},\n\nOnly 1 hour left to make your picks for ${w.week_name}!\n\nGo to https://theboyspicks.com to make your 3 score predictions.\n\nGood luck!`
-          });
-          console.log(`Reminder sent to ${u.email} for ${w.week_name}`);
-        } catch (e) { console.error('Email failed:', e.message); }
-      }
-    }
-  }
-  } catch (e) { console.error('Reminder loop error:', e.message); }
-}, 60 * 1000); // Check every minute
-
-// Wait for DB then start
-function startServer() {
-  if (!dbReady) {
-    setTimeout(startServer, 500);
-    return;
-  }
-  initEmail();
-  app.listen(PORT, () => console.log('Picks app running on http://localhost:' + PORT));
-}
-
-startServer();
+  
