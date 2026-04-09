@@ -819,4 +819,106 @@ app.get('/api/external/golf-events', auth, adminOnly, async (req, res) => {
     const params = new URLSearchParams({ api_key: apiKey });
     if (req.query.start_date) params.set('start_date', req.query.start_date);
     if (req.query.end_date) params.set('end_date', req.query.end_date);
-  
+    const resp = await fetch(`https://api.sportradar.com/golf/trial/v3/en/schedules/pga/schedule.json?${params}`);
+    const data = await resp.json();
+    res.json(data || []);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch golf events: ' + err.message });
+  }
+});
+
+app.get('/api/external/epl-results', auth, adminOnly, async (req, res) => {
+  res.status(410).json({ error: 'This endpoint is deprecated. EPL data now comes from ESPN on the frontend.' });
+});
+
+app.get('/api/external/epl-fixtures', auth, adminOnly, async (req, res) => {
+  res.status(410).json({ error: 'This endpoint is deprecated. EPL data now comes from ESPN on the frontend.' });
+});
+
+// Email settings & reminder system
+let emailTransporter = null;
+
+function initEmail() {
+  const s = db.get('settings').value();
+  if (s.smtp_host && s.smtp_user && s.smtp_password) {
+    emailTransporter = require('nodemailer').createTransport({
+      host: s.smtp_host,
+      port: s.smtp_port || 587,
+      secure: false,
+      auth: { user: s.smtp_user, pass: s.smtp_password }
+    });
+  }
+}
+
+// Check for pending picks and send reminders every minute
+setInterval(async () => {
+  if (!emailTransporter || !dbReady) return;
+  try {
+    const now = new Date();
+    const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+
+    // Check golf tournaments
+    const golfTournaments = db.get('golf_tournaments').value();
+  for (const t of golfTournaments) {
+    if (t.results_entered || !t.deadline) continue;
+    const dl = new Date(t.deadline);
+    if (dl > now && dl <= oneHourFromNow) {
+      const picks = db.get('golf_picks').filter({ tournament_id: t.id }).value();
+      const users = db.get('users').value();
+      const pickedUserIds = new Set(picks.map(p => p.user_id));
+
+      const usersWithoutPicks = users.filter(u => u.email && !pickedUserIds.has(u.id));
+      for (const u of usersWithoutPicks) {
+        try {
+          await emailTransporter.sendMail({
+            from: '"The Boys Picks" <noreply@theboyspicks.com>',
+            to: u.email,
+            subject: `⛳ Reminder: ${t.name} - 1 hour to pick!`,
+            text: `Hi ${u.username},\n\nOnly 1 hour left to make your pick for ${t.name}!\n\nPick a golfer NOT in the predicted Top 5.\n\nGo to https://theboyspicks.com to make your pick.\n\nGood luck!`
+          });
+          console.log(`Reminder sent to ${u.email} for ${t.name}`);
+        } catch (e) { console.error('Email failed:', e.message); }
+      }
+    }
+  }
+
+  // Check soccer weeks
+  const soccerWeeks = db.get('soccer_weeks').value();
+  for (const w of soccerWeeks) {
+    if (w.results_entered || !w.deadline) continue;
+    const dl = new Date(w.deadline);
+    if (dl > now && dl <= oneHourFromNow) {
+      const games = db.get('soccer_games').filter({ week_id: w.id }).value();
+      const gameIds = games.map(g => g.id);
+      const picks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
+      const users = db.get('users').value();
+      const pickedUserIds = new Set(picks.map(p => p.user_id));
+
+      const usersWithoutPicks = users.filter(u => u.email && !pickedUserIds.has(u.id));
+      for (const u of usersWithoutPicks) {
+        try {
+          await emailTransporter.sendMail({
+            from: '"The Boys Picks" <noreply@theboyspicks.com>',
+            to: u.email,
+            subject: `⚽ Reminder: ${w.week_name} - 1 hour to pick!`,
+            text: `Hi ${u.username},\n\nOnly 1 hour left to make your picks for ${w.week_name}!\n\nGo to https://theboyspicks.com to make your 3 score predictions.\n\nGood luck!`
+          });
+          console.log(`Reminder sent to ${u.email} for ${w.week_name}`);
+        } catch (e) { console.error('Email failed:', e.message); }
+      }
+    }
+  }
+  } catch (e) { console.error('Reminder loop error:', e.message); }
+}, 60 * 1000); // Check every minute
+
+// Wait for DB then start
+function startServer() {
+  if (!dbReady) {
+    setTimeout(startServer, 500);
+    return;
+  }
+  initEmail();
+  app.listen(PORT, () => console.log('Picks app running on http://localhost:' + PORT));
+}
+
+startServer();
