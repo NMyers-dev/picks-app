@@ -359,6 +359,24 @@ app.delete('/api/golf/picks/:pickId', auth, adminOnly, (req, res) => {
   res.json({ success: true });
 });
 
+// Admin: set result for a single pick
+app.put('/api/golf/picks/:pickId/result', auth, adminOnly, (req, res) => {
+  const pickId = parseInt(req.params.pickId);
+  const { result_category } = req.body || {};
+  
+  const pick = db.get('golf_picks').find({ id: pickId }).value();
+  if (!pick) return res.status(404).json({ error: 'Pick not found' });
+  
+  // Get tournament for multiplier
+  const tournament = db.get('golf_tournaments').find({ id: pick.tournament_id }).value();
+  const multiplier = tournament?.event_type === 'major' ? 1.5 : tournament?.event_type === 'signature' ? 1.25 : 1;
+  const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
+  const points = Math.round((pointsMap[result_category] ?? 0) * multiplier * 10) / 10;
+  
+  db.get('golf_picks').find({ id: pickId }).assign({ result_category, points_earned: points }).write();
+  res.json({ success: true, points, result_category });
+});
+
 app.put('/api/golf/tournaments/:id/results', auth, adminOnly, (req, res) => {
   const { results } = req.body || {};
   const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };

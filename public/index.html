@@ -1697,13 +1697,17 @@ async function loadAdminGolfPicks(tournamentId) {
       const displayName = u.is_kennure ? `<span class="rainbow-name">${u.username}</span>` : `<span style="font-weight:700;">${u.username}</span>`;
       if (p) {
         const adminBadge = p.admin_entered ? ' <span style="font-size:0.6rem;background:#e67e22;color:#fff;padding:1px 4px;border-radius:3px;">ADMIN</span>' : '';
+        const currentResult = p.result_category || '';
+        const resultOptions = ['','winner','top5','top10','top20','made_cut','other'];
+        const resultSelect = resultOptions.map(o => `<option value="${o}" ${o === currentResult ? 'selected' : ''}>${o || 'Set result'}</option>`).join('');
         return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem;border-bottom:2px solid #000;gap:0.5rem;">
-          <div style="min-width:110px;">${displayName}${adminBadge}</div>
+          <div style="min-width:80px;">${displayName}${adminBadge}</div>
           <span style="font-weight:900;flex:1;text-align:center;">${p.picked_golfer}</span>
-          <div style="display:flex;gap:0.3rem;">
-            <button onclick="adminEditPick(${u.id},'${u.username.replace(/'/g,"\\'")}',${tournamentId})" style="background:#3498db;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">✏️ EDIT</button>
-            <button onclick="deleteGolfPick(${p.id},${tournamentId})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">🗑️</button>
-          </div>
+          <select onchange="adminSetResult(${p.id},this.value,${tournamentId})" style="font-size:0.65rem;padding:0.2rem;border:2px solid #000;font-weight:700;background:${currentResult ? '#FFD700' : '#fff'}">
+            ${resultSelect}
+          </select>
+          <button onclick="adminEditPick(${u.id},'${u.username.replace(/'/g,"\\'")}',${tournamentId})" style="background:#3498db;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">✏️</button>
+          <button onclick="deleteGolfPick(${p.id},${tournamentId})" style="background:#e74c3c;color:#fff;border:2px solid #000;box-shadow:2px 2px 0 #000;padding:0.2rem 0.5rem;font-size:0.65rem;font-weight:700;cursor:pointer;">🗑️</button>
         </div>`;
       } else {
         return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem;border-bottom:2px solid #000;gap:0.5rem;background:#fff8f0;">
@@ -2127,6 +2131,17 @@ async function showEditSoccer(id, weekName, deadline) {
       } catch (e) { toast(e.message, 'error'); }
     });
   });
+}
+
+async function adminSetResult(pickId, resultCategory, tournamentId) {
+  if (!resultCategory) return;
+  try {
+    await api(`/golf/picks/${pickId}/result`, { method: 'PUT', body: { result_category: resultCategory } });
+    toast('Result saved: ' + (resultCategory || 'None'));
+    loadAdminGolfPicks(tournamentId);
+    loadGolfLeaderboard();
+    if (state.currentPage === 'golf') loadGolfTournaments();
+  } catch (e) { toast('Failed: ' + e.message, 'error'); }
 }
 
 function init() {
