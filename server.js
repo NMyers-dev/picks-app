@@ -627,6 +627,7 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
     console.log(`[SYNC] Event: ${event.name}, Competitors: ${competitors.length}, tournament.event_type: ${tournament.event_type}`);
     
     const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
+    const notFound = [];
 
     // First pass: Calculate toPar for ALL competitors to determine actual positions
     const allCompetitors = [];
@@ -744,7 +745,7 @@ app.post('/api/golf/tournaments/:id/sync-espn', auth, adminOnly, async (req, res
     const pointsMap = { winner: 15, top5: 10, top10: 8, top20: 4, made_cut: 1, other: 0 };
     const multiplier = tournament.event_type === 'major' ? 1.5
                      : tournament.event_type === 'signature' ? 1.25 : 1;
-    const updated = [], notFound = [], results = [];
+    const updated = [], results = [];
 
     // Third pass: assign categories based on actual position in tournament
     // Use roundsCompleted to detect missed cut (< 4 rounds)
