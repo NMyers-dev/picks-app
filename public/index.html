@@ -1189,9 +1189,6 @@ async function loadHomePage() {
     }
     for (const w of completedSoccer) {
       const soccerPicksRes = await fetch(`/api/soccer/weeks/${w.id}/picks`).then(r => r.ok ? r.json() : []);
-      const gamesRes = await fetch(`/api/soccer/weeks/${w.id}/games`).then(r => r.ok ? r.json() : []);
-      const gameMap = {};
-      (gamesRes || []).forEach(g => { gameMap[g.id] = g; });
       recentHtml += `<div style="padding: 0.75rem; border: 2px solid #000; margin-bottom: 4px; background: #3498db;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <strong>${w.week_name}</strong>
@@ -1199,15 +1196,12 @@ async function loadHomePage() {
         </div>
         <div id="home-soccer-picks-${w.id}" style="display:none;margin-top:0.5rem;border:2px solid #000;max-height:250px;overflow-y:auto;background:#fff;">
           ${soccerPicksRes.length ? soccerPicksRes.map(p => {
-            const g = gameMap[p.game_id];
             const predicted = `${p.predicted_home ?? '-'}-${p.predicted_away ?? '-'}`;
-            const actual = `${p.actual_home_score ?? '-'}-${p.actual_away_score ?? '-'}`;
             const pts = p.points_earned || 0;
-            const isCorrect = p.is_correct;
             return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem;border-bottom:1px solid #000;font-size:0.75rem;">
               <span style="font-weight:700;">${p.username || 'Unknown'}</span>
-              <span style="font-size:0.7rem;">${g?.home_team} ${predicted} vs ${g?.away_team}</span>
-              <span style="background:${isCorrect ? '#2ecc71' : isCorrect === false ? '#e74c3c' : '#ccc'};border:1px solid #000;padding:1px 4px;font-size:0.65rem;font-weight:700;">${pts}pts</span>
+              <span style="font-size:0.7rem;">${p.home_team || '?'} ${predicted} vs ${p.away_team || '?'}</span>
+              <span style="background:${pts > 0 ? '#2ecc71' : '#ccc'};border:1px solid #000;padding:1px 4px;font-size:0.65rem;font-weight:700;">${pts}pts</span>
             </div>`;
           }).join('') : '<p style="padding:0.5rem;font-size:0.75rem;">No picks</p>'}
         </div>
@@ -1955,7 +1949,7 @@ async function loadAdminSoccerPicks(weekId) {
     const [week, games, allPicks, users] = await Promise.all([
       api('/soccer/weeks/' + weekId),
       api('/soccer/weeks/' + weekId + '/games'),
-      api('/soccer/weeks/' + weekId + '/picks'),
+      api('/soccer/weeks/' + weekId + '/picks-auth'),
       api('/users')
     ]);
     const list = document.getElementById('admin-soccer-picks-list');
