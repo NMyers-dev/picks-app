@@ -517,7 +517,24 @@ app.delete('/api/soccer/weeks', auth, superAdminOnly, (req, res) => {
   res.json({ success: true, deleted: completed.length });
 });
 
-app.get('/api/soccer/weeks/:id/picks', auth, (req, res) => {
+app.get('/api/soccer/weeks/:id/picks', (req, res) => {
+  const weekId = parseInt(req.params.id);
+  const week = db.get('soccer_weeks').find({ id: weekId }).value();
+  const games = db.get('soccer_games').filter({ week_id: weekId }).value();
+  const gameIds = games.map(g => g.id);
+
+  // Get picks - no auth required for completed weeks
+  const picks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
+  const users = db.get('users').value();
+  const result = picks.map(p => {
+    const user = users.find(u => u.id === p.user_id);
+    const game = games.find(g => g.id === p.game_id);
+    return { ...p, username: user?.username, home_team: game?.home_team, away_team: game?.away_team, actual_home_score: game?.actual_home_score, actual_away_score: game?.actual_away_score, game_order: game?.game_order };
+  }).sort((a, b) => (a.username || '').localeCompare(b.username || '') || a.game_order - b.game_order);
+  res.json(result);
+});
+
+app.get('/api/soccer/weeks/:id/picks-auth', auth, (req, res) => {
   const weekId = parseInt(req.params.id);
   const week = db.get('soccer_weeks').find({ id: weekId }).value();
   const games = db.get('soccer_games').filter({ week_id: weekId }).value();
