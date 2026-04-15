@@ -523,6 +523,18 @@ app.get('/api/soccer/weeks/:id/picks', auth, (req, res) => {
   const games = db.get('soccer_games').filter({ week_id: weekId }).value();
   const gameIds = games.map(g => g.id);
 
+  // Admins can always see all picks
+  if (req.user.is_admin) {
+    const picks = db.get('soccer_picks').filter(p => gameIds.includes(p.game_id)).value();
+    const users = db.get('users').value();
+    const result = picks.map(p => {
+      const user = users.find(u => u.id === p.user_id);
+      const game = games.find(g => g.id === p.game_id);
+      return { ...p, username: user?.username, home_team: game?.home_team, away_team: game?.away_team, actual_home_score: game?.actual_home_score, actual_away_score: game?.actual_away_score, game_order: game?.game_order };
+    }).sort((a, b) => (a.username || '').localeCompare(b.username || '') || a.game_order - b.game_order);
+    return res.json(result);
+  }
+
   // Hide other users' picks until deadline or results entered
   const deadlinePassed = week && (week.results_entered || (week.deadline && new Date() >= new Date(week.deadline)));
   if (!deadlinePassed) {
@@ -601,6 +613,24 @@ app.put('/api/soccer/weeks/:id/results', auth, superAdminOnly, (req, res) => {
   }
 
   db.get('soccer_weeks').find({ id: parseInt(req.params.id) }).assign({ results_entered: true }).write();
+  res.json({ success: true });
+});
+
+// Admin: mark soccer week as complete
+app.post('/api/soccer/weeks/:id/complete', auth, adminOnly, (req, res) => {
+  const weekId = parseInt(req.params.id);
+  const week = db.get('soccer_weeks').find({ id: weekId }).value();
+  if (!week) return res.status(404).json({ error: 'Week not found' });
+  
+  // Check all games have results
+  const games = db.get('soccer_games').filter({ week_id: weekId }).value();
+  const withoutResults = games.filter(g => g.actual_home_score === null || g.actual_away_score === null);
+  
+  if (withoutResults.length > 0) {
+    return res.status(400).json({ error: `${withoutResults.length} games don't have scores. Enter results first.` });
+  }
+  
+  db.get('soccer_weeks').find({ id: weekId }).assign({ results_entered: true }).write();
   res.json({ success: true });
 });
 
