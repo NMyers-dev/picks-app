@@ -393,6 +393,24 @@ app.put('/api/golf/tournaments/:id/results', auth, adminOnly, (req, res) => {
   res.json({ success: true });
 });
 
+// Admin: mark tournament as complete (without syncing from ESPN)
+app.post('/api/golf/tournaments/:id/complete', auth, adminOnly, (req, res) => {
+  const tournamentId = parseInt(req.params.id);
+  const tournament = db.get('golf_tournaments').find({ id: tournamentId }).value();
+  if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
+  
+  // Verify all picks have results set
+  const picks = db.get('golf_picks').filter({ tournament_id: tournamentId }).value();
+  const withoutResults = picks.filter(p => !p.result_category);
+  
+  if (withoutResults.length > 0) {
+    return res.status(400).json({ error: `${withoutResults.length} picks don't have results set. Set results for all picks first.` });
+  }
+  
+  db.get('golf_tournaments').find({ id: tournamentId }).assign({ results_entered: true }).write();
+  res.json({ success: true });
+});
+
 app.put('/api/golf/tournaments/:id/top5', auth, adminOnly, (req, res) => {
   const { predicted_top5 } = req.body || {};
   if (!Array.isArray(predicted_top5)) return res.status(400).json({ error: 'predicted_top5 must be an array' });
