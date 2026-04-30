@@ -5,45 +5,69 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
+const { createMongoAdapter, FALLBACK_DEFAULTS } = require('./db-adapter');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production-set-JWT_SECRET-env-var';
 
-// Wait for DB file to be ready
+// Wait for DB to be ready
 let db;
 let dbReady = false;
+let mongoFlush = () => Promise.resolve(); // overridden in initDb if Mongo is used
 
 function getDb() {
   if (!dbReady || !db) throw new Error('Database not ready');
   return db;
 }
 
-function initDb() {
+async function initDb() {
   try {
-    const dbPath = process.env.DB_PATH || path.join(__dirname, 'data', 'picks.json');
-    const adapter = new FileSync(dbPath);
-    db = low(adapter);
-    
-    db.defaults({
-      users: [],
-      golf_tournaments: [],
-      golf_picks: [],
-      soccer_weeks: [],
-      soccer_games: [],
-      soccer_picks: [],
-      settings: {}
-    }).write();
-    
-    dbReady = true;
-    console.log('Database ready');
+    const mongoUri = process.env.MONGODB_URI;
+
+    if (mongoUri) {
+      // ─── Production / Railway path: persist to MongoDB Atlas ────────────
+      const { adapter, flush } = await createMongoAdapter({
+        uri: mongoUri,
+        dbName: process.env.MONGODB_DB || 'picks_app',
+        defaults: FALLBACK_DEFAULTS
+      });
+      db = low(adapter);
+      // db.defaults() is a no-op for keys already present; safe belt-and-braces.
+      db.defaults(FALLBACK_DEFAULTS).write();
+      mongoFlush = flush;
+      dbReady = true;
+      console.log('[DB] Ready (MongoDB).');
+    } else {
+      // ─── Local-dev fallback: keep using a JSON file ──────────────────────
+      const dbPath = process.env.DB_PATH || path.join(__dirname, 'data', 'picks.json');
+      // Make sure the directory exists so first run on a new machine doesn't crash.
+      try { fs.mkdirSync(path.dirname(dbPath), { recursive: true }); } catch {}
+      const adapter = new FileSync(dbPath);
+      db = low(adapter);
+      db.defaults(FALLBACK_DEFAULTS).write();
+      dbReady = true;
+      console.warn('[DB] Ready (local JSON file at ' + dbPath + ').');
+      console.warn('[DB] WARNING: MONGODB_URI not set. Data will NOT persist on Railway.');
+    }
   } catch (e) {
-    console.log('DB init failed, retrying...:', e.message);
-    setTimeout(initDb, 1000);
+    console.error('[DB] init failed, retrying in 5s:', e.message);
+    setTimeout(initDb, 5000);
   }
 }
 
 initDb();
+
+// Flush pending MongoDB writes on graceful shutdown so we don't lose the
+// last pick someone made right before Railway swaps the container.
+function shutdown(signal) {
+  console.log(`[Shutdown] ${signal} received, flushing DB writes...`);
+  Promise.resolve(mongoFlush())
+    .catch(e => console.error('[Shutdown] flush error:', e.message))
+    .finally(() => process.exit(0));
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT',  () => shutdown('SIGINT'));
 
 function nextId(collection) {
   const items = db.get(collection).value();
@@ -966,7 +990,6 @@ setInterval(async () => {
     }
   }
 
-  // Check soccer weeks
   const soccerWeeks = db.get('soccer_weeks').value();
   for (const w of soccerWeeks) {
     if (w.results_entered || !w.deadline) continue;
